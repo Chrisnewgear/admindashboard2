@@ -1,13 +1,15 @@
 
 
+import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/layout.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:admindashboard/controllers/menu_controller.dart';
+
 void main(){
+  Get.put(MyMenuController());
   runApp(MyApp());
-
-
 }
 
 class MyApp extends StatelessWidget {
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: "Dashboard",
       theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: light,
         textTheme: GoogleFonts.mulishTextTheme(
           Theme.of(context).textTheme
         ).apply(
@@ -30,7 +32,7 @@ class MyApp extends StatelessWidget {
         }),
         primaryColor: Colors.blue
       ),
-      home: const SiteLayout(),
+      home: SiteLayout(),
     );
   }
 }
