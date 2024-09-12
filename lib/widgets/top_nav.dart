@@ -3,22 +3,23 @@ import 'package:admindashboard/helpers/responsiveness.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 
-AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> Key) =>
+AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) =>
     AppBar(
       leading: !ResponsiveWidget.isSmallScreen(context)
           ? Row(
               children: [
                 Container(
                   padding: const EdgeInsets.only(left: 14),
+                  //margin: const EdgeInsets.only(right: 100),
                   child:
-                      Image.asset("assets/icons/Logo-Techmall.webp", width: 30),
+                      Image.asset("assets/icons/Logo-Techmall.webp", width: 40),
                 )
               ],
             )
           : IconButton(
               icon: const Icon(Icons.menu),
               onPressed: () {
-                Key.currentState!.openDrawer();
+                key.currentState!.openDrawer();
               },
             ),
       elevation: 0,
@@ -26,11 +27,11 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> Key) =>
         children: [
           Visibility(
               child: CustomText(
-            text: "Dash",
+            text: "Dashboard",
             color: lightGrey,
             size: 20,
             weight: FontWeight.bold,
-          )),
+          ),),
           Expanded(child: Container()),
           IconButton(
             icon: Icon(

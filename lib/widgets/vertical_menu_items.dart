@@ -6,8 +6,8 @@ import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 
 class VerticalMenuItem extends StatelessWidget {
   final String itemName;
-  final GestureTapCallback onTap;
-  const VerticalMenuItem({super.key, required this.itemName, required this.onTap});
+  final Function()? onTap;
+  const VerticalMenuItem({super.key, required this.itemName, this.onTap});
 
   @override
   Widget build(BuildContext context) {

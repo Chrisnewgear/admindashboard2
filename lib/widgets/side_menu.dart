@@ -30,12 +30,12 @@ class SideMenu extends StatelessWidget {
                   children: [
                     SizedBox(width: _width / 48),
                     Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Image.asset("assets/icons/Logo-Techmall.webp"),
+                      padding: const EdgeInsets.only(right:12),
+                      child: Image.asset("assets/icons/Logo-Techmall.webp", width: 100, height: 100,),
                     ),
                     Flexible(
                       child: CustomText(
-                        text: "Dash",
+                        text: "Dashboard",
                         size: 20,
                         color: active,
                         weight: FontWeight.bold,
@@ -46,7 +46,7 @@ class SideMenu extends StatelessWidget {
                 ),
               ],
             ),
-          const SizedBox(height: 40),
+          //const SizedBox(height: 40),
           Divider(color: lightGrey.withOpacity(.1)),
           Column(
             mainAxisSize: MainAxisSize.min,
@@ -65,8 +65,8 @@ class SideMenu extends StatelessWidget {
                           menuController.changeActiveItemTo(itemName);
                           if (ResponsiveWidget.isSmallScreen(context)) {
                             Get.back();
-                            //TODO - Implementar lógica adicional si es necesario
                           }
+                          navigationController.navigateTo(itemName);
                         }
                       },
                     ))
