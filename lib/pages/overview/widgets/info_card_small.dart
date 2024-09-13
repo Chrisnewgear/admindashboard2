@@ -6,7 +6,6 @@ class InfoCardSmall extends StatelessWidget {
   final String title;
   final String value;
   final bool isActive;
-  final Color? topColor;
   final Function() onTap;
 
   const InfoCardSmall({
@@ -15,7 +14,6 @@ class InfoCardSmall extends StatelessWidget {
     required this.value,
     this.isActive = false,
     required this.onTap,
-    this.topColor
   });
 
   @override

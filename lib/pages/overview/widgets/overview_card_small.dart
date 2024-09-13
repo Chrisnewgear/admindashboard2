@@ -8,7 +8,7 @@ class OverViewCardSmallScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
 
-    return Container(
+    return SizedBox(
       height: 400,
       child: Column(children: [
         InfoCardSmall(

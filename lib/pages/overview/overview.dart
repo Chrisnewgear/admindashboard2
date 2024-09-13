@@ -3,6 +3,8 @@ import 'package:admindashboard/helpers/responsiveness.dart';
 import 'package:admindashboard/pages/overview/widgets/overview_card_large.dart';
 import 'package:admindashboard/pages/overview/widgets/overview_card_medium.dart';
 import 'package:admindashboard/pages/overview/widgets/overview_card_small.dart';
+import 'package:admindashboard/pages/overview/widgets/revenue_section_large.dart';
+import 'package:admindashboard/pages/overview/widgets/revenue_section_small.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -31,14 +33,19 @@ class OverviewPage extends StatelessWidget {
         Expanded(
           child: ListView(
             children: [
-              if(ResponsiveWidget.isLargeScreen(context) || 
+              if(ResponsiveWidget.isLargeScreen(context) ||
                 ResponsiveWidget.isMediumScreen(context))
                   if(ResponsiveWidget.isCustomScreen(context))
                     const OverviewCardMediumScreen()
                   else
                     const OverviewCardsLargeScreen()
               else
-                const OverViewCardSmallScreen()
+                const OverViewCardSmallScreen(),
+
+                if(!ResponsiveWidget.isSmallScreen(context))
+                  const RevenueSectionLarge()
+                else
+                  const RevenueSectionSmall()
             ],
         ))
       ],
