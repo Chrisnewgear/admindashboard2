@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings){
   switch (settings.name){
-      case OverViewPageRoute:
+      case overViewPageRoute:
         return _getPageRoute(const OverviewPage());
-      case DriversPagePageRoute:
+      case driversPagePageRoute:
         return _getPageRoute(const DriversPage());
-      case ClientsPageRoute:
+      case clientsPageRoute:
         return _getPageRoute(const ClientsPage());
       default:
         return _getPageRoute(const OverviewPage());

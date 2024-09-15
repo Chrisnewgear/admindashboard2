@@ -26,7 +26,7 @@ class RevenueSectionSmall extends StatelessWidget {
       ), // Added missing closing bracket for BoxDecoration
       child: Column(
         children: [
-          Container(
+          SizedBox(
             height: 260,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

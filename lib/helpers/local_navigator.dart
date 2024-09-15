@@ -5,6 +5,6 @@ import 'package:flutter/material.dart';
 
 Navigator localNavigator() => Navigator(
   key: navigationController.navigatorKey,
-  initialRoute: OverViewPageRoute,
+  initialRoute: overViewPageRoute,
   onGenerateRoute: generateRoute,
 );

@@ -1,5 +1,6 @@
 import 'package:admindashboard/constants/controllers.dart';
 import 'package:admindashboard/helpers/responsiveness.dart';
+import 'package:admindashboard/pages/overview/widgets/available_drivers.dart';
 import 'package:admindashboard/pages/overview/widgets/overview_card_large.dart';
 import 'package:admindashboard/pages/overview/widgets/overview_card_medium.dart';
 import 'package:admindashboard/pages/overview/widgets/overview_card_small.dart';
@@ -45,7 +46,9 @@ class OverviewPage extends StatelessWidget {
                 if(!ResponsiveWidget.isSmallScreen(context))
                   const RevenueSectionLarge()
                 else
-                  const RevenueSectionSmall()
+                  const RevenueSectionSmall(),
+                  
+                  const AvailableDriversTable()
             ],
         ))
       ],

@@ -13,7 +13,7 @@ class SideMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double _width = MediaQuery.of(context).size.width;
+    double width = MediaQuery.of(context).size.width;
 
     return Container(
       color: light,
@@ -28,7 +28,7 @@ class SideMenu extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    SizedBox(width: _width / 48),
+                    SizedBox(width: width / 48),
                     Padding(
                       padding: const EdgeInsets.only(right:12),
                       child: Image.asset("assets/icons/Logo-Techmall.webp", width: 100, height: 100,),
@@ -41,7 +41,7 @@ class SideMenu extends StatelessWidget {
                         weight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(width: _width / 48),
+                    SizedBox(width: width / 48),
                   ],
                 ),
               ],
@@ -52,11 +52,11 @@ class SideMenu extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: sideMenuItems
                 .map((itemName) => SideMenuItem(
-                      itemName: itemName == AuthenticationPageRoute
+                      itemName: itemName == authenticationPageRoute
                           ? "Log Out"
                           : itemName,
                       onTap: () {
-                        if (itemName == AuthenticationPageRoute) {
+                        if (itemName == authenticationPageRoute) {
                           //Navigator.of(context).pushNamedAndRemoveUntil(loginPageRoute, (route) => false);
                           //TODO - Implementar lógica de Logout
                         }

@@ -1,11 +1,11 @@
-  const OverViewPageRoute = "Overview";
-  const DriversPagePageRoute = "Drivers";
-  const ClientsPageRoute = "Clients";
-  const AuthenticationPageRoute = "Authentication";
+  const overViewPageRoute = "Overview";
+  const driversPagePageRoute = "Drivers";
+  const clientsPageRoute = "Clients";
+  const authenticationPageRoute = "Authentication";
 
   List sideMenuItems = [
-    OverViewPageRoute,
-    DriversPagePageRoute,
-    ClientsPageRoute,
-    AuthenticationPageRoute
+    overViewPageRoute,
+    driversPagePageRoute,
+    clientsPageRoute,
+    authenticationPageRoute
   ];
