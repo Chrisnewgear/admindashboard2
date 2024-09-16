@@ -1,6 +1,7 @@
 import 'package:admindashboard/constants/controllers.dart';
 import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/helpers/responsiveness.dart';
+import 'package:admindashboard/pages/authentication/authentication.dart';
 import 'package:admindashboard/routing/routes.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:admindashboard/widgets/side_menu_items.dart';
@@ -57,8 +58,7 @@ class SideMenu extends StatelessWidget {
                           : itemName,
                       onTap: () {
                         if (itemName == authenticationPageRoute) {
-                          //Navigator.of(context).pushNamedAndRemoveUntil(loginPageRoute, (route) => false);
-                          //TODO - Implementar lógica de Logout
+                          Get.offAll(() => const AuthenticationPage());
                         }
 
                         if (!menuController.isActive(itemName)) {

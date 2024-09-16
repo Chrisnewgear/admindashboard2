@@ -3,6 +3,7 @@
 import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/controllers/navigation_controllers.dart';
 import 'package:admindashboard/layout.dart';
+import 'package:admindashboard/pages/authentication/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         }),
         primaryColor: Colors.blue
       ),
-      home: SiteLayout(),
+      home: const AuthenticationPage(),
     );
   }
 }
