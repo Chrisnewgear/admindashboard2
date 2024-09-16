@@ -1,8 +1,11 @@
 import 'package:admindashboard/constants/style.dart';
+import 'package:admindashboard/pages/overview/overview.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../../layout.dart';
 
 class AuthenticationPage extends StatelessWidget {
   const AuthenticationPage({super.key});
@@ -27,7 +30,7 @@ class AuthenticationPage extends StatelessWidget {
               const SizedBox(
                 height: 30,
               ),
-      
+
               Row(
                 children: [
                   Text('Login', style: GoogleFonts.roboto(
@@ -35,7 +38,7 @@ class AuthenticationPage extends StatelessWidget {
                   ),)
                 ],
               ),
-      
+
               Row(
                 children: [
                   CustomText(text: "Welcome back, you've been missed!", 
@@ -43,11 +46,11 @@ class AuthenticationPage extends StatelessWidget {
                   )
                 ],
               ),
-      
+
               const SizedBox(
                 height: 15,
               ),
-      
+
               TextField(
                 decoration: InputDecoration(
                   labelText: 'Email',
@@ -55,11 +58,11 @@ class AuthenticationPage extends StatelessWidget {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20))),
               ),
-      
+
               const SizedBox(
                 height: 15,
               ),
-      
+
               TextField(
                 obscureText: true,
                 decoration: InputDecoration(
@@ -68,7 +71,7 @@ class AuthenticationPage extends StatelessWidget {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20))),
               ),
-      
+
               const SizedBox(
                 height: 15,
               ),
@@ -81,21 +84,21 @@ class AuthenticationPage extends StatelessWidget {
                       const CustomText(text: 'Remember Me'),
                     ],
                   ),
-      
+
                   CustomText(
                     text: 'Forgot Password?',
                     color: active,
                   )
                 ],
               ),
-      
+
               const SizedBox(
                 height: 15,
               ),
-      
+
               InkWell(
                 onTap: () {
-                  Get.offAll(() => const AuthenticationPage());
+                  Get.offAll(() => SiteLayout());
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -110,9 +113,9 @@ class AuthenticationPage extends StatelessWidget {
                     ),
                 ),
               ),
-      
+
               const SizedBox(height: 15,),
-      
+
               RichText(text: TextSpan(children: [
                 const TextSpan(text: "Don't have admin credentials? "),
                 TextSpan(text: "Request Credentials!", style: TextStyle(color: active)),
