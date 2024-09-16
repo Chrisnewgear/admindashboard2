@@ -47,7 +47,7 @@ class OverviewPage extends StatelessWidget {
                   const RevenueSectionLarge()
                 else
                   const RevenueSectionSmall(),
-                  
+
                   const AvailableDriversTable()
             ],
         ))

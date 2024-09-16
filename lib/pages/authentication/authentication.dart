@@ -1,11 +1,10 @@
 import 'package:admindashboard/constants/style.dart';
-import 'package:admindashboard/pages/overview/overview.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../layout.dart';
+import '../../routing/routes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthenticationPage extends StatelessWidget {
   const AuthenticationPage({super.key});
@@ -41,7 +40,7 @@ class AuthenticationPage extends StatelessWidget {
 
               Row(
                 children: [
-                  CustomText(text: "Welcome back, you've been missed!", 
+                  CustomText(text: "Welcome back, you've been missed!",
                     color: lightGrey
                   )
                 ],
@@ -52,6 +51,10 @@ class AuthenticationPage extends StatelessWidget {
               ),
 
               TextField(
+              controller: _email,
+              enableSuggestions: false,
+              autocorrect: false,
+              keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   hintText: 'abc@domain.com',
@@ -80,7 +83,7 @@ class AuthenticationPage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Checkbox(value: true, onChanged: (value){}),
+                      Checkbox(value: false, onChanged: (value){}),
                       const CustomText(text: 'Remember Me'),
                     ],
                   ),
@@ -97,8 +100,9 @@ class AuthenticationPage extends StatelessWidget {
               ),
 
               InkWell(
-                onTap: () {
-                  Get.offAll(() => SiteLayout());
+                onTap: () async{
+                  FirebaseAuth.instance.signInWithEmailAndPassword(email: 'abc@domain.com', password: '123');
+                  Get.offAllNamed(rootRoute);
                 },
                 child: Container(
                   decoration: BoxDecoration(

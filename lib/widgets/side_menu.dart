@@ -1,7 +1,6 @@
 import 'package:admindashboard/constants/controllers.dart';
 import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/helpers/responsiveness.dart';
-import 'package:admindashboard/pages/authentication/authentication.dart';
 import 'package:admindashboard/routing/routes.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:admindashboard/widgets/side_menu_items.dart';
@@ -51,22 +50,21 @@ class SideMenu extends StatelessWidget {
           Divider(color: lightGrey.withOpacity(.1)),
           Column(
             mainAxisSize: MainAxisSize.min,
-            children: sideMenuItems
-                .map((itemName) => SideMenuItem(
-                      itemName: itemName == authenticationPageRoute
-                          ? "Log Out"
-                          : itemName,
+            children: sideMenuItemRoutes
+                .map((item) => SideMenuItem(
+                      itemName:   item.name,
                       onTap: () {
-                        if (itemName == authenticationPageRoute) {
-                          Get.offAll(() => const AuthenticationPage());
+                        if (item.route == authenticationPageRoute) {
+                          menuController.changeActiveItemTo(overviewPageDisplayName);
+                          Get.offAllNamed(authenticationPageRoute);
                         }
 
-                        if (!menuController.isActive(itemName)) {
-                          menuController.changeActiveItemTo(itemName);
+                        if (!menuController.isActive(item.name)) {
+                          menuController.changeActiveItemTo(item.name);
                           if (ResponsiveWidget.isSmallScreen(context)) {
                             Get.back();
                           }
-                          navigationController.navigateTo(itemName);
+                          navigationController.navigateTo(item.route);
                         }
                       },
                     ))

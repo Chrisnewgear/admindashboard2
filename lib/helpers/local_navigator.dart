@@ -4,7 +4,7 @@ import 'package:admindashboard/routing/routes.dart';
 import 'package:flutter/material.dart';
 
 Navigator localNavigator() => Navigator(
-  key: navigationController.navigatorKey,
-  initialRoute: overViewPageRoute,
-  onGenerateRoute: generateRoute,
-);
+      key: navigationController.navigatorKey,
+      onGenerateRoute: generateRoute,
+      initialRoute: overviewPageRoute,
+    );
