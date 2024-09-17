@@ -1,13 +1,31 @@
 import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
+import 'package:admindashboard/widgets/message_box.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../routing/routes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class AuthenticationPage extends StatelessWidget {
+class AuthenticationPage extends StatefulWidget {
   const AuthenticationPage({super.key});
+
+  @override
+  State<AuthenticationPage> createState() => _AuthenticationPageState();
+}
+
+
+
+class _AuthenticationPageState extends State<AuthenticationPage>{
+  late final TextEditingController _email;
+  late final TextEditingController _password;
+
+  @override
+  void initState() {
+    _email = TextEditingController();
+    _password = TextEditingController();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +40,7 @@ class AuthenticationPage extends StatelessWidget {
               Row(
                 children: [
                   Padding(padding: const EdgeInsets.only(right: 12),
-                    child: Image.asset('assets/icons/Logo-Techmall.webp'),),
+                    child: Image.asset('assets/icons/gosoftware.jpeg', height: 50, width: 50,),),
                     Expanded(child: Container())
                 ],
               ),
@@ -67,7 +85,10 @@ class AuthenticationPage extends StatelessWidget {
               ),
 
               TextField(
+                controller: _password,
                 obscureText: true,
+                enableSuggestions: false,
+                autocorrect: false,
                 decoration: InputDecoration(
                   labelText: 'Password',
                   hintText: '123',
@@ -101,8 +122,20 @@ class AuthenticationPage extends StatelessWidget {
 
               InkWell(
                 onTap: () async{
-                  FirebaseAuth.instance.signInWithEmailAndPassword(email: 'abc@domain.com', password: '123');
-                  Get.offAllNamed(rootRoute);
+                  //final email = _email.text;
+                  //final password = _password.text;
+                  // try{
+                  //   FirebaseAuth.instance
+                  //     .signInWithEmailAndPassword(email: email, password: password);
+                  // } on FirebaseAuthException catch(e){
+                  //   print(e.code);
+                  //   if(e.code == "invalid-credential"){
+                  //     showCustomAlert(context, "User not found");
+                  //   }else if(e.code == "wrong-password"){
+                  //     //showCustomAlert(context, "Wrong password");
+                  //   }
+                  // }
+                    Get.offAllNamed(rootRoute);
                 },
                 child: Container(
                   decoration: BoxDecoration(

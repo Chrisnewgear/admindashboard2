@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 class HorizontalMenuItem extends StatelessWidget {
     final String itemName;
   final Function()? onTap;
-  const HorizontalMenuItem({ Key? key,required this.itemName, this.onTap }) : super(key: key);
+  const HorizontalMenuItem({ super.key,required this.itemName, this.onTap });
 
   @override
   Widget build(BuildContext context) {
