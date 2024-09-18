@@ -12,6 +12,9 @@ const clientsPageRoute = "/clients";
 const authenticationPageDisplayName = "Log out";
 const authenticationPageRoute = "/auth";
 
+const registerPageDisplayName = "sign up";
+const registerPageRoute = "/register";
+
 class MenuItem {
   final String name;
   final String route;
@@ -24,4 +27,5 @@ List<MenuItem> sideMenuItemRoutes = [
   MenuItem(driversPageDisplayName, driversPageRoute),
   MenuItem(clientsPageDisplayName, clientsPageRoute),
   MenuItem(authenticationPageDisplayName, authenticationPageRoute),
+  //MenuItem(registerPageDisplayName, registerPageRoute),
 ];

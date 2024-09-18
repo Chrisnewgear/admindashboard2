@@ -29,11 +29,11 @@ class MyApp extends StatelessWidget {
       builder: (context, snapshot) {
         return GetMaterialApp(
           initialRoute: authenticationPageRoute,
-          unknownRoute: GetPage(name: "/not-found", page: () => const PageNotFound(), 
+          unknownRoute: GetPage(name: "/not-found", page: () => const PageNotFound(),
             transition: Transition.fadeIn),
           getPages: [
             GetPage(name: rootRoute, page: () => SiteLayout()),
-            GetPage(name: authenticationPageRoute, page: () => const AuthenticationPage()),
+            GetPage(name: authenticationPageRoute, page: () => AuthenticationPage()),
           ],
           debugShowCheckedModeBanner: false,
           title: "Dashboard",

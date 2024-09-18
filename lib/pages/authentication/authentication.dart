@@ -1,4 +1,5 @@
 import 'package:admindashboard/constants/style.dart';
+import 'package:admindashboard/pages/register/register.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:admindashboard/widgets/message_box.dart';
 import 'package:flutter/material.dart';
@@ -14,11 +15,11 @@ class AuthenticationPage extends StatefulWidget {
   State<AuthenticationPage> createState() => _AuthenticationPageState();
 }
 
-
-
-class _AuthenticationPageState extends State<AuthenticationPage>{
+class _AuthenticationPageState extends State<AuthenticationPage> {
   late final TextEditingController _email;
   late final TextEditingController _password;
+  bool notVisiblePassword = false;
+  bool isChecked = false;
 
   @override
   void initState() {
@@ -39,76 +40,97 @@ class _AuthenticationPageState extends State<AuthenticationPage>{
             children: [
               Row(
                 children: [
-                  Padding(padding: const EdgeInsets.only(right: 12),
-                    child: Image.asset('assets/icons/gosoftware.jpeg', height: 50, width: 50,),),
-                    Expanded(child: Container())
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Image.asset(
+                      'assets/icons/gosoftware.jpeg',
+                      height: 50,
+                      width: 50,
+                    ),
+                  ),
+                  Expanded(child: Container())
                 ],
               ),
               const SizedBox(
                 height: 30,
               ),
-
               Row(
                 children: [
-                  Text('Login', style: GoogleFonts.roboto(
-                    fontSize: 30, fontWeight: FontWeight.bold
-                  ),)
-                ],
-              ),
-
-              Row(
-                children: [
-                  CustomText(text: "Welcome back, you've been missed!",
-                    color: lightGrey
+                  Text(
+                    'Login',
+                    style: GoogleFonts.roboto(
+                        fontSize: 30, fontWeight: FontWeight.bold),
                   )
                 ],
               ),
-
+              Row(
+                children: [
+                  CustomText(
+                      text: "Welcome back, you've been missed!",
+                      color: lightGrey)
+                ],
+              ),
               const SizedBox(
                 height: 15,
               ),
-
               TextField(
-              controller: _email,
-              enableSuggestions: false,
-              autocorrect: false,
-              keyboardType: TextInputType.emailAddress,
+                controller: _email,
+                enableSuggestions: false,
+                autocorrect: false,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText: 'Email',
-                  hintText: 'abc@domain.com',
+                    labelText: 'Email',
+                    hintText: 'abc@domain.com',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20))),
+                        borderRadius: BorderRadius.circular(20))),
               ),
-
               const SizedBox(
                 height: 15,
               ),
-
               TextField(
                 controller: _password,
-                obscureText: true,
+                obscureText: !notVisiblePassword, // Toggles between show/hide password
                 enableSuggestions: false,
                 autocorrect: false,
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  hintText: '123',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20))),
+                  hintText: 'At least 8 characters',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20)),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      notVisiblePassword == false ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        // Toggle visibility
+                        notVisiblePassword = !notVisiblePassword;
+                      });
+                    },
+                  ),
+                ),
               ),
 
               const SizedBox(
                 height: 15,
               ),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
-                      Checkbox(value: false, onChanged: (value){}),
+                      Checkbox(
+                        value: isChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            isChecked = value!;
+                          });
+                        },
+                      ),
                       const CustomText(text: 'Remember Me'),
                     ],
                   ),
-
                   CustomText(
                     text: 'Forgot Password?',
                     color: active,
@@ -121,42 +143,61 @@ class _AuthenticationPageState extends State<AuthenticationPage>{
               ),
 
               InkWell(
-                onTap: () async{
-                  //final email = _email.text;
-                  //final password = _password.text;
-                  // try{
-                  //   FirebaseAuth.instance
-                  //     .signInWithEmailAndPassword(email: email, password: password);
-                  // } on FirebaseAuthException catch(e){
-                  //   print(e.code);
-                  //   if(e.code == "invalid-credential"){
-                  //     showCustomAlert(context, "User not found");
-                  //   }else if(e.code == "wrong-password"){
-                  //     //showCustomAlert(context, "Wrong password");
-                  //   }
-                  // }
+                onTap: () async {
+                  final email = _email.text;
+                  final password = _password.text;
+                  try {
+                    final UserCredential userCredential =
+                        await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: email, password: password);
                     Get.offAllNamed(rootRoute);
+                  } on FirebaseAuthException catch (e) {
+                    print(e.code);
+                    if (e.code == "user-not-found") {
+                      // Handle case when email is not registered
+                      showCustomAlert(context, "User not found. Please register.");
+                    } else if (e.code == "wrong-password") {
+                      // Handle incorrect password
+                      showCustomAlert(context, "Incorrect password. Please try again.");
+                    } else if (e.code == "invalid-email") {
+                      // Handle invalid email format
+                      showCustomAlert(context, "Invalid email format.");
+                    } else if (e.code == "user-disabled") {
+                      // Handle case where the account is disabled
+                      showCustomAlert(context, "This account has been disabled.");
+                    } else {
+                      // Handle other errors
+                      showCustomAlert(context, "Login failed. Please try again.");
+                    }
+                  }
+                  //Get.offAllNamed(rootRoute);
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: active,
-                    borderRadius: BorderRadius.circular(20)),
-                    alignment: Alignment.center,
-                    width: double.maxFinite,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: const CustomText(
-                      text: "Login",
-                      color: Colors.white,
-                    ),
+                      color: active, borderRadius: BorderRadius.circular(20)),
+                  alignment: Alignment.center,
+                  width: double.maxFinite,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: const CustomText(
+                    text: "Login",
+                    color: Colors.white,
+                  ),
                 ),
               ),
-
-              const SizedBox(height: 15,),
-
-              RichText(text: TextSpan(children: [
-                const TextSpan(text: "Don't have admin credentials? "),
-                TextSpan(text: "Request Credentials!", style: TextStyle(color: active)),
-              ]))
+              const SizedBox(
+                height: 15,
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const RegisterPage(), // Directly pushing the RegisterPage widget
+                    ),
+                  );
+                },
+                child: const Text("Not register yet? Register here"),
+              )
             ],
           ),
         ),
