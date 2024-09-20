@@ -21,7 +21,7 @@ class _RegisterPageState extends State<RegisterPage>{
   late final TextEditingController _repeated_password;
   bool notVisiblePassword = false;
   bool notVisibleRepeatPassword = false;
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  //final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {

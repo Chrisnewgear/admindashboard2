@@ -132,7 +132,7 @@ return showDialog<void>(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  backgroundColor: isHovered ? Color(0xFF3C19c0).withOpacity(0.1) : Colors.transparent,
+                  backgroundColor: isHovered ? const Color(0xFF3C19c0).withOpacity(0.1) : Colors.transparent,
                 ),
                 child: Text(
                   'OK',

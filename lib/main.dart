@@ -30,10 +30,10 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           initialRoute: authenticationPageRoute,
           unknownRoute: GetPage(name: "/not-found", page: () => const PageNotFound(),
-            transition: Transition.fadeIn),
+                                transition: Transition.downToUp),
           getPages: [
             GetPage(name: rootRoute, page: () => SiteLayout()),
-            GetPage(name: authenticationPageRoute, page: () => AuthenticationPage()),
+            GetPage(name: authenticationPageRoute, page: () => const AuthenticationPage()),
           ],
           debugShowCheckedModeBanner: false,
           title: "Dashboard",
@@ -47,6 +47,7 @@ class MyApp extends StatelessWidget {
             pageTransitionsTheme: const PageTransitionsTheme(builders: {
               TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
               TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+              TargetPlatform.fuchsia: FadeUpwardsPageTransitionsBuilder(),
             }),
             primaryColor: Colors.blue
           ),

@@ -26,6 +26,6 @@ List<MenuItem> sideMenuItemRoutes = [
   MenuItem(overviewPageDisplayName, overviewPageRoute),
   MenuItem(driversPageDisplayName, driversPageRoute),
   MenuItem(clientsPageDisplayName, clientsPageRoute),
-  MenuItem(authenticationPageDisplayName, authenticationPageRoute),
+  //MenuItem(authenticationPageDisplayName, authenticationPageRoute),
   //MenuItem(registerPageDisplayName, registerPageRoute),
 ];
