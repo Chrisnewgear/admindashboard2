@@ -40,15 +40,16 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
             children: [
               Row(
                 children: [
+                  const Spacer(), // Espacio antes de la imagen
                   Padding(
                     padding: const EdgeInsets.only(right: 12),
                     child: Image.asset(
-                      'assets/icons/gosoftware.jpeg',
-                      height: 50,
-                      width: 50,
+                      'assets/icons/gosoftware.png',
+                      height: 200,
+                      width: 200 ,
                     ),
                   ),
-                  Expanded(child: Container())
+                  const Spacer(), // Espacio después de la imagen
                 ],
               ),
               const SizedBox(

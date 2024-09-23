@@ -15,6 +15,9 @@ const authenticationPageRoute = "/auth";
 const registerPageDisplayName = "sign up";
 const registerPageRoute = "/register";
 
+const verifyEmailDisplayName = "verify mail";
+const verifyEmailPageRoute = "/verify-email";
+
 class MenuItem {
   final String name;
   final String route;

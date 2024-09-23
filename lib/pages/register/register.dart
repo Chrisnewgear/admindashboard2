@@ -1,11 +1,10 @@
 import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/pages/authentication/authentication.dart';
+import 'package:admindashboard/pages/verification/verifiaction_page.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:admindashboard/widgets/message_box.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../routing/routes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -43,9 +42,10 @@ class _RegisterPageState extends State<RegisterPage>{
             children: [
               Row(
                 children: [
+                  const Spacer(),
                   Padding(padding: const EdgeInsets.only(right: 12),
-                    child: Image.asset('assets/icons/gosoftware.jpeg', height: 50, width: 50,),),
-                    Expanded(child: Container())
+                    child: Image.asset('assets/icons/gosoftware.png', height: 200, width: 200,),),
+                    const Spacer(),
                 ],
               ),
               const SizedBox(
@@ -158,45 +158,91 @@ class _RegisterPageState extends State<RegisterPage>{
                 height: 15,
               ),
 
+              // InkWell(
+              //   onTap: () async{
+              //     final email = _email.text;
+              //     final password = _password.text;
+              //     // if (_formKey.currentState!.validate()) {
+              //       try{
+              //         final UserCredential userCredential =
+              //         await FirebaseAuth.instance.createUserWithEmailAndPassword(
+              //             email: email, password: password);
+              //           Get.offAllNamed(rootRoute);
+              //       } on FirebaseAuthException catch(e){
+              //         //print(e.code);
+              //         if (e.code == 'weak-password') {
+              //           // Handle errors here, e.g., show an error message to the user
+              //           showCustomAlert(context, 'Weak Password');
+              //         } else if (e.code == 'email-already-in-use') {
+              //           showCustomAlert(context,'User already exist');
+              //         } else {
+              //           showCustomAlert(context,'Invalid e-mail entered');
+              //         }
+              //         //print("I'm here");
+              //       }
+              //     // }else{
+              //     //   print("I'm outside");
+              //     // }
+              //   },
+              //   child: Container(
+              //     decoration: BoxDecoration(
+              //       color: active,
+              //       borderRadius: BorderRadius.circular(20)),
+              //       alignment: Alignment.center,
+              //       width: double.maxFinite,
+              //       padding: const EdgeInsets.symmetric(vertical: 16),
+              //       child: const CustomText(
+              //         text: "Register",
+              //         color: Colors.white,
+              //       ),
+              //   ),
+              // ),
+
               InkWell(
-                onTap: () async{
+                onTap: () async {
                   final email = _email.text;
                   final password = _password.text;
-                  // if (_formKey.currentState!.validate()) {
-                    try{
-                      final UserCredential userCredential =
-                      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                          email: email, password: password);
-                        Get.offAllNamed(rootRoute);
-                    } on FirebaseAuthException catch(e){
-                      //print(e.code);
-                      if (e.code == 'weak-password') {
-                        // Handle errors here, e.g., show an error message to the user
-                        showCustomAlert(context, 'Weak Password');
-                      } else if (e.code == 'email-already-in-use') {
-                        showCustomAlert(context,'User already exist');
-                      } else {
-                        showCustomAlert(context,'Invalid e-mail entered');
-                      }
-                      //print("I'm here");
+                  try {
+                    final UserCredential userCredential =
+                        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                            email: email, password: password);
+                    
+                    // Enviar un email de verificación
+                    await userCredential.user?.sendEmailVerification();
+
+                    // Navegar a la vista de verificación de email
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const VerifyEmailView(),
+                      ),
+                    );
+                  } on FirebaseAuthException catch (e) {
+                    if (e.code == 'weak-password') {
+                      showCustomAlert(context, 'Weak Password');
+                    } else if (e.code == 'email-already-in-use') {
+                      showCustomAlert(context, 'User already exists');
+                    } else {
+                      showCustomAlert(context, 'Invalid email entered');
                     }
-                  // }else{
-                  //   print("I'm outside");
-                  // }
+                  }
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: active,
-                    borderRadius: BorderRadius.circular(20)),
-                    alignment: Alignment.center,
-                    width: double.maxFinite,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: const CustomText(
-                      text: "Sign Up",
-                      color: Colors.white,
-                    ),
+                      color: active, borderRadius: BorderRadius.circular(20)),
+                  alignment: Alignment.center,
+                  width: double.maxFinite,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: const CustomText(
+                    text: "Sign Up",
+                    color: Colors.white,
+                  ),
                 ),
               ),
+
+
+
+
+
               const SizedBox(height: 15,),
               TextButton(
                 onPressed: () {

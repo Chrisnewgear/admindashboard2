@@ -1,12 +1,11 @@
 import 'package:admindashboard/constants/style.dart';
-import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/helpers/responsiveness.dart';
 import 'package:admindashboard/pages/authentication/authentication.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'package:firebase_auth/firebase_auth.dart'; // Importar FirebaseAuth
+// Importar FirebaseAuth
 
 AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
   return AppBar(
@@ -143,12 +142,12 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
                   PopupMenuItem<String>(
                     value: 'Log Out',
                     onTap: () async {
-                      // Cerrar sesión de Firebase
+                      //Cerrar sesión de Firebase
                       await FirebaseAuth.instance.signOut();
 
                       // Redirigir al usuario a la pantalla de autenticación
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => AuthenticationPage()),
+                        MaterialPageRoute(builder: (context) => const AuthenticationPage()),
                       );
                     },
                     child: const Row(
