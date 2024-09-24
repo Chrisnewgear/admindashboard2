@@ -15,7 +15,7 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
               Container(
                 padding: const EdgeInsets.only(left: 14),
                 //margin: const EdgeInsets.only(right: 100),
-                child: Image.asset("assets/icons/Logo-Techmall.webp", width: 40),
+                child: Image.asset("assets/icons/gosoftware.png", width: 40),
               )
             ],
           )

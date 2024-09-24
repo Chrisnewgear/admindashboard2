@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
             pageTransitionsTheme: const PageTransitionsTheme(builders: {
               TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
               TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-              TargetPlatform.fuchsia: FadeUpwardsPageTransitionsBuilder(),
+              //TargetPlatform.fuchsia: FadeUpwardsPageTransitionsBuilder(),
             }),
             primaryColor: Colors.blue
           ),
