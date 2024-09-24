@@ -18,6 +18,9 @@ const registerPageRoute = "/register";
 const verifyEmailDisplayName = "verify mail";
 const verifyEmailPageRoute = "/verify-email";
 
+const pageNotFoundDisplayName = "Page not found";
+const pageNotFoundPageRoute = "/404";
+
 class MenuItem {
   final String name;
   final String route;
@@ -31,4 +34,5 @@ List<MenuItem> sideMenuItemRoutes = [
   MenuItem(clientsPageDisplayName, clientsPageRoute),
   //MenuItem(authenticationPageDisplayName, authenticationPageRoute),
   //MenuItem(registerPageDisplayName, registerPageRoute),
+  //MenuItem(pageNotFoundDisplayName, pageNotFoundPageRoute),
 ];
