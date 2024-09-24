@@ -207,7 +207,18 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                 ),
-                // ... (Código anterior omitido por brevedad)
+                const SizedBox(height: 15,),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const AuthenticationPage(), // Directly pushing the RegisterPage widget
+                    ),
+                  );
+                },
+                child: const Text("Already have an account? Login here"),
+              )
               ],
             ),
           ),
