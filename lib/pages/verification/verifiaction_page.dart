@@ -1,4 +1,6 @@
+import 'package:admindashboard/layout.dart';
 import 'package:admindashboard/pages/overview/overview.dart';
+import 'package:admindashboard/widgets/message_box.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -21,16 +23,21 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
     checkEmailVerified();
   }
 
-  Future<void> checkEmailVerified() async {
+    Future<void> checkEmailVerified() async {
     await FirebaseAuth.instance.currentUser?.reload(); // Recarga el estado del usuario
     setState(() {
       isEmailVerified = FirebaseAuth.instance.currentUser?.emailVerified ?? false;
     });
+  }
+  void verifyEmail() async {
+    await checkEmailVerified();
     if (isEmailVerified) {
       // Navega al dashboard si el correo ya está verificado
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const OverviewPage()),
+        MaterialPageRoute(builder: (context) => SiteLayout()),
       );
+    }else{
+      showCustomAlert(context, 'You have to verify your email first');
     }
   }
 
@@ -46,7 +53,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
               const Text('Please verify your email address'),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: checkEmailVerified,
+              onPressed: verifyEmail,
               child: const Text('I have verified my email'),
             ),
           ],
