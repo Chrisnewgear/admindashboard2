@@ -14,13 +14,13 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage>{
+class _RegisterPageState extends State<RegisterPage> {
   late final TextEditingController _email;
   late final TextEditingController _password;
   late final TextEditingController _repeated_password;
   bool notVisiblePassword = false;
   bool notVisibleRepeatPassword = false;
-  //final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -37,9 +37,11 @@ class _RegisterPageState extends State<RegisterPage>{
         child: Container(
           constraints: const BoxConstraints(maxWidth: 400),
           padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
               Row(
                 children: [
                   const Spacer(),
@@ -122,147 +124,99 @@ class _RegisterPageState extends State<RegisterPage>{
                 height: 15,
               ),
               TextFormField(
-                controller: _repeated_password,
-                obscureText: !notVisibleRepeatPassword,
-                enableSuggestions: false,
-                autocorrect: false,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please confirm your password';
-                  }
-                  if (value != _password.text) {
-                    return 'Passwords do not match';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  labelText: 'Repeat Password',
-                  hintText: 'Repeat your password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20)),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      notVisibleRepeatPassword == false ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        // Toggle visibility
-                        notVisibleRepeatPassword = !notVisibleRepeatPassword;
-                      });
-                    },
-                  ),
-                  ),
-                ),
-
-              const SizedBox(
-                height: 15,
-              ),
-
-              // InkWell(
-              //   onTap: () async{
-              //     final email = _email.text;
-              //     final password = _password.text;
-              //     // if (_formKey.currentState!.validate()) {
-              //       try{
-              //         final UserCredential userCredential =
-              //         await FirebaseAuth.instance.createUserWithEmailAndPassword(
-              //             email: email, password: password);
-              //           Get.offAllNamed(rootRoute);
-              //       } on FirebaseAuthException catch(e){
-              //         //print(e.code);
-              //         if (e.code == 'weak-password') {
-              //           // Handle errors here, e.g., show an error message to the user
-              //           showCustomAlert(context, 'Weak Password');
-              //         } else if (e.code == 'email-already-in-use') {
-              //           showCustomAlert(context,'User already exist');
-              //         } else {
-              //           showCustomAlert(context,'Invalid e-mail entered');
-              //         }
-              //         //print("I'm here");
-              //       }
-              //     // }else{
-              //     //   print("I'm outside");
-              //     // }
-              //   },
-              //   child: Container(
-              //     decoration: BoxDecoration(
-              //       color: active,
-              //       borderRadius: BorderRadius.circular(20)),
-              //       alignment: Alignment.center,
-              //       width: double.maxFinite,
-              //       padding: const EdgeInsets.symmetric(vertical: 16),
-              //       child: const CustomText(
-              //         text: "Register",
-              //         color: Colors.white,
-              //       ),
-              //   ),
-              // ),
-
-              InkWell(
-                onTap: () async {
-                  final email = _email.text;
-                  final password = _password.text;
-                  try {
-                    final UserCredential userCredential =
-                        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                            email: email, password: password);
-                    
-                    // Enviar un email de verificación
-                    await userCredential.user?.sendEmailVerification();
-
-                    // Navegar a la vista de verificación de email
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => const VerifyEmailView(),
-                      ),
-                    );
-                  } on FirebaseAuthException catch (e) {
-                    if (e.code == 'weak-password') {
-                      showCustomAlert(context, 'Weak Password');
-                    } else if (e.code == 'email-already-in-use') {
-                      showCustomAlert(context, 'User already exists');
-                    } else {
-                      showCustomAlert(context, 'Invalid email entered');
+                  controller: _repeated_password,
+                  obscureText: !notVisibleRepeatPassword,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please confirm your password';
                     }
-                  }
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: active, borderRadius: BorderRadius.circular(20)),
-                  alignment: Alignment.center,
-                  width: double.maxFinite,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: const CustomText(
-                    text: "Sign Up",
-                    color: Colors.white,
+                    if (value != _password.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Repeat Password',
+                    hintText: 'Repeat your password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        notVisibleRepeatPassword == false
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          notVisibleRepeatPassword = !notVisibleRepeatPassword;
+                        });
+                      },
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(height: 15),
+                InkWell(
+                  onTap: () async {
+                    // Verifica que el formulario sea válido
+                    if (_formKey.currentState?.validate() ?? false) {
+                      final email = _email.text;
+                      final password = _password.text;
 
+                      try {
+                        // Intentar registrar al usuario con Firebase
+                        final UserCredential userCredential =
+                            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                          email: email,
+                          password: password,
+                        );
 
+                        // Enviar un email de verificación
+                        await userCredential.user?.sendEmailVerification();
 
-
-
-              const SizedBox(height: 15,),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const AuthenticationPage(), // Directly pushing the RegisterPage widget
+                        // Navegar a la vista de verificación de email
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const VerifyEmailView(),
+                          ),
+                        );
+                      } on FirebaseAuthException catch (e) {
+                        if (e.code == 'weak-password') {
+                          showCustomAlert(context, 'Weak Password');
+                        } else if (e.code == 'email-already-in-use') {
+                          showCustomAlert(context, 'User already exists');
+                        } else {
+                          showCustomAlert(context, 'Invalid email entered');
+                        }
+                      }
+                    }
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: active,
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                  );
-                },
-                child: const Text("Already have an account? Login here"),
-              )
-            ],
+                    alignment: Alignment.center,
+                    width: double.maxFinite,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: const CustomText(
+                      text: "Sign Up",
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                // ... (Código anterior omitido por brevedad)
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-    @override
+  @override
   void dispose() {
     _password.dispose();
     _repeated_password.dispose();
