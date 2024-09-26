@@ -1,3 +1,5 @@
+import 'package:admindashboard/pages/roles/role_page.dart';
+
 const rootRoute = "/";
 
 const overviewPageDisplayName = "Overview";
@@ -18,6 +20,9 @@ const registerPageRoute = "/register";
 const verifyEmailDisplayName = "verify mail";
 const verifyEmailPageRoute = "/verify-email";
 
+const roleManagementWidgetDisplayName = "Roles";
+const roleManagementWidgetPageRoute = "/roles";
+
 const pageNotFoundDisplayName = "Page not found";
 const pageNotFoundPageRoute = "/404";
 
@@ -32,6 +37,7 @@ List<MenuItem> sideMenuItemRoutes = [
   MenuItem(overviewPageDisplayName, overviewPageRoute),
   MenuItem(driversPageDisplayName, driversPageRoute),
   MenuItem(clientsPageDisplayName, clientsPageRoute),
+  MenuItem(roleManagementWidgetDisplayName, roleManagementWidgetPageRoute),
   //MenuItem(authenticationPageDisplayName, authenticationPageRoute),
   //MenuItem(registerPageDisplayName, registerPageRoute),
   //MenuItem(pageNotFoundDisplayName, pageNotFoundPageRoute),
