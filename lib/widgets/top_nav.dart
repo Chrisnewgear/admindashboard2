@@ -139,16 +139,67 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
                       ],
                     ),
                   ),
+                  // PopupMenuItem<String>(
+                  //   value: 'Log Out',
+                  //   onTap: () async {
+                  //     //Cerrar sesión de Firebase
+                  //     await FirebaseAuth.instance.signOut();
+
+                  //     // Redirigir al usuario a la pantalla de autenticación
+                  //     Navigator.of(context).pushReplacement(
+                  //       MaterialPageRoute(builder: (context) => const AuthenticationPage()),
+                  //     );
+                  //   },
+                  //   child: const Row(
+                  //     children: [
+                  //       Icon(Icons.logout, color: Colors.black), // Icono para la opción
+                  //       SizedBox(width: 8),
+                  //       Text('Log Out'),
+                  //     ],
+                  //   ),
+                  // ),
+
                   PopupMenuItem<String>(
                     value: 'Log Out',
                     onTap: () async {
-                      //Cerrar sesión de Firebase
-                      await FirebaseAuth.instance.signOut();
+                      // Delay the execution to avoid conflicts with PopupMenuItem
+                      WidgetsBinding.instance.addPostFrameCallback((_) async {
+                        // Show confirmation dialog
+                        bool? confirmLogout = await showDialog<bool>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Confirm Logout'),
+                              content: const Text('Are you sure you want to log out?'),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: const Text('Cancel'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop(false);
+                                  },
+                                ),
+                                TextButton(
+                                  child: const Text('Log Out'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop(true);
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
 
-                      // Redirigir al usuario a la pantalla de autenticación
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => const AuthenticationPage()),
-                      );
+                        // If user confirms, proceed with logout
+                        if (confirmLogout == true) {
+                          // Cerrar sesión de Firebase
+                          await FirebaseAuth.instance.signOut();
+
+                          // Redirigir al usuario a la pantalla de autenticación
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) => const AuthenticationPage()),
+                          );
+                        }
+                      });
                     },
                     child: const Row(
                       children: [

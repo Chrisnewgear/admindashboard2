@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../routing/routes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthenticationPage extends StatefulWidget {
   const AuthenticationPage({super.key});
@@ -25,7 +26,37 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
+    _loadRememberMe();
     super.initState();
+  }
+
+    @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
+    // Load the remember me state and email
+  void _loadRememberMe() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isChecked = prefs.getBool('rememberMe') ?? false;
+      if (isChecked) {
+        _email.text = prefs.getString('email') ?? '';
+      }
+    });
+  }
+
+  // Save the remember me state and email
+  void _saveRememberMe() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('rememberMe', isChecked);
+    if (isChecked) {
+      await prefs.setString('email', _email.text);
+    } else {
+      await prefs.remove('email');
+    }
   }
 
   @override
@@ -151,6 +182,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                     final UserCredential userCredential =
                         await FirebaseAuth.instance.signInWithEmailAndPassword(
                             email: email, password: password);
+                    _saveRememberMe(); // Save remember me state
                     Get.offAllNamed(rootRoute);
                   } on FirebaseAuthException catch (e) {
                     print(e.code);
