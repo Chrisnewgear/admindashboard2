@@ -16,7 +16,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case clientsPageRoute:
       return _getPageRoute(const ClientsPage());
     case roleManagementWidgetPageRoute:
-      return _getPageRoute(const RoleManagementWidget());
+      return _getPageRoute(RoleManagementWidget());
     default:
       return _getPageRoute(const PageNotFound());
   }

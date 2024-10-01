@@ -1,5 +1,5 @@
-import 'package:admindashboard/constants/style.dart';
 import 'package:flutter/material.dart';
+import 'package:admindashboard/constants/style.dart';
 
 class RoleManagementWidget extends StatefulWidget {
   const RoleManagementWidget({super.key});
@@ -8,86 +8,77 @@ class RoleManagementWidget extends StatefulWidget {
   _RoleManagementWidgetState createState() => _RoleManagementWidgetState();
 }
 
-class _RoleManagementWidgetState extends State<RoleManagementWidget>
-    with SingleTickerProviderStateMixin {
-  List<String> roles = ['Vendedor', 'Supervisor'];
+class _RoleManagementWidgetState extends State<RoleManagementWidget> {
+  final _formKey = GlobalKey<FormState>();
   String selectedRole = 'Vendedor';
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(seconds: 1),
-      vsync: this,
-    );
-
-    _fadeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeIn,
-    );
-
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _lastNameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _animationController.dispose();
-    super.dispose();
-  }
+  List<String> roles = ['Vendedor', 'Supervisor'];
+  bool isManagerApproved = false;
+  bool hasAssignedDelegates = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Administrar Roles', style: TextStyle(color: light)),
-        backgroundColor: active,
-        iconTheme: IconThemeData(color: light),
+        title: Text('Administrar Roles', style: TextStyle(color: dark)),
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Selecciona un rol:',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: light,
-                  ),
+                  'Administrar Roles',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: dark),
                 ),
-                const SizedBox(height: 10),
-                _buildDropdown(),
-                const SizedBox(height: 20),
-                _buildTextField(_nameController, 'Nombre'),
-                const SizedBox(height: 10),
-                _buildTextField(_lastNameController, 'Apellido'),
-                const SizedBox(height: 10),
-                _buildTextField(_emailController, 'Correo electrónico', keyboardType: TextInputType.emailAddress),
-                const SizedBox(height: 10),
-                _buildTextField(_phoneController, 'Número de teléfono', keyboardType: TextInputType.phone),
-                const SizedBox(height: 20),
+                const SizedBox(height: 8),
+                const Text(
+                  'Add description',
+                  style: TextStyle(fontSize: 14, color: Colors.blue),
+                ),
+                const SizedBox(height: 24),
+                _buildFormSection([
+                  _buildResponsiveRow([
+                    _buildCustomTextField(label: 'Nombres', required: true),
+                    _buildCustomTextField(label: 'Apellidos'),
+                  ]),
+                  _buildResponsiveRow([
+                    _buildCustomTextField(label: 'Email', hintText: 'email@dominio.com'),
+                    _buildCustomTextField(label: 'Telefono', hintText: '09-1234-5678'),
+                  ]),
+                  _buildResponsiveRow([
+                    _buildDropdown(),
+                    _buildCustomTextField(label: 'Fecha Ingreso', hintText: 'dd/mm/yyyy'),
+                    // _buildRadioButtons('Manager Approved', isManagerApproved, (value) {
+                    //   setState(() => isManagerApproved = value!);
+                    // }),
+                  ]),
+                  // _buildResponsiveRow([
+                  //   _buildRadioButtons('Assigned Delegates', hasAssignedDelegates, (value) {
+                  //     setState(() => hasAssignedDelegates = value!);
+                  //   }),
+                  //   _buildCustomTextField(label: 'PL Balance'),
+                  // ]),
+                ]),
+                const SizedBox(height: 24),
                 Center(
-                  child: SizedBox(
-                    width: 200,
-                    child: _buildSaveButton(),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        // Process data
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: active,
+                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    ),
+                    child: Text('Submit', style: TextStyle(color: light)),
                   ),
                 ),
-                const SizedBox(height: 20),
-                _buildRoleList(),
               ],
             ),
           ),
@@ -96,109 +87,105 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget>
     );
   }
 
-  Widget _buildDropdown() {
-    return DecoratedBox(
+  Widget _buildFormSection(List<Widget> children) {
+    return Container(
       decoration: BoxDecoration(
-        color: light,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: lightGrey, width: 1),
+        border: Border.all(color: lightGrey),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: selectedRole,
-            isExpanded: true,
-            onChanged: (String? newRole) {
-              setState(() {
-                selectedRole = newRole!;
-              });
-            },
-            items: roles.map<DropdownMenuItem<String>>((String role) {
-              return DropdownMenuItem<String>(
-                value: role,
-                child: Text(role),
-              );
-            }).toList(),
-          ),
-        ),
-      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(children: children),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, {TextInputType keyboardType = TextInputType.text}) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: light,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: lightGrey),
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSaveButton() {
-    return ElevatedButton.icon(
-      onPressed: () {
-        print('Rol: $selectedRole');
-        print('Nombre: ${_nameController.text}');
-        print('Apellido: ${_lastNameController.text}');
-        print('Email: ${_emailController.text}');
-        print('Teléfono: ${_phoneController.text}');
-        // lógica para guardar los datos
-        _clearFields();
-      },
-      icon: Icon(Icons.save, color: light),
-      label: Text('Guardar', style: TextStyle(color: light)),
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        backgroundColor: active,
-      ),
-    );
-  }
-
-  Widget _buildRoleList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: roles.length,
-      itemBuilder: (context, index) {
-        return Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          margin: const EdgeInsets.symmetric(vertical: 6),
-          color: light,
-          child: ListTile(
-            leading: Icon(Icons.person, color: active),
-            title: Text(roles[index], style: TextStyle(color: dark)),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.redAccent),
-              onPressed: () {
-                setState(() {
-                  roles.removeAt(index);
-                });
-              },
-            ),
-          ),
-        );
+  Widget _buildResponsiveRow(List<Widget> children) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return constraints.maxWidth > 600
+            ? Row(
+                children: children.map((child) => Expanded(child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: child,
+                ))).toList(),
+              )
+            : Column(children: children);
       },
     );
   }
 
-  void _clearFields() {
-    _nameController.clear();
-    _lastNameController.clear();
-    _emailController.clear();
-    _phoneController.clear();
+  Widget _buildCustomTextField({
+    required String label,
+    String? hintText,
+    bool required = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        decoration: InputDecoration(
+          labelText: label + (required ? '*' : ''),
+          hintText: hintText,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          filled: true,
+          fillColor: Colors.grey[100],
+        ),
+        validator: required
+            ? (value) => value!.isEmpty ? 'This field is required' : null
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildDropdown() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          labelText: 'Role',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          filled: true,
+          fillColor: Colors.grey[100],
+        ),
+        value: selectedRole,
+        items: roles.map((String role) {
+          return DropdownMenuItem<String>(
+            value: role,
+            child: Text(role),
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          setState(() {
+            selectedRole = newValue!;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildRadioButtons(String label, bool value, Function(bool?) onChanged) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(fontSize: 16, color: dark)),
+          Row(
+            children: [
+              Radio<bool>(
+                value: true,
+                groupValue: value,
+                onChanged: onChanged,
+              ),
+              const Text('Yes'),
+              Radio<bool>(
+                value: false,
+                groupValue: value,
+                onChanged: onChanged,
+              ),
+              const Text('No'),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
