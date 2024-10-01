@@ -30,7 +30,7 @@ class MyMenuController extends GetxController{
       case clientsPageDisplayName:
         return _customIcon(Icons.people_alt_outlined, itemName);
       case roleManagementWidgetDisplayName:
-        return _customIcon(Icons.sell_outlined, itemName);
+        return _customIcon(Icons.assignment_ind, itemName);
       default:
         return _customIcon(Icons.exit_to_app, itemName);
     }
