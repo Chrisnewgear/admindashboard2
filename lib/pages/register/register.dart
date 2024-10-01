@@ -1,6 +1,6 @@
 import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/pages/authentication/authentication.dart';
-import 'package:admindashboard/pages/verification/verifiaction_page.dart';
+import 'package:admindashboard/pages/verification/verification_page.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:admindashboard/widgets/message_box.dart';
 import 'package:flutter/material.dart';

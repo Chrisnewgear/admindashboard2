@@ -171,7 +171,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget>
   Widget _buildRoleList() {
     return ListView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: roles.length,
       itemBuilder: (context, index) {
         return Card(

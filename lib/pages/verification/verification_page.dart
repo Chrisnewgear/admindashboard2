@@ -1,10 +1,8 @@
 import 'package:admindashboard/layout.dart';
-import 'package:admindashboard/pages/overview/overview.dart';
 import 'package:admindashboard/widgets/message_box.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter/material.dart';
 
 class VerifyEmailView extends StatefulWidget {
   const VerifyEmailView({super.key});

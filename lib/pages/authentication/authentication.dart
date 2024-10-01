@@ -1,4 +1,5 @@
 import 'package:admindashboard/constants/style.dart';
+import 'package:admindashboard/pages/forgot_password/forgot_password.dart';
 import 'package:admindashboard/pages/register/register.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:admindashboard/widgets/message_box.dart';
@@ -15,25 +16,39 @@ class AuthenticationPage extends StatefulWidget {
   @override
   State<AuthenticationPage> createState() => _AuthenticationPageState();
 }
-
-class _AuthenticationPageState extends State<AuthenticationPage> {
+class _AuthenticationPageState extends State<AuthenticationPage> with SingleTickerProviderStateMixin {
   late final TextEditingController _email;
   late final TextEditingController _password;
   bool notVisiblePassword = false;
   bool isChecked = false;
+  bool isPasswordIncorrect = false;
+  late AnimationController _animationController;
+  late Animation<Offset> _offsetAnimation;
 
-  @override
+@override
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
     _loadRememberMe();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _offsetAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0.1, 0),
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.elasticIn,
+    ));
     super.initState();
   }
 
-    @override
+  @override
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -57,6 +72,11 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     } else {
       await prefs.remove('email');
     }
+  }
+  void _shakePassword() {
+    _animationController.forward().then((_) {
+      _animationController.reverse();
+    });
   }
 
   @override
@@ -119,27 +139,62 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
               const SizedBox(
                 height: 15,
               ),
-              TextField(
-                controller: _password,
-                obscureText: !notVisiblePassword, // Toggles between show/hide password
-                enableSuggestions: false,
-                autocorrect: false,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  hintText: 'At least 8 characters',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20)),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      notVisiblePassword == false ? Icons.visibility_off : Icons.visibility,
+
+              SlideTransition(
+                position: _offsetAnimation,
+                child: TextFormField(
+                  controller: _password,
+                  obscureText: !notVisiblePassword,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    hintText: 'At least 8 characters',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(
+                        color: isPasswordIncorrect ? Colors.red : Colors.grey,
+                        width: 2.0,
+                      ),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        // Toggle visibility
-                        notVisiblePassword = !notVisiblePassword;
-                      });
-                    },
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(
+                        color: isPasswordIncorrect ? Colors.red : Colors.grey,
+                        width: 2.0,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(
+                        color: isPasswordIncorrect ? Colors.red : active,
+                        width: 2.0,
+                      ),
+                    ),
+                    labelStyle: TextStyle(
+                      color: isPasswordIncorrect ? Colors.red : Colors.grey,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        notVisiblePassword == false ? Icons.visibility_off : Icons.visibility,
+                        color: isPasswordIncorrect ? Colors.red : Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          notVisiblePassword = !notVisiblePassword;
+                        });
+                      },
+                    ),
+                    errorText: isPasswordIncorrect ? 'Incorrect password' : null,
+                    errorStyle: const TextStyle(color: Colors.red),
                   ),
+                  onChanged: (value) {
+                    if (isPasswordIncorrect) {
+                      setState(() {
+                        isPasswordIncorrect = false;
+                      });
+                    }
+                  },
                 ),
               ),
 
@@ -163,10 +218,17 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                       const CustomText(text: 'Remember Me'),
                     ],
                   ),
-                  CustomText(
-                    text: 'Forgot Password?',
-                    color: active,
-                  )
+                  TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const ForgotPasswordPage(),
+                    ),
+                  );
+                },
+                child: const Text("Forgot your password?"),
+              )
                 ],
               ),
 
@@ -185,25 +247,26 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                     _saveRememberMe(); // Save remember me state
                     Get.offAllNamed(rootRoute);
                   } on FirebaseAuthException catch (e) {
-                    print(e.code);
+                    //print("Error Code: ${e.code}");
+                    //print("Error Message: ${e.message}");
+
                     if (e.code == "user-not-found") {
-                      // Handle case when email is not registered
                       showCustomAlert(context, "User not found. Please register.");
-                    } else if (e.code == "wrong-password") {
-                      // Handle incorrect password
-                      showCustomAlert(context, "Incorrect password. Please try again.");
-                    } else if (e.code == "invalid-email") {
-                      // Handle invalid email format
+                    } else if (e.message == "The supplied auth credential is incorrect, malformed or has expired.") {
+                      setState(() {
+                        isPasswordIncorrect = true;
+                      });
+                      _shakePassword();
+                    }else if(e.message == "Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later."){
+                      showCustomAlert(context, "Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.");
+                    } else if (e.message == "invalid-email") {
                       showCustomAlert(context, "Invalid email format.");
                     } else if (e.code == "user-disabled") {
-                      // Handle case where the account is disabled
                       showCustomAlert(context, "This account has been disabled.");
                     } else {
-                      // Handle other errors
                       showCustomAlert(context, "Login failed. Please try again.");
                     }
                   }
-                  //Get.offAllNamed(rootRoute);
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -217,6 +280,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                   ),
                 ),
               ),
+
               const SizedBox(
                 height: 15,
               ),
