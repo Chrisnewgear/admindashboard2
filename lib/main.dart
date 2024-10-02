@@ -4,7 +4,6 @@ import 'package:admindashboard/firebase_options.dart';
 import 'package:admindashboard/layout.dart';
 import 'package:admindashboard/pages/authentication/authentication.dart';
 import 'package:admindashboard/routing/routes.dart';
-import 'package:admindashboard/theme/app_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
