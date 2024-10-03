@@ -22,6 +22,9 @@ const verifyEmailPageRoute = "/verify-email";
 const roleManagementWidgetDisplayName = "Roles";
 const roleManagementWidgetPageRoute = "/roles";
 
+const profileDisplayName = "Profile";
+const profilePageRoute = "/profile";
+
 const pageNotFoundDisplayName = "Page not found";
 const pageNotFoundPageRoute = "/404";
 

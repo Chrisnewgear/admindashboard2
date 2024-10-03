@@ -74,7 +74,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 height: 30,
               ),
               const CustomText(
-                text: 'Enter your email to reset your password',
+                text: 'Ingrese su mail para resetear su password',
                 size: 18,
               ),
               const SizedBox(height: 20),
@@ -82,7 +82,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
-                  hintText: 'Enter your email',
+                  hintText: 'Ingrese su email',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -104,7 +104,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const CustomText(
-                          text: 'Reset Password',
+                          text: 'Resetear Password',
                           color: Colors.white,
                         ),
                 ),

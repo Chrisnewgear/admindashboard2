@@ -1,6 +1,7 @@
 import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/helpers/responsiveness.dart';
 import 'package:admindashboard/pages/authentication/authentication.dart';
+import 'package:admindashboard/pages/profile/profile_page.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,7 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
               Container(
                 padding: const EdgeInsets.only(left: 14),
                 //margin: const EdgeInsets.only(right: 100),
-                child: Image.asset("assets/icons/goSoftwareSolutions-01", width: 40),
+                child: Image.asset("assets/icons/goSoftwareSolutions-01.png", width: 40),
               )
             ],
           )
@@ -119,9 +120,14 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
               offset: const Offset(0, 40), // Desplaza el menú hacia abajo del icono
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    value: 'Profile',
-                    child: Row(
+                  PopupMenuItem<String>(
+                    value: 'Perfil',
+                    onTap: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) => const ProfileWidget()),
+                      );
+                    },
+                    child: const Row(
                       children: [
                         Icon(Icons.person, color: Colors.black), // Icono para la opción
                         SizedBox(width: 8), // Espacio entre el icono y el texto
