@@ -15,7 +15,7 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
               Container(
                 padding: const EdgeInsets.only(left: 14),
                 //margin: const EdgeInsets.only(right: 100),
-                child: Image.asset("assets/icons/gosoftware.png", width: 40),
+                child: Image.asset("assets/icons/goSoftwareSolutions-01", width: 40),
               )
             ],
           )
@@ -139,26 +139,6 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
                       ],
                     ),
                   ),
-                  // PopupMenuItem<String>(
-                  //   value: 'Log Out',
-                  //   onTap: () async {
-                  //     //Cerrar sesión de Firebase
-                  //     await FirebaseAuth.instance.signOut();
-
-                  //     // Redirigir al usuario a la pantalla de autenticación
-                  //     Navigator.of(context).pushReplacement(
-                  //       MaterialPageRoute(builder: (context) => const AuthenticationPage()),
-                  //     );
-                  //   },
-                  //   child: const Row(
-                  //     children: [
-                  //       Icon(Icons.logout, color: Colors.black), // Icono para la opción
-                  //       SizedBox(width: 8),
-                  //       Text('Log Out'),
-                  //     ],
-                  //   ),
-                  // ),
-
                   PopupMenuItem<String>(
                     value: 'Log Out',
                     onTap: () async {

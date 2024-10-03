@@ -95,7 +95,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
                   Padding(
                     padding: const EdgeInsets.only(right: 12),
                     child: Image.asset(
-                      'assets/icons/gosoftware.png',
+                      'assets/icons/goSoftwareSolutions-01.png',
                       height: 200,
                       width: 200 ,
                     ),
@@ -118,7 +118,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
               Row(
                 children: [
                   CustomText(
-                      text: "Welcome back, you've been missed!",
+                      text: "Bienvenido, te hemos extrañado!",
                       color: lightGrey)
                 ],
               ),
@@ -149,7 +149,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
                   autocorrect: false,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    hintText: 'At least 8 characters',
+                    hintText: 'Al menos 8 caracteres',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide(
@@ -185,7 +185,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
                         });
                       },
                     ),
-                    errorText: isPasswordIncorrect ? 'Incorrect password' : null,
+                    errorText: isPasswordIncorrect ? 'Password incorrecto' : null,
                     errorStyle: const TextStyle(color: Colors.red),
                   ),
                   onChanged: (value) {
@@ -215,7 +215,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
                           });
                         },
                       ),
-                      const CustomText(text: 'Remember Me'),
+                      const CustomText(text: 'Recuérdame'),
                     ],
                   ),
                   TextButton(
@@ -227,7 +227,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
                     ),
                   );
                 },
-                child: const Text("Forgot your password?"),
+                child: const Text("Olvidaste tu password?"),
               )
                 ],
               ),
@@ -293,7 +293,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
                     ),
                   );
                 },
-                child: const Text("Not register yet? Register here"),
+                child: const Text("No tienes una cuenta? Registrate aquí"),
               )
             ],
           ),

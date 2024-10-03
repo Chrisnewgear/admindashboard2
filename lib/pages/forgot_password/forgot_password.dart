@@ -62,7 +62,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   Padding(
                     padding: const EdgeInsets.only(right: 12),
                     child: Image.asset(
-                      'assets/icons/gosoftware.png',
+                      'assets/icons/goSoftwareSolutions-01.png',
                       height: 200,
                       width: 200 ,
                     ),

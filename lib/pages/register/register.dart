@@ -22,9 +22,10 @@ class _RegisterPageState extends State<RegisterPage> {
   late final TextEditingController _name;
   late final TextEditingController _surname;
   late final TextEditingController _phone;
-  bool notVisiblePassword = false;
-  bool notVisibleRepeatPassword = false;
+  bool notVisiblePassword = true;
+  bool notVisibleRepeatPassword = true;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _passwordsMatch = true;
 
   @override
   void initState() {
@@ -67,6 +68,7 @@ Future<void> saveUserToFirestore(User user) async {
     });
   }
 
+  //Verifica que el email no este en uso
   Future<bool> isEmailAlreadyInUse(String email) async {
     final result = await FirebaseFirestore.instance
         .collection('Users')
@@ -74,17 +76,19 @@ Future<void> saveUserToFirestore(User user) async {
         .get();
     return result.docs.isNotEmpty;
   }
-Widget _buildTextField({
+
+  Widget _buildTextField({
     required TextEditingController controller,
     required String labelText,
     required String hintText,
     bool isPassword = false,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
+    bool isRepeatedPassword = false,
   }) {
     return TextFormField(
       controller: controller,
-      obscureText: isPassword ? !notVisiblePassword : false,
+      obscureText: isPassword ? (labelText == 'Password' ? notVisiblePassword : notVisibleRepeatPassword) : false,
       enableSuggestions: !isPassword,
       autocorrect: !isPassword,
       keyboardType: keyboardType,
@@ -92,23 +96,85 @@ Widget _buildTextField({
         labelText: labelText,
         hintText: hintText,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20)
-        ),
-        suffixIcon: isPassword ? IconButton(
-          icon: Icon(
-            notVisiblePassword ? Icons.visibility : Icons.visibility_off,
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(
+            color: (isRepeatedPassword && !_passwordsMatch) ? Colors.red : Colors.grey,
+            width: 2.0,
           ),
-          onPressed: () {
-            setState(() {
-              notVisiblePassword = !notVisiblePassword;
-            });
-          },
-        ) : null,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(
+            color: (isRepeatedPassword && !_passwordsMatch) ? Colors.red : Colors.grey,
+            width: 2.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(
+            color: (isRepeatedPassword && !_passwordsMatch) ? Colors.red : Colors.blue,
+            width: 2.0,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(
+            color: Colors.red,
+            width: 2.0,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(
+            color: Colors.red,
+            width: 2.0,
+          ),
+        ),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  (labelText == 'Password' ? notVisiblePassword : notVisibleRepeatPassword)
+                      ? Icons.visibility_off
+                      : Icons.visibility,
+                ),
+                onPressed: () {
+                  setState(() {
+                    if (labelText == 'Password') {
+                      notVisiblePassword = !notVisiblePassword;
+                    } else if (labelText == 'Repita su Password') {
+                      notVisibleRepeatPassword = !notVisibleRepeatPassword;
+                    }
+                  });
+                },
+              )
+            : null,
       ),
-      validator: validator,
+      validator: (value) {
+        if (validator != null) {
+          String? validationResult = validator(value);
+          if (validationResult != null) {
+            return validationResult;
+          }
+        }
+        if (isRepeatedPassword && value != _password.text) {
+          setState(() {
+            _passwordsMatch = false;
+          });
+          return 'Las contraseñas no coinciden';
+        }
+        return null;
+      },
+      onChanged: (value) {
+        if (isRepeatedPassword || labelText == 'Password') {
+          setState(() {
+            _passwordsMatch = _repeated_password.text == _password.text;
+          });
+        }
+      },
     );
   }
-    @override
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
@@ -128,7 +194,7 @@ Widget _buildTextField({
                           const Spacer(),
                           Padding(
                             padding: const EdgeInsets.only(right: 12),
-                            child: Image.asset('assets/icons/gosoftware.png', height: 200, width: 200,),
+                            child: Image.asset('assets/icons/goSoftwareSolutions-01.png', height: 200, width: 200,),
                           ),
                           const Spacer(),
                         ],
@@ -141,11 +207,11 @@ Widget _buildTextField({
                       constraints.maxWidth > 600
                           ? Column(
                               children: [
-                                _buildRowFields(_name, _surname, 'Name', 'Surname'),
+                                _buildRowFields(_name, _surname, 'Nombre', 'Apellido'),
                                 const SizedBox(height: 15),
-                                _buildRowFields(_email, _phone, 'Email', 'Phone'),
+                                _buildRowFields(_email, _phone, 'Email', 'Teléfono', isPhoneOptional: true),
                                 const SizedBox(height: 15),
-                                _buildRowFields(_password, _repeated_password, 'Password', 'Repeat Password', isSecondFieldPassword: true),
+                                _buildRowFields(_password, _repeated_password, 'Password', 'Repita su Password', isSecondFieldPassword: true),
                               ],
                             )
                           : Column(
@@ -174,8 +240,8 @@ Widget _buildTextField({
                                 const SizedBox(height: 15),
                                 _buildTextField(
                                   controller: _phone,
-                                  labelText: 'Phone',
-                                  hintText: 'Ingrese su número de teléfono',
+                                  labelText: 'Teléfono',
+                                  hintText: 'Ingrese su número de teléfono (opcional)',
                                   keyboardType: TextInputType.phone,
                                 ),
                                 const SizedBox(height: 15),
@@ -200,9 +266,10 @@ Widget _buildTextField({
                                   labelText: 'Repita su Password',
                                   hintText: 'Repita su password',
                                   isPassword: true,
+                                  isRepeatedPassword: true,
                                   validator: (value) {
                                     if (value != _password.text) {
-                                      return 'Passwords no coinciden';
+                                      return 'Las contraseñas no coinciden';
                                     }
                                     return null;
                                   },
@@ -213,6 +280,14 @@ Widget _buildTextField({
                       InkWell(
                         onTap: () async {
                           if (_formKey.currentState?.validate() ?? false) {
+                            if (_password.text != _repeated_password.text) {
+                              setState(() {
+                                _passwordsMatch = false;
+                              });
+                              showCustomAlert(context, 'Las contraseñas no coinciden');
+                              return;
+                            }
+
                             final email = _email.text;
                             final password = _password.text;
 
@@ -241,14 +316,14 @@ Widget _buildTextField({
                               );
                             } on FirebaseAuthException catch (e) {
                               if (e.code == 'weak-password') {
-                                showCustomAlert(context, 'Weak Password');
+                                showCustomAlert(context, 'Password Debil');
                               } else if (e.code == 'email-already-in-use') {
-                                showCustomAlert(context, 'User already exists');
+                                showCustomAlert(context, 'Usuario ya existe');
                               } else {
-                                showCustomAlert(context, 'Invalid email entered');
+                                showCustomAlert(context, 'Email invalido');
                               }
                             } catch (e) {
-                              showCustomAlert(context, 'An error occurred. Please try again.');
+                              showCustomAlert(context, 'Ocurrió un error. Intétalo de nuevo.');
                             }
                           }
                         },
@@ -258,7 +333,7 @@ Widget _buildTextField({
                             borderRadius: BorderRadius.circular(20),
                           ),
                           alignment: Alignment.center,
-                          width: double.maxFinite,
+                          width: 200,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: const CustomText(
                             text: "Sign Up",
@@ -275,7 +350,7 @@ Widget _buildTextField({
                             ),
                           );
                         },
-                        child: const Text("Already have an account? Login here"),
+                        child: const Text("Ya tienes cuenta? Ingresa aqui"),
                       )
                     ],
                   ),
@@ -294,7 +369,8 @@ Widget _buildTextField({
     TextEditingController controller2,
     String label1,
     String label2, {
-    bool isSecondFieldPassword = false
+    bool isSecondFieldPassword = false,
+    bool isPhoneOptional = false
   }) {
     return Row(
       children: [
@@ -302,10 +378,11 @@ Widget _buildTextField({
           child: _buildTextField(
             controller: controller1,
             labelText: label1,
-            hintText: 'Enter your $label1',
-            validator: (value) => value!.isEmpty ? 'Please enter your $label1' : null,
-            keyboardType: label1 == 'Email' ? TextInputType.emailAddress : 
-                          label1 == 'Phone' ? TextInputType.phone : null,
+            isPassword: isSecondFieldPassword,
+            hintText: isSecondFieldPassword ? 'Al menos 8 caracteres' : 'Ingrese su $label1',
+            validator: (value) => value!.isEmpty ? 'Por favor ingrese su $label1' : null,
+            keyboardType: label1 == 'Email' ? TextInputType.emailAddress :
+                          label1 == 'Teléfono' ? TextInputType.phone : null,
           ),
         ),
         const SizedBox(width: 15),
@@ -313,24 +390,26 @@ Widget _buildTextField({
           child: _buildTextField(
             controller: controller2,
             labelText: label2,
-            hintText: isSecondFieldPassword ? 'At least 8 characters' : 'Enter your $label2',
+            hintText: isSecondFieldPassword ? 'Al menos 8 caracteres' : 'Ingrese su $label2${isPhoneOptional ? ' (opcional)' : ''}',
             isPassword: isSecondFieldPassword,
             validator: (value) {
+              if (isPhoneOptional && label2 == 'Teléfono') {
+                return null; // No validation for optional phone field
+              }
               if (value!.isEmpty) {
-                return 'Please enter your $label2';
+                return 'Por favor ingrese su $label2';
               }
               if (isSecondFieldPassword && value.length < 8) {
-                return 'Password must be at least 8 characters long';
+                return 'Password debe tener al menos 8 caracteres';
               }
               return null;
             },
-            keyboardType: label2 == 'Phone' ? TextInputType.phone : null,
+            keyboardType: label2 == 'Teléfono' ? TextInputType.phone : null,
           ),
         ),
       ],
     );
   }
-
   @override
   void dispose() {
     _email.dispose();
