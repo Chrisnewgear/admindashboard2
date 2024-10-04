@@ -31,7 +31,7 @@ class SideMenu extends StatelessWidget {
                         SizedBox(width: width / 48),
                         Padding(
                           padding: const EdgeInsets.only(right: 12),
-                          child: Image.asset("assets/icons/gosoftware.png", height: 100, width: 100,),
+                          child: Image.asset("assets/icons/goSoftwareSolutions-01.png", height: 100, width: 100,),
                         ),
                         Flexible(
                           child: CustomText(

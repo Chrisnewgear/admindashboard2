@@ -47,7 +47,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Forgot Password'),
+        title: const Text('Cambio de Contraseña'),
       ),
       body: Center(
         child: Container(
@@ -74,7 +74,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 height: 30,
               ),
               const CustomText(
-                text: 'Ingrese su mail para resetear su password',
+                text: 'Ingrese tu mail para cambiar tu contraseña',
                 size: 18,
               ),
               const SizedBox(height: 20),
@@ -104,7 +104,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const CustomText(
-                          text: 'Resetear Password',
+                          text: 'Cambiar Contraseña',
                           color: Colors.white,
                         ),
                 ),

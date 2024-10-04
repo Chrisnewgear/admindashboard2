@@ -227,7 +227,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
                     ),
                   );
                 },
-                child: const Text("Olvidaste tu password?"),
+                child: const Text("Olvidaste tu contraseña?"),
               )
                 ],
               ),

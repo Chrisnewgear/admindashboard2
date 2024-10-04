@@ -4,7 +4,7 @@ class Employee {
   final String email;
   final String telefono;
   final String role;
-  final String fechaIngreso;
+  final DateTime fechaIngreso;
 
   Employee({
     required this.nombres,
