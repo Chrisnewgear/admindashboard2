@@ -50,66 +50,73 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         title: const Text('Cambio de Contraseña'),
       ),
       body: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 400),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-                Row(
-                children: [
-                  const Spacer(), // Espacio antes de la imagen
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: Image.asset(
-                      'assets/icons/goSoftwareSolutions-01.png',
-                      height: 200,
-                      width: 200 ,
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12), // Bordes redondeados
+          ),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                  Row(
+                  children: [
+                    const Spacer(), // Espacio antes de la imagen
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Image.asset(
+                        'assets/icons/goSoftwareSolutions-01.png',
+                        height: 200,
+                        width: 200 ,
+                      ),
                     ),
-                  ),
-                  const Spacer(), // Espacio después de la imagen
-                ],
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              const CustomText(
-                text: 'Ingrese tu mail para cambiar tu contraseña',
-                size: 18,
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  hintText: 'Ingrese su email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                    const Spacer(), // Espacio después de la imagen
+                  ],
                 ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: active,
-                    shape: RoundedRectangleBorder(
+                const SizedBox(
+                  height: 30,
+                ),
+                const CustomText(
+                  text: 'Ingrese tu mail para cambiar tu contraseña',
+                  size: 18,
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    hintText: 'Ingrese su email',
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  onPressed: _isLoading ? null : _resetPassword,
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const CustomText(
-                          text: 'Cambiar Contraseña',
-                          color: Colors.white,
-                        ),
+                  keyboardType: TextInputType.emailAddress,
                 ),
-              ),
-            ],
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: active,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    onPressed: _isLoading ? null : _resetPassword,
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const CustomText(
+                            text: 'Cambiar Contraseña',
+                            color: Colors.white,
+                          ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

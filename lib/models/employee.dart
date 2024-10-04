@@ -4,6 +4,7 @@ class Employee {
   final String email;
   final String telefono;
   final String role;
+  final String codigo;
   final DateTime fechaIngreso;
 
   Employee({
@@ -13,5 +14,6 @@ class Employee {
     required this.telefono,
     required this.role,
     required this.fechaIngreso,
+    required this.codigo
   });
 }

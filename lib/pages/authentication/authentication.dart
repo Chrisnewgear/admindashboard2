@@ -83,219 +83,215 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 400),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  const Spacer(), // Espacio antes de la imagen
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: Image.asset(
-                      'assets/icons/goSoftwareSolutions-01.png',
-                      height: 200,
-                      width: 200 ,
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  children: [
+                    const Spacer(), // Espacio antes de la imagen
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Image.asset(
+                        'assets/icons/goSoftwareSolutions-01.png',
+                        height: 200,
+                        width: 200,
+                      ),
                     ),
-                  ),
-                  const Spacer(), // Espacio después de la imagen
-                ],
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Row(
-                children: [
-                  Text(
-                    'Login',
-                    style: GoogleFonts.roboto(
-                        fontSize: 30, fontWeight: FontWeight.bold),
-                  )
-                ],
-              ),
-              Row(
-                children: [
-                  CustomText(
-                      text: "Bienvenido, te hemos extrañado!",
-                      color: lightGrey)
-                ],
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              TextField(
-                controller: _email,
-                enableSuggestions: false,
-                autocorrect: false,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'abc@domain.com',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-
-              SlideTransition(
-                position: _offsetAnimation,
-                child: TextFormField(
-                  controller: _password,
-                  obscureText: !notVisiblePassword,
+                    const Spacer(),
+                  ],
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                Row(
+                  children: [
+                    Text(
+                      'Login',
+                      style: GoogleFonts.roboto(
+                          fontSize: 30, fontWeight: FontWeight.bold),
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+                    CustomText(
+                        text: "Bienvenido, te hemos extrañado!",
+                        color: lightGrey)
+                  ],
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                TextField(
+                  controller: _email,
                   enableSuggestions: false,
                   autocorrect: false,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: 'Password',
-                    hintText: 'Al menos 8 caracteres',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(
-                        color: isPasswordIncorrect ? Colors.red : Colors.grey,
-                        width: 2.0,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(
-                        color: isPasswordIncorrect ? Colors.red : Colors.grey,
-                        width: 2.0,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(
-                        color: isPasswordIncorrect ? Colors.red : active,
-                        width: 2.0,
-                      ),
-                    ),
-                    labelStyle: TextStyle(
-                      color: isPasswordIncorrect ? Colors.red : Colors.grey,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        notVisiblePassword == false ? Icons.visibility_off : Icons.visibility,
-                        color: isPasswordIncorrect ? Colors.red : Colors.grey,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          notVisiblePassword = !notVisiblePassword;
-                        });
-                      },
-                    ),
-                    errorText: isPasswordIncorrect ? 'Password incorrecto' : null,
-                    errorStyle: const TextStyle(color: Colors.red),
-                  ),
-                  onChanged: (value) {
-                    if (isPasswordIncorrect) {
-                      setState(() {
-                        isPasswordIncorrect = false;
-                      });
-                    }
-                  },
+                      labelText: 'Email',
+                      hintText: 'abc@domain.com',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20))),
                 ),
-              ),
-
-              const SizedBox(
-                height: 15,
-              ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: isChecked,
-                        onChanged: (value) {
+                const SizedBox(
+                  height: 15,
+                ),
+                SlideTransition(
+                  position: _offsetAnimation,
+                  child: TextFormField(
+                    controller: _password,
+                    obscureText: !notVisiblePassword,
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      hintText: 'Al menos 8 caracteres',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide(
+                          color: isPasswordIncorrect ? Colors.red : Colors.grey,
+                          width: 2.0,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide(
+                          color: isPasswordIncorrect ? Colors.red : Colors.grey,
+                          width: 2.0,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide(
+                          color: isPasswordIncorrect ? Colors.red : active,
+                          width: 2.0,
+                        ),
+                      ),
+                      labelStyle: TextStyle(
+                        color: isPasswordIncorrect ? Colors.red : Colors.grey,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          notVisiblePassword == false ? Icons.visibility_off : Icons.visibility,
+                          color: isPasswordIncorrect ? Colors.red : Colors.grey,
+                        ),
+                        onPressed: () {
                           setState(() {
-                            isChecked = value!;
+                            notVisiblePassword = !notVisiblePassword;
                           });
                         },
                       ),
-                      const CustomText(text: 'Recuérdame'),
-                    ],
-                  ),
-                  TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const ForgotPasswordPage(),
+                      errorText: isPasswordIncorrect ? 'Password incorrecto' : null,
+                      errorStyle: const TextStyle(color: Colors.red),
                     ),
-                  );
-                },
-                child: const Text("Olvidaste tu contraseña?"),
-              )
-                ],
-              ),
-
-              const SizedBox(
-                height: 15,
-              ),
-
-              InkWell(
-                onTap: () async {
-                  final email = _email.text;
-                  final password = _password.text;
-                  try {
-                    final UserCredential userCredential =
-                        await FirebaseAuth.instance.signInWithEmailAndPassword(
-                            email: email, password: password);
-                    _saveRememberMe(); // Save remember me state
-                    Get.offAllNamed(rootRoute);
-                  } on FirebaseAuthException catch (e) {
-                    //print("Error Code: ${e.code}");
-                    //print("Error Message: ${e.message}");
-
-                    if (e.code == "user-not-found") {
-                      showCustomAlert(context, "User not found. Please register.");
-                    } else if (e.message == "The supplied auth credential is incorrect, malformed or has expired.") {
-                      setState(() {
-                        isPasswordIncorrect = true;
-                      });
-                      _shakePassword();
-                    }else if(e.message == "Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later."){
-                      showCustomAlert(context, "Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.");
-                    } else if (e.message == "invalid-email") {
-                      showCustomAlert(context, "Invalid email format.");
-                    } else if (e.code == "user-disabled") {
-                      showCustomAlert(context, "This account has been disabled.");
-                    } else {
-                      showCustomAlert(context, "Login failed. Please try again.");
-                    }
-                  }
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: active, borderRadius: BorderRadius.circular(20)),
-                  alignment: Alignment.center,
-                  width: double.maxFinite,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: const CustomText(
-                    text: "Login",
-                    color: Colors.white,
+                    onChanged: (value) {
+                      if (isPasswordIncorrect) {
+                        setState(() {
+                          isPasswordIncorrect = false;
+                        });
+                      }
+                    },
                   ),
                 ),
-              ),
-
-              const SizedBox(
-                height: 15,
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const RegisterPage(), // Directly pushing the RegisterPage widget
+                const SizedBox(
+                  height: 15,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: isChecked,
+                          onChanged: (value) {
+                            setState(() {
+                              isChecked = value!;
+                            });
+                          },
+                        ),
+                        const CustomText(text: 'Recuérdame'),
+                      ],
                     ),
-                  );
-                },
-                child: const Text("No tienes una cuenta? Registrate aquí"),
-              )
-            ],
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const ForgotPasswordPage(),
+                          ),
+                        );
+                      },
+                      child: const Text("Olvidaste tu contraseña?"),
+                    )
+                  ],
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                InkWell(
+                  onTap: () async {
+                    final email = _email.text;
+                    final password = _password.text;
+                    try {
+                      final UserCredential userCredential =
+                          await FirebaseAuth.instance.signInWithEmailAndPassword(
+                              email: email, password: password);
+                      _saveRememberMe(); // Save remember me state
+                      Get.offAllNamed(rootRoute);
+                    } on FirebaseAuthException catch (e) {
+                      if (e.code == "user-not-found") {
+                        showCustomAlert(context, "User not found. Please register.");
+                      } else if (e.message == "The supplied auth credential is incorrect, malformed or has expired.") {
+                        setState(() {
+                          isPasswordIncorrect = true;
+                        });
+                        _shakePassword();
+                      } else if (e.message == "Access to this account has been temporarily disabled due to many failed login attempts.") {
+                        showCustomAlert(context, "Access to this account has been temporarily disabled.");
+                      } else if (e.message == "invalid-email") {
+                        showCustomAlert(context, "Invalid email format.");
+                      } else if (e.code == "user-disabled") {
+                        showCustomAlert(context, "This account has been disabled.");
+                      } else {
+                        showCustomAlert(context, "Login failed. Please try again.");
+                      }
+                    }
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: active, borderRadius: BorderRadius.circular(20)),
+                    alignment: Alignment.center,
+                    width: double.maxFinite,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: const CustomText(
+                      text: "Login",
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterPage(), 
+                      ),
+                    );
+                  },
+                  child: const Text("No tienes una cuenta? Registrate aquí"),
+                )
+              ],
+            ),
           ),
         ),
       ),

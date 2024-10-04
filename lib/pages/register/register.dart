@@ -178,191 +178,213 @@ Future<void> saveUserToFirestore(User user) async {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 800),
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          const Spacer(),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: Image.asset('assets/icons/goSoftwareSolutions-01.png', height: 200, width: 200,),
-                          ),
-                          const Spacer(),
-                        ],
-                      ),
-                      const SizedBox(height: 30),
-                      Text('Sign Up', style: GoogleFonts.roboto(fontSize: 30, fontWeight: FontWeight.bold)),
-                      CustomText(text: "Sign up with your email!", color: lightGrey),
-                      const SizedBox(height: 15),
-                      // Responsive layout for form fields
-                      constraints.maxWidth > 600
-                          ? Column(
-                              children: [
-                                _buildRowFields(_name, _surname, 'Nombre', 'Apellido'),
-                                const SizedBox(height: 15),
-                                _buildRowFields(_email, _phone, 'Email', 'Teléfono', isPhoneOptional: true),
-                                const SizedBox(height: 15),
-                                _buildRowFields(_password, _repeated_password, 'Password', 'Repita su Password', isSecondFieldPassword: true),
-                              ],
-                            )
-                          : Column(
-                              children: [
-                                _buildTextField(
-                                  controller: _name,
-                                  labelText: 'Nombre',
-                                  hintText: 'Ingrese su nombre',
-                                  validator: (value) => value!.isEmpty ? 'El campo nombre es obligatorio' : null,
-                                ),
-                                const SizedBox(height: 15),
-                                _buildTextField(
-                                  controller: _surname,
-                                  labelText: 'Apellidos',
-                                  hintText: 'Ingrese sus apellidos',
-                                  validator: (value) => value!.isEmpty ? 'El campo apellidos es obligatorio' : null,
-                                ),
-                                const SizedBox(height: 15),
-                                _buildTextField(
-                                  controller: _email,
-                                  labelText: 'Email',
-                                  hintText: 'abc@domain.com',
-                                  keyboardType: TextInputType.emailAddress,
-                                  validator: (value) => value!.isEmpty ? 'Ingrese su email' : null,
-                                ),
-                                const SizedBox(height: 15),
-                                _buildTextField(
-                                  controller: _phone,
-                                  labelText: 'Teléfono',
-                                  hintText: 'Ingrese su número de teléfono (opcional)',
-                                  keyboardType: TextInputType.phone,
-                                ),
-                                const SizedBox(height: 15),
-                                _buildTextField(
-                                  controller: _password,
-                                  labelText: 'Password',
-                                  hintText: 'Al menos 8 caracteres',
-                                  isPassword: true,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Ingrese su password';
-                                    }
-                                    if (value.length < 8) {
-                                      return 'Password debe tener al menos 8 caracteres';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 15),
-                                _buildTextField(
-                                  controller: _repeated_password,
-                                  labelText: 'Repita su Password',
-                                  hintText: 'Repita su password',
-                                  isPassword: true,
-                                  isRepeatedPassword: true,
-                                  validator: (value) {
-                                    if (value != _password.text) {
-                                      return 'Las contraseñas no coinciden';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ],
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12), // Bordes redondeados
+          ),
+          child: SingleChildScrollView(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 800),
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min, // Ajusta la altura del Card al contenido
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            const Spacer(),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 12),
+                              child: Image.asset(
+                                'assets/icons/goSoftwareSolutions-01.png',
+                                height: 200,
+                                width: 200,
+                              ),
                             ),
-                      const SizedBox(height: 15),
-                      InkWell(
-                        onTap: () async {
-                          if (_formKey.currentState?.validate() ?? false) {
-                            if (_password.text != _repeated_password.text) {
-                              setState(() {
-                                _passwordsMatch = false;
-                              });
-                              showCustomAlert(context, 'Las contraseñas no coinciden');
-                              return;
-                            }
-
-                            final email = _email.text;
-                            final password = _password.text;
-
-                            // Check if email is already in use
-                            bool emailExists = await isEmailAlreadyInUse(email);
-                            if (emailExists) {
-                              showCustomAlert(context, 'Email ya existe');
-                              return;
-                            }
-
-                            try {
-                              final UserCredential userCredential =
-                                  await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                                email: email,
-                                password: password,
-                              );
-
-                              await saveUserToFirestore(userCredential.user!);
-
-                              await userCredential.user?.sendEmailVerification();
-
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                  builder: (context) => const VerifyEmailView(),
-                                ),
-                              );
-                            } on FirebaseAuthException catch (e) {
-                              if (e.code == 'weak-password') {
-                                showCustomAlert(context, 'Password Debil');
-                              } else if (e.code == 'email-already-in-use') {
-                                showCustomAlert(context, 'Usuario ya existe');
-                              } else {
-                                showCustomAlert(context, 'Email invalido');
-                              }
-                            } catch (e) {
-                              showCustomAlert(context, 'Ocurrió un error. Intétalo de nuevo.');
-                            }
-                          }
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: active,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          alignment: Alignment.center,
-                          width: 200,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: const CustomText(
-                            text: "Sign Up",
-                            color: Colors.white,
+                            const Spacer(),
+                          ],
+                        ),
+                        const SizedBox(height: 30),
+                        Text(
+                          'Sign Up',
+                          style: GoogleFonts.roboto(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 15),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const AuthenticationPage(),
+                        CustomText(
+                          text: "Sign up with your email!",
+                          color: lightGrey,
+                        ),
+                        const SizedBox(height: 15),
+                        constraints.maxWidth > 600
+                            ? Column(
+                                children: [
+                                  _buildRowFields(
+                                    _name, _surname, 'Nombre', 'Apellido'),
+                                  const SizedBox(height: 15),
+                                  _buildRowFields(
+                                    _email, _phone, 'Email', 'Teléfono',
+                                    isPhoneOptional: true),
+                                  const SizedBox(height: 15),
+                                  _buildRowFields(
+                                    _password, _repeated_password, 'Password', 'Repita su Password',
+                                    isSecondFieldPassword: true),
+                                ],
+                              )
+                            : Column(
+                                children: [
+                                  _buildTextField(
+                                    controller: _name,
+                                    labelText: 'Nombre',
+                                    hintText: 'Ingrese su nombre',
+                                    validator: (value) => value!.isEmpty ? 'El campo nombre es obligatorio' : null,
+                                  ),
+                                  const SizedBox(height: 15),
+                                  _buildTextField(
+                                    controller: _surname,
+                                    labelText: 'Apellidos',
+                                    hintText: 'Ingrese sus apellidos',
+                                    validator: (value) => value!.isEmpty ? 'El campo apellidos es obligatorio' : null,
+                                  ),
+                                  const SizedBox(height: 15),
+                                  _buildTextField(
+                                    controller: _email,
+                                    labelText: 'Email',
+                                    hintText: 'abc@domain.com',
+                                    keyboardType: TextInputType.emailAddress,
+                                    validator: (value) => value!.isEmpty ? 'Ingrese su email' : null,
+                                  ),
+                                  const SizedBox(height: 15),
+                                  _buildTextField(
+                                    controller: _phone,
+                                    labelText: 'Teléfono',
+                                    hintText: 'Ingrese su número de teléfono (opcional)',
+                                    keyboardType: TextInputType.phone,
+                                  ),
+                                  const SizedBox(height: 15),
+                                  _buildTextField(
+                                    controller: _password,
+                                    labelText: 'Password',
+                                    hintText: 'Al menos 8 caracteres',
+                                    isPassword: true,
+                                    validator: (value) {
+                                      if (value!.isEmpty) {
+                                        return 'Ingrese su password';
+                                      }
+                                      if (value.length < 8) {
+                                        return 'Password debe tener al menos 8 caracteres';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 15),
+                                  _buildTextField(
+                                    controller: _repeated_password,
+                                    labelText: 'Repita su Password',
+                                    hintText: 'Repita su password',
+                                    isPassword: true,
+                                    isRepeatedPassword: true,
+                                    validator: (value) {
+                                      if (value != _password.text) {
+                                        return 'Las contraseñas no coinciden';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ],
+                              ),
+                        const SizedBox(height: 15),
+                        InkWell(
+                          onTap: () async {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              if (_password.text != _repeated_password.text) {
+                                setState(() {
+                                  _passwordsMatch = false;
+                                });
+                                showCustomAlert(context, 'Las contraseñas no coinciden');
+                                return;
+                              }
+
+                              final email = _email.text;
+                              final password = _password.text;
+
+                              bool emailExists = await isEmailAlreadyInUse(email);
+                              if (emailExists) {
+                                showCustomAlert(context, 'Email ya existe');
+                                return;
+                              }
+
+                              try {
+                                final UserCredential userCredential =
+                                    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                                  email: email,
+                                  password: password,
+                                );
+
+                                await saveUserToFirestore(userCredential.user!);
+
+                                await userCredential.user?.sendEmailVerification();
+
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (context) => const VerifyEmailView(),
+                                  ),
+                                );
+                              } on FirebaseAuthException catch (e) {
+                                if (e.code == 'weak-password') {
+                                  showCustomAlert(context, 'Password Debil');
+                                } else if (e.code == 'email-already-in-use') {
+                                  showCustomAlert(context, 'Usuario ya existe');
+                                } else {
+                                  showCustomAlert(context, 'Email invalido');
+                                }
+                              } catch (e) {
+                                showCustomAlert(context, 'Ocurrió un error. Intétalo de nuevo.');
+                              }
+                            }
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: active,
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                          );
-                        },
-                        child: const Text("Ya tienes cuenta? Ingresa aqui"),
-                      )
-                    ],
-                  ),
-                );
-              },
+                            alignment: Alignment.center,
+                            width: 200,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: const CustomText(
+                              text: "Sign Up",
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const AuthenticationPage(),
+                              ),
+                            );
+                          },
+                          child: const Text("Ya tienes cuenta? Ingresa aqui"),
+                        )
+                      ],
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         ),
       ),
     );
   }
-
 
   Widget _buildRowFields(
     TextEditingController controller1,

@@ -38,7 +38,8 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
   }
 
   Future<void> _loadUsers() async {
-    final querySnapshot = await FirebaseFirestore.instance.collection('Users').get();
+    final querySnapshot =
+        await FirebaseFirestore.instance.collection('Users').get();
     setState(() {
       employees = querySnapshot.docs
           .map((doc) => Employee(
@@ -47,7 +48,10 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                 email: doc['email'] ?? '',
                 telefono: doc['Telefono'] ?? '',
                 role: doc['Role'] ?? 'Vendedor',
-                fechaIngreso: doc['createdAt'] ?? '',
+                codigo: doc['Codigo'] ?? '',
+                fechaIngreso: doc['createdAt'] != null
+                    ? (doc['createdAt'] as Timestamp).toDate()
+                    : DateTime.now(),
               ))
           .toList();
     });
@@ -79,7 +83,8 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
             children: [
               Text(
                 'Administrar Roles',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: dark),
+                style: TextStyle(
+                    fontSize: 24, fontWeight: FontWeight.bold, color: dark),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -96,58 +101,73 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
       ),
     );
   }
+
   Widget _buildForm() {
-  return Card(
-    elevation: 4,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Formulario de Empleado',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: dark),
-            ),
-            const SizedBox(height: 24),
-            _buildFormSection([
-              _buildResponsiveRow([
-                _buildCustomTextField(controller: _nombresController, label: 'Nombres', required: true),
-                _buildCustomTextField(controller: _apellidosController, label: 'Apellidos', required: true),
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Formulario de Empleado',
+                style: TextStyle(
+                    fontSize: 24, fontWeight: FontWeight.bold, color: dark),
+              ),
+              const SizedBox(height: 24),
+              _buildFormSection([
+                _buildResponsiveRow([
+                  _buildCustomTextField(
+                      controller: _nombresController,
+                      label: 'Nombres',
+                      required: true),
+                  _buildCustomTextField(
+                      controller: _apellidosController,
+                      label: 'Apellidos',
+                      required: true),
+                ]),
+                const SizedBox(height: 16),
+                _buildResponsiveRow([
+                  _buildCustomTextField(
+                      controller: _emailController,
+                      label: 'Email',
+                      hintText: 'email@dominio.com',
+                      required: true),
+                  _buildCustomTextField(
+                      controller: _telefonoController,
+                      label: 'Teléfono',
+                      hintText: '09-1234-5678'),
+                ]),
+                const SizedBox(height: 16),
+                _buildResponsiveRow([
+                  //_buildDropdown(),
+                  _buildDatePicker(),
+                ]),
+                const SizedBox(height: 32),
+                // Center(
+                //   child: ElevatedButton(
+                //     onPressed: _submitForm,
+                //     style: ElevatedButton.styleFrom(
+                //       primary: Colors.blue[700],
+                //       padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                //       shape: RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(8),
+                //       ),
+                //     ),
+                //     child: Text('Guardar', style: TextStyle(color: Colors.white, fontSize: 16)),
+                //   ),
+                // ),
               ]),
-              const SizedBox(height: 16),
-              _buildResponsiveRow([
-                _buildCustomTextField(controller: _emailController, label: 'Email', hintText: 'email@dominio.com', required: true),
-                _buildCustomTextField(controller: _telefonoController, label: 'Teléfono', hintText: '09-1234-5678'),
-              ]),
-              const SizedBox(height: 16),
-              _buildResponsiveRow([
-                //_buildDropdown(),
-                _buildDatePicker(),
-              ]),
-              const SizedBox(height: 32),
-              // Center(
-              //   child: ElevatedButton(
-              //     onPressed: _submitForm,
-              //     style: ElevatedButton.styleFrom(
-              //       primary: Colors.blue[700],
-              //       padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(8),
-              //       ),
-              //     ),
-              //     child: Text('Guardar', style: TextStyle(color: Colors.white, fontSize: 16)),
-              //   ),
-              // ),
-            ]),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildUserTable() {
   return Card(
@@ -176,6 +196,10 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
               headingRowColor: WidgetStateProperty.all(Colors.grey[200]),
               columns: const [
                 DataColumn2(
+                  label: Text('Codigo', style: TextStyle(fontWeight: FontWeight.bold)),
+                  size: ColumnSize.L,
+                ),
+                DataColumn2(
                   label: Text('Nombres', style: TextStyle(fontWeight: FontWeight.bold)),
                   size: ColumnSize.L,
                 ),
@@ -202,6 +226,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
               ],
               rows: employees.map((employee) => DataRow2(
                 cells: [
+                  DataCell(Text(employee.codigo)),
                   DataCell(Text(employee.nombres)),
                   DataCell(Text(employee.apellidos)),
                   DataCell(Text(employee.email)),
@@ -221,6 +246,15 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                   ),
                   DataCell(Text(DateFormat('dd/MM/yyyy').format(employee.fechaIngreso))),
                 ],
+                color: WidgetStateProperty.resolveWith<Color?>(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.hovered)) {
+                      return Colors.grey[300]; // Color sutil para el hover
+                    }
+                    return null; // Usa el color por defecto
+                  },
+                ),
+                onTap: () {}, // Necesario para activar el efecto hover
               )).toList(),
             ),
           ),
@@ -230,18 +264,18 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
   );
 }
 
-Color _getRoleColor(String role) {
-  switch (role.toLowerCase()) {
-    case 'admin':
-      return Colors.red[400]!;
-    case 'manager':
-      return Colors.green[400]!;
-    case 'employee':
-      return Colors.blue[400]!;
-    default:
-      return Colors.grey[400]!;
+  Color _getRoleColor(String role) {
+    switch (role.toLowerCase()) {
+      case 'admin':
+        return Colors.red[400]!;
+      case 'supervisor':
+        return Colors.green[400]!;
+      case 'vendedor':
+        return Colors.blue[400]!;
+      default:
+        return Colors.grey[400]!;
+    }
   }
-}
 
   // void _submitForm() {
   //   if (_formKey.currentState!.validate()) {
@@ -295,7 +329,8 @@ Color _getRoleColor(String role) {
   // }
 
   Widget _buildEmployeeList(String role) {
-    final roleEmployees = employees.where((employee) => employee.role == role).toList();
+    final roleEmployees =
+        employees.where((employee) => employee.role == role).toList();
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -412,7 +447,8 @@ Color _getRoleColor(String role) {
               lastDate: DateTime(2101),
             );
             if (pickedDate != null) {
-              String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
+              String formattedDate =
+                  DateFormat('dd/MM/yyyy').format(pickedDate);
               setState(() {
                 _fechaIngresoController.text = formattedDate;
               });
