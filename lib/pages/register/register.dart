@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/pages/authentication/authentication.dart';
 import 'package:admindashboard/pages/verification/verification_page.dart';
@@ -39,21 +41,47 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   // Función para generar el siguiente código de usuario
-  Future<String> getNextUserCode() async {
-    final usersCollection = FirebaseFirestore.instance.collection('Users');
-    final querySnapshot = await usersCollection
-        .orderBy('Codigo', descending: true)
-        .limit(1)
-        .get();
+  // Future<String> getNextUserCode() async {
+  //   final usersCollection = FirebaseFirestore.instance.collection('Users');
+  //   final querySnapshot = await usersCollection
+  //       .orderBy('Codigo', descending: true)
+  //       .limit(1)
+  //       .get();
 
-    if (querySnapshot.docs.isEmpty) {
-      return 'usr001';
-    } else {
-      final lastCode = querySnapshot.docs.first['Codigo'] as String;
-      final lastNumber = int.parse(lastCode.substring(3));
-      return 'usr${(lastNumber + 1).toString().padLeft(3, '0')}';
+  //   if (querySnapshot.docs.isEmpty) {
+  //     return 'usr001';
+  //   } else {
+  //     final lastCode = querySnapshot.docs.first['Codigo'] as String;
+  //     final lastNumber = int.parse(lastCode.substring(3));
+  //     return 'usr${(lastNumber + 1).toString().padLeft(3, '0')}';
+  //   }
+  // }
+
+  Future<String> getNextUserCode() async {
+    Random random = Random();
+    String code = '';
+    bool isUnique = false;
+
+    while (!isUnique) {
+      // Generar un número aleatorio de 6 dígitos
+      int randomNumber = random.nextInt(900000) + 100000; // Asegura 6 dígitos
+      code = 'USR$randomNumber';
+
+      // Verificar si el código ya existe en Firebase
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('Codigo', isEqualTo: code)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        isUnique = true; // El código es único
+      }
     }
+
+    return code;
   }
+
 
   // Función para guardar el usuario en Firestore
 Future<void> saveUserToFirestore(User user) async {

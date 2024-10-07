@@ -1,12 +1,12 @@
 // ignore_for_file: duplicate_import
 
+import 'dart:math';
+
 import 'package:admindashboard/models/employee.dart';
-//import 'package:admindashboard/widgets/content_box.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-//import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/models/employee.dart';
 import 'package:flutter/material.dart';
-//import 'package:admindashboard/constants/style.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +21,7 @@ class RoleManagementWidget extends StatefulWidget {
 }
 
 class _RoleManagementWidgetState extends State<RoleManagementWidget> {
-  //final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   String selectedRole = 'Vendedor';
   List<String> roles = ['Vendedor', 'Supervisor'];
   List<Employee> employees = [];
@@ -31,6 +31,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _telefonoController = TextEditingController();
   final TextEditingController _fechaIngresoController = TextEditingController();
+  final TextEditingController _codigoController = TextEditingController();
 
   @override
   void initState() {
@@ -39,41 +40,128 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
   }
 
   Future<void> _loadUsers() async {
+  try {
     final querySnapshot =
         await FirebaseFirestore.instance.collection('Users').get();
     setState(() {
       employees = querySnapshot.docs
-          .map((doc) => Employee(
-                nombres: doc['Nombre'] ?? '',
-                apellidos: doc['Apellidos'] ?? '',
-                email: doc['email'] ?? '',
-                telefono: doc['Telefono'] ?? '',
-                role: doc['Role'] ?? 'Vendedor',
-                codigo: doc['Codigo'] ?? '',
-                fechaIngreso: doc['createdAt'] != null
-                    ? (doc['createdAt'] as Timestamp).toDate()
-                    : DateTime.now(),
-              ))
+          .map((doc) => Employee.fromFirestore(doc))
           .toList();
     });
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error loading users: $e');
+    }
+    // Puedes mostrar un mensaje de error al usuario si lo deseas
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error al cargar los usuarios: $e'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+  Future<String> _getNextUserCode() async {
+    Random random = Random();
+    String code = '';
+    bool isUnique = false;
+
+    while (!isUnique) {
+      // Generar un número aleatorio de 6 dígitos
+      int randomNumber = random.nextInt(900000) + 100000; // Asegura 6 dígitos
+      code = 'USR$randomNumber';
+
+      // Verificar si el código ya existe en Firebase
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('Codigo', isEqualTo: code)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        isUnique = true; // El código es único
+      }
+    }
+
+    return code;
   }
 
+
+  Future<void> _saveOrUpdateEmployee(Employee? existingEmployee) async {
+  try {
+    final employeeData = {
+      'Nombre': _nombresController.text,
+      'Apellidos': _apellidosController.text,
+      'email': _emailController.text,
+      'Telefono': _telefonoController.text,
+      'Role': selectedRole,
+      'Codigo': _codigoController.text,
+      'updatedAt': Timestamp.now(),
+    };
+
+    if (existingEmployee == null) {
+      // Create a new employee
+      final nextCode = await _getNextUserCode();
+      employeeData['Codigo'] = nextCode;
+      employeeData['createdAt'] = Timestamp.now();
+
+      await FirebaseFirestore.instance.collection('Users').add(employeeData);
+    } else {
+      // Update existing employee
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .where('Codigo', isEqualTo: existingEmployee.codigo)
+          .get()
+          .then((querySnapshot) {
+        if (querySnapshot.docs.isNotEmpty) {
+          querySnapshot.docs.first.reference.update(employeeData);
+        }
+      });
+    }
+
+    // Reload the users list
+    await _loadUsers();
+
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(existingEmployee == null
+            ? 'Empleado creado exitosamente'
+            : 'Empleado actualizado exitosamente'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  } catch (e) {
+    // Show error message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error: ${e.toString()}'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
   void _showFormDialog(BuildContext context, Employee? employee) {
     final _formKey = GlobalKey<FormState>();
-    String selectedRole = employee?.role ?? 'Vendedor';
-    final TextEditingController _nombresController =
-        TextEditingController(text: employee?.nombres ?? '');
-    final TextEditingController _apellidosController =
-        TextEditingController(text: employee?.apellidos ?? '');
-    final TextEditingController _emailController =
-        TextEditingController(text: employee?.email ?? '');
-    final TextEditingController _telefonoController =
-        TextEditingController(text: employee?.telefono ?? '');
-    final TextEditingController _fechaIngresoController = TextEditingController(
-      text: employee != null
-          ? DateFormat('dd/MM/yyyy').format(employee.fechaIngreso)
-          : '',
-    );
+
+    if (employee != null) {
+      _nombresController.text = employee.nombres;
+      _apellidosController.text = employee.apellidos;
+      _emailController.text = employee.email;
+      _telefonoController.text = employee.telefono;
+      _codigoController.text = employee.codigo;
+      _fechaIngresoController.text =
+          DateFormat('dd/MM/yyyy').format(employee.fechaIngreso);
+      selectedRole = employee.role;
+    } else {
+      _nombresController.clear();
+      _apellidosController.clear();
+      _emailController.clear();
+      _telefonoController.clear();
+      _fechaIngresoController.clear();
+      _codigoController.clear();
+      selectedRole = 'Vendedor';
+    }
 
     showDialog(
       context: context,
@@ -222,10 +310,8 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              // Aquí iría la lógica para guardar o actualizar el empleado
+                              _saveOrUpdateEmployee(employee);
                               Navigator.of(context).pop();
-                              // Después de guardar, actualiza la lista de empleados
-                              _loadUsers();
                             }
                           },
                           child: const Row(
@@ -286,6 +372,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
     _emailController.dispose();
     _telefonoController.dispose();
     _fechaIngresoController.dispose();
+    _codigoController.dispose();
     super.dispose();
   }
 
@@ -312,116 +399,6 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
     );
   }
 
-  // Widget _buildForm() {
-  //   return Card(
-  //     elevation: 4,
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(24),
-  //       child: Form(
-  //         key: _formKey,
-  //         child: Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           children: [
-  //             Text(
-  //               'Formulario de Empleado',
-  //               style: TextStyle(
-  //                   fontSize: 24, fontWeight: FontWeight.bold, color: dark),
-  //             ),
-  //             const SizedBox(height: 24),
-  //             _buildFormSection([
-  //               _buildResponsiveRow([
-  //                 _buildCustomTextField(
-  //                     controller: _nombresController,
-  //                     label: 'Nombres',
-  //                     required: true),
-  //                 _buildCustomTextField(
-  //                     controller: _apellidosController,
-  //                     label: 'Apellidos',
-  //                     required: true),
-  //               ]),
-  //               const SizedBox(height: 16),
-  //               _buildResponsiveRow([
-  //                 _buildCustomTextField(
-  //                     controller: _emailController,
-  //                     label: 'Email',
-  //                     hintText: 'email@dominio.com',
-  //                     required: true),
-  //                 _buildCustomTextField(
-  //                     controller: _telefonoController,
-  //                     label: 'Teléfono',
-  //                     hintText: '09-1234-5678'),
-  //               ]),
-  //               const SizedBox(height: 16),
-  //               _buildResponsiveRow([
-  //                 //_buildDropdown(),
-  //                 _buildDatePicker(context, _fechaIngresoController),
-  //               ]),
-  //               const SizedBox(height: 32),
-  //               // Center(
-  //               //   child: ElevatedButton(
-  //               //     onPressed: _submitForm,
-  //               //     style: ElevatedButton.styleFrom(
-  //               //       primary: Colors.blue[700],
-  //               //       padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-  //               //       shape: RoundedRectangleBorder(
-  //               //         borderRadius: BorderRadius.circular(8),
-  //               //       ),
-  //               //     ),
-  //               //     child: Text('Guardar', style: TextStyle(color: Colors.white, fontSize: 16)),
-  //               //   ),
-  //               // ),
-  //             ]),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  // void _showFormModal(BuildContext context, Employee? employee) {
-  //   if (employee != null) {
-  //     _nombresController.text = employee.nombres;
-  //     _apellidosController.text = employee.apellidos;
-  //     _emailController.text = employee.email;
-  //     _telefonoController.text = employee.telefono;
-  //     _fechaIngresoController.text =
-  //         DateFormat('dd/MM/yyyy').format(employee.fechaIngreso);
-  //     selectedRole = employee.role;
-  //   } else {
-  //     _clearForm();
-  //   }
-
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text(employee == null ? 'Nuevo Empleado' : 'Editar Empleado'),
-  //         content: SingleChildScrollView(
-  //           child: _buildForm(),
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: const Text('Cancelar'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //           TextButton(
-  //             child: const Text('Guardar'),
-  //             onPressed: () {
-  //               if (_formKey.currentState!.validate()) {
-  //                 // Aquí iría la lógica para guardar o actualizar el empleado
-  //                 Navigator.of(context).pop();
-  //               }
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-
   Widget _buildUserTable() {
     return Card(
       elevation: 4,
@@ -431,17 +408,17 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Lista de Empleados',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                ElevatedButton(
-                  onPressed: () => _showFormDialog(context, null),
-                  child: const Text('Nuevo Empleado'),
-                ),
+                // ElevatedButton(
+                //   onPressed: () => _showFormDialog(context, null),
+                //   child: const Text('Nuevo Empleado'),
+                // ),
               ],
             ),
             const SizedBox(height: 16),
@@ -457,24 +434,95 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                 ),
                 headingRowColor: WidgetStateProperty.all(Colors.grey[200]),
                 columns: const [
-                  DataColumn2(label: Text('Codigo'), size: ColumnSize.L),
-                  DataColumn2(label: Text('Nombres'), size: ColumnSize.L),
-                  DataColumn2(label: Text('Apellidos'), size: ColumnSize.L),
-                  DataColumn2(label: Text('Email'), size: ColumnSize.L),
-                  DataColumn2(label: Text('Teléfono'), size: ColumnSize.M),
-                  DataColumn2(label: Text('Role'), size: ColumnSize.S),
-                  DataColumn2(label: Text('Fecha Ingreso'), size: ColumnSize.M),
+                  DataColumn2(
+                    label: Center(
+                      child: Text('Codigo',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          )),
+                    ),
+                    size: ColumnSize.L,
+                  ),
+                  DataColumn2(
+                    label: Center(
+                      child: Text('Nombres',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          )),
+                    ),
+                    size: ColumnSize.L,
+                  ),
+                  DataColumn2(
+                    label: Center(
+                      child: Text('Apellidos',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          )),
+                    ),
+                    size: ColumnSize.L,
+                  ),
+                  DataColumn2(
+                    label: Center(
+                      child: Text('Email',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          )),
+                    ),
+                    size: ColumnSize.L,
+                  ),
+                  DataColumn2(
+                    label: Center(
+                      child: Text('Teléfono',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          )),
+                    ),
+                    size: ColumnSize.L,
+                  ),
+                  DataColumn2(
+                    label: Center(
+                      child: Text('Role',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          )),
+                    ),
+                    size: ColumnSize.L,
+                  ),
+                  DataColumn2(
+                    label: Center(
+                      child: Text('Fecha Ingreso',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          )),
+                    ),
+                    size: ColumnSize.L,
+                  ),
                 ],
                 rows: employees
-                    .map((employee) => DataRow2(
-                          cells: [
-                            DataCell(Text(employee.codigo)),
-                            DataCell(Text(employee.nombres)),
-                            DataCell(Text(employee.apellidos)),
-                            DataCell(Text(employee.email)),
-                            DataCell(Text(employee.telefono)),
-                            DataCell(
-                              Container(
+                  .map((employee) => DataRow2(
+                        cells: [
+                          DataCell(Center(child: Text(employee.codigo))),
+                          DataCell(Center(child: Text(employee.nombres))),
+                          DataCell(Center(child: Text(employee.apellidos))),
+                          DataCell(Center(child: Text(employee.email))),
+                          DataCell(Center(child: Text(employee.telefono))),
+                          DataCell(
+                            Center(
+                              child: Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
@@ -487,20 +535,50 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                                 ),
                               ),
                             ),
-                            DataCell(Text(DateFormat('dd/MM/yyyy')
-                                .format(employee.fechaIngreso))),
-                          ],
-                          color: WidgetStateProperty.resolveWith<Color?>(
-                            (Set<WidgetState> states) {
-                              if (states.contains(WidgetState.hovered)) {
-                                return Colors.grey[300];
-                              }
-                              return null;
-                            },
                           ),
-                          onDoubleTap: () => _showFormDialog(context, employee),
-                        ))
-                    .toList(),
+                          // ... (otras celdas) ...
+                          DataCell(
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(DateFormat('dd/MM/yyyy')
+                                    .format(employee.fechaIngreso)),
+                                PopupMenuButton<String>(
+                                  onSelected: (value) {
+                                    if (value == 'Eliminar') {
+                                      _deleteEmployee(employee);
+                                    } else if (value == 'Deshabilitar') {
+                                      //_disableEmployee(employee);
+                                      print('Aqui se va a deshabilitar');
+                                    }
+                                  },
+                                  itemBuilder: (BuildContext context) => [
+                                    const PopupMenuItem<String>(
+                                      value: 'Eliminar',
+                                      child: Text('Eliminar'),
+                                    ),
+                                    const PopupMenuItem<String>(
+                                      value: 'Deshabilitar',
+                                      child: Text('Deshabilitar'),
+                                    ),
+                                  ],
+                                  icon: const Icon(Icons.more_vert),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        color: WidgetStateProperty.resolveWith<Color?>(
+                          (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.hovered)) {
+                              return Colors.grey[300];
+                            }
+                            return null;
+                          },
+                        ),
+                        onDoubleTap: () => _showFormDialog(context, employee),
+                      ))
+                  .toList(),
               ),
             ),
           ],
@@ -509,138 +587,79 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
     );
   }
 
+  void _deleteEmployee(Employee employee) async {
+    // Mostrar un diálogo de confirmación
+    bool confirmDelete = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar eliminación'),
+          content: Text('¿Está seguro de que desea eliminar a ${employee.nombres} ${employee.apellidos}?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text('Eliminar'),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmDelete == true) {
+      try {
+        // Buscar el documento por el email del empleado
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('Users')
+            .where('email', isEqualTo: employee.email)
+            .limit(1)
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          // Eliminar el documento
+          await querySnapshot.docs.first.reference.delete();
+
+          // Actualizar la lista de empleados
+          setState(() {
+            employees.removeWhere((e) => e.email == employee.email);
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Empleado eliminado con éxito')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No se encontró el empleado')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al eliminar el empleado: $e')),
+        );
+      }
+    }
+  }
+
   Color _getRoleColor(String role) {
     switch (role.toLowerCase()) {
       case 'admin':
-        return Colors.red[400]!;
+        return Colors.black87;
       case 'supervisor':
         return Colors.green[400]!;
       case 'vendedor':
-        return Colors.blue[400]!;
+        return Colors.blue[300]!;
       default:
         return Colors.grey[400]!;
     }
   }
 
-  // void _submitForm() {
-  //   if (_formKey.currentState!.validate()) {
-  //     final newEmployee = Employee(
-  //       nombres: _nombresController.text,
-  //       apellidos: _apellidosController.text,
-  //       email: _emailController.text,
-  //       telefono: _telefonoController.text,
-  //       role: selectedRole,
-  //       fechaIngreso: _fechaIngresoController,
-  //     );
-
-  //     setState(() {
-  //       employees.add(newEmployee);
-  //     });
-
-  //     _clearForm();
-  //   }
-  // }
-
-  void _clearForm() {
-    _nombresController.clear();
-    _apellidosController.clear();
-    _emailController.clear();
-    _telefonoController.clear();
-    _fechaIngresoController.clear();
-    setState(() {
-      selectedRole = 'Vendedor';
-    });
-  }
-
-  // Widget _buildAccordions() {
-  //   return ExpansionPanelList(
-  //     expansionCallback: (int index, bool isExpanded) {
-  //       setState(() {
-  //         roles[index] = roles[index] == 'Vendedor' ? 'Supervisor' : 'Vendedor';
-  //       });
-  //     },
-  //     children: roles.map<ExpansionPanel>((String role) {
-  //       return ExpansionPanel(
-  //         headerBuilder: (BuildContext context, bool isExpanded) {
-  //           return ListTile(
-  //             title: Text(role, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-  //           );
-  //         },
-  //         body: _buildEmployeeList(role),
-  //         isExpanded: true,
-  //       );
-  //     }).toList(),
-  //   );
-  // }
-
-  // Widget _buildEmployeeList(String role) {
-  //   final roleEmployees =
-  //       employees.where((employee) => employee.role == role).toList();
-  //   return ListView.builder(
-  //     shrinkWrap: true,
-  //     physics: const NeverScrollableScrollPhysics(),
-  //     itemCount: roleEmployees.length,
-  //     itemBuilder: (context, index) {
-  //       final employee = roleEmployees[index];
-  //       return ListTile(
-  //         title: Text('${employee.nombres} ${employee.apellidos}'),
-  //         subtitle: Text(employee.email),
-  //         trailing: Text(employee.fechaIngreso.toString()),
-  //       );
-  //     },
-  //   );
-  // }
-
-  // Widget _buildFormSection(List<Widget> children) {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.stretch,
-  //     children: children,
-  //   );
-  // }
-
-  // Widget _buildResponsiveRow(List<Widget> children) {
-  //   return Row(
-  //     children: children.map((child) => Expanded(child: child)).toList(),
-  //   );
-  // }
-
-  // Widget _buildCustomTextField({
-  //   required TextEditingController controller,
-  //   required String label,
-  //   String? hintText,
-  //   bool required = false,
-  // }) {
-  //   return Expanded(
-  //     child: Padding(
-  //       padding: const EdgeInsets.symmetric(horizontal: 8),
-  //       child: TextFormField(
-  //         controller: controller,
-  //         decoration: InputDecoration(
-  //           labelText: label,
-  //           hintText: hintText,
-  //           border: OutlineInputBorder(
-  //             borderRadius: BorderRadius.circular(8),
-  //           ),
-  //           filled: true,
-  //           fillColor: Colors.grey[100],
-  //         ),
-  //         validator: required
-  //             ? (value) {
-  //                 if (value == null || value.isEmpty) {
-  //                   return 'Este campo es requerido';
-  //                 }
-  //                 return null;
-  //               }
-  //             : null,
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget _buildDropdown(String selectedRole, Function(String?) onChanged) {
     return DropdownButtonFormField<String>(
       value: selectedRole,
-      items: ['Vendedor', 'Supervisor', 'Admin'].map((String value) {
+      items: ['Vendedor', 'Supervisor', 'Admin', 'None'].map((String value) {
         return DropdownMenuItem<String>(
           value: value,
           child: Text(value),
