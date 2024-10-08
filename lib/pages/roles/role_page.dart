@@ -21,7 +21,7 @@ class RoleManagementWidget extends StatefulWidget {
 }
 
 class _RoleManagementWidgetState extends State<RoleManagementWidget> {
-  final _formKey = GlobalKey<FormState>();
+  //final _formKey = GlobalKey<FormState>();
   String selectedRole = 'Vendedor';
   List<String> roles = ['Vendedor', 'Supervisor'];
   List<Employee> employees = [];
@@ -40,27 +40,28 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
   }
 
   Future<void> _loadUsers() async {
-  try {
-    final querySnapshot =
-        await FirebaseFirestore.instance.collection('Users').get();
-    setState(() {
-      employees = querySnapshot.docs
-          .map((doc) => Employee.fromFirestore(doc))
-          .toList();
-    });
-  } catch (e) {
-    if (kDebugMode) {
-      print('Error loading users: $e');
+    try {
+      final querySnapshot =
+          await FirebaseFirestore.instance.collection('Users').get();
+      setState(() {
+        employees = querySnapshot.docs
+            .map((doc) => Employee.fromFirestore(doc))
+            .toList();
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading users: $e');
+      }
+      // Puedes mostrar un mensaje de error al usuario si lo deseas
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al cargar los usuarios: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
-    // Puedes mostrar un mensaje de error al usuario si lo deseas
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error al cargar los usuarios: $e'),
-        backgroundColor: Colors.red,
-      ),
-    );
   }
-}
+
   Future<String> _getNextUserCode() async {
     Random random = Random();
     String code = '';
@@ -86,61 +87,61 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
     return code;
   }
 
-
   Future<void> _saveOrUpdateEmployee(Employee? existingEmployee) async {
-  try {
-    final employeeData = {
-      'Nombre': _nombresController.text,
-      'Apellidos': _apellidosController.text,
-      'email': _emailController.text,
-      'Telefono': _telefonoController.text,
-      'Role': selectedRole,
-      'Codigo': _codigoController.text,
-      'updatedAt': Timestamp.now(),
-    };
+    try {
+      final employeeData = {
+        'Nombre': _nombresController.text,
+        'Apellidos': _apellidosController.text,
+        'email': _emailController.text,
+        'Telefono': _telefonoController.text,
+        'Role': selectedRole,
+        'Codigo': _codigoController.text,
+        'updatedAt': Timestamp.now(),
+      };
 
-    if (existingEmployee == null) {
-      // Create a new employee
-      final nextCode = await _getNextUserCode();
-      employeeData['Codigo'] = nextCode;
-      employeeData['createdAt'] = Timestamp.now();
+      if (existingEmployee == null) {
+        // Create a new employee
+        final nextCode = await _getNextUserCode();
+        employeeData['Codigo'] = nextCode;
+        employeeData['createdAt'] = Timestamp.now();
 
-      await FirebaseFirestore.instance.collection('Users').add(employeeData);
-    } else {
-      // Update existing employee
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .where('Codigo', isEqualTo: existingEmployee.codigo)
-          .get()
-          .then((querySnapshot) {
-        if (querySnapshot.docs.isNotEmpty) {
-          querySnapshot.docs.first.reference.update(employeeData);
-        }
-      });
+        await FirebaseFirestore.instance.collection('Users').add(employeeData);
+      } else {
+        // Update existing employee
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .where('Codigo', isEqualTo: existingEmployee.codigo)
+            .get()
+            .then((querySnapshot) {
+          if (querySnapshot.docs.isNotEmpty) {
+            querySnapshot.docs.first.reference.update(employeeData);
+          }
+        });
+      }
+
+      // Reload the users list
+      await _loadUsers();
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(existingEmployee == null
+              ? 'Empleado creado exitosamente'
+              : 'Empleado actualizado exitosamente'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
-
-    // Reload the users list
-    await _loadUsers();
-
-    // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(existingEmployee == null
-            ? 'Empleado creado exitosamente'
-            : 'Empleado actualizado exitosamente'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  } catch (e) {
-    // Show error message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error: ${e.toString()}'),
-        backgroundColor: Colors.red,
-      ),
-    );
   }
-}
+
   void _showFormDialog(BuildContext context, Employee? employee) {
     final _formKey = GlobalKey<FormState>();
 
@@ -339,7 +340,6 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
       },
     );
   }
-
   Widget _buildTextField(TextEditingController controller, String label,
       {bool isEmail = false}) {
     return TextFormField(
@@ -422,165 +422,185 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
               ],
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              height: 400,
-              child: DataTable2(
-                columnSpacing: 12,
-                horizontalMargin: 12,
-                minWidth: 600,
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                headingRowColor: WidgetStateProperty.all(Colors.grey[200]),
-                columns: const [
-                  DataColumn2(
-                    label: Center(
-                      child: Text('Codigo',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          )),
+            employees.isEmpty
+                ? const SizedBox(
+                    height: 400,
+                    child: Center(
+                      child:
+                          CircularProgressIndicator(), // Use a circular indicator
                     ),
-                    size: ColumnSize.L,
-                  ),
-                  DataColumn2(
-                    label: Center(
-                      child: Text('Nombres',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          )),
-                    ),
-                    size: ColumnSize.L,
-                  ),
-                  DataColumn2(
-                    label: Center(
-                      child: Text('Apellidos',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          )),
-                    ),
-                    size: ColumnSize.L,
-                  ),
-                  DataColumn2(
-                    label: Center(
-                      child: Text('Email',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          )),
-                    ),
-                    size: ColumnSize.L,
-                  ),
-                  DataColumn2(
-                    label: Center(
-                      child: Text('Teléfono',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          )),
-                    ),
-                    size: ColumnSize.L,
-                  ),
-                  DataColumn2(
-                    label: Center(
-                      child: Text('Role',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          )),
-                    ),
-                    size: ColumnSize.L,
-                  ),
-                  DataColumn2(
-                    label: Center(
-                      child: Text('Fecha Ingreso',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          )),
-                    ),
-                    size: ColumnSize.L,
-                  ),
-                ],
-                rows: employees
-                  .map((employee) => DataRow2(
-                        cells: [
-                          DataCell(Center(child: Text(employee.codigo))),
-                          DataCell(Center(child: Text(employee.nombres))),
-                          DataCell(Center(child: Text(employee.apellidos))),
-                          DataCell(Center(child: Text(employee.email))),
-                          DataCell(Center(child: Text(employee.telefono))),
-                          DataCell(
-                            Center(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: _getRoleColor(employee.role),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  employee.role,
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ),
+                  )
+                : SizedBox(
+                    height: 400,
+                    child: DataTable2(
+                      columnSpacing: 12,
+                      horizontalMargin: 12,
+                      minWidth: 600,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      headingRowColor:
+                          WidgetStateProperty.all(Colors.grey[200]),
+                      columns: const [
+                        DataColumn2(
+                          label: Center(
+                            child: Text('Codigo',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                )),
                           ),
-                          // ... (otras celdas) ...
-                          DataCell(
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(DateFormat('dd/MM/yyyy')
-                                    .format(employee.fechaIngreso)),
-                                PopupMenuButton<String>(
-                                  onSelected: (value) {
-                                    if (value == 'Eliminar') {
-                                      _deleteEmployee(employee);
-                                    } else if (value == 'Deshabilitar') {
-                                      //_disableEmployee(employee);
-                                      print('Aqui se va a deshabilitar');
-                                    }
-                                  },
-                                  itemBuilder: (BuildContext context) => [
-                                    const PopupMenuItem<String>(
-                                      value: 'Eliminar',
-                                      child: Text('Eliminar'),
-                                    ),
-                                    const PopupMenuItem<String>(
-                                      value: 'Deshabilitar',
-                                      child: Text('Deshabilitar'),
-                                    ),
-                                  ],
-                                  icon: const Icon(Icons.more_vert),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                        color: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) {
-                            if (states.contains(WidgetState.hovered)) {
-                              return Colors.grey[300];
-                            }
-                            return null;
-                          },
+                          size: ColumnSize.L,
                         ),
-                        onDoubleTap: () => _showFormDialog(context, employee),
-                      ))
-                  .toList(),
-              ),
-            ),
+                        DataColumn2(
+                          label: Center(
+                            child: Text('Nombres',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                )),
+                          ),
+                          size: ColumnSize.L,
+                        ),
+                        DataColumn2(
+                          label: Center(
+                            child: Text('Apellidos',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                )),
+                          ),
+                          size: ColumnSize.L,
+                        ),
+                        DataColumn2(
+                          label: Center(
+                            child: Text('Email',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                )),
+                          ),
+                          size: ColumnSize.L,
+                        ),
+                        DataColumn2(
+                          label: Center(
+                            child: Text('Teléfono',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                )),
+                          ),
+                          size: ColumnSize.L,
+                        ),
+                        DataColumn2(
+                          label: Center(
+                            child: Text('Role',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                )),
+                          ),
+                          size: ColumnSize.L,
+                        ),
+                        DataColumn2(
+                          label: Center(
+                            child: Text('Fecha Ingreso',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                )),
+                          ),
+                          size: ColumnSize.L,
+                        ),
+                      ],
+                      rows: employees
+                        .map((employee) => DataRow2(
+                                cells: [
+                                  DataCell(
+                                      Center(child: Text(employee.codigo))),
+                                  DataCell(
+                                      Center(child: Text(employee.nombres))),
+                                  DataCell(
+                                      Center(child: Text(employee.apellidos))),
+                                  DataCell(Center(child: Text(employee.email))),
+                                  DataCell(
+                                      Center(child: Text(employee.telefono))),
+                                  DataCell(
+                                    Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: _getRoleColor(employee.role),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          employee.role,
+                                          style: const TextStyle(
+                                              color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  // ... (otras celdas) ...
+                                  DataCell(
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(DateFormat('dd/MM/yyyy')
+                                            .format(employee.fechaIngreso)),
+                                        PopupMenuButton<String>(
+                                          onSelected: (value) {
+                                            if (value == 'Eliminar') {
+                                              _deleteEmployee(employee);
+                                            } else if (value ==
+                                                'Deshabilitar') {
+                                              //_disableEmployee(employee);
+                                              print(
+                                                  'Aqui se va a deshabilitar');
+                                            }
+                                          },
+                                          itemBuilder: (BuildContext context) =>
+                                              [
+                                            const PopupMenuItem<String>(
+                                              value: 'Eliminar',
+                                              child: Text('Eliminar'),
+                                            ),
+                                            const PopupMenuItem<String>(
+                                              value: 'Deshabilitar',
+                                              child: Text('Deshabilitar'),
+                                            ),
+                                          ],
+                                          icon: const Icon(Icons.more_vert),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                                color: WidgetStateProperty.resolveWith<Color?>(
+                                  (Set<WidgetState> states) {
+                                    if (states.contains(WidgetState.hovered)) {
+                                      return Colors.grey[300];
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                onDoubleTap: () =>
+                                    _showFormDialog(context, employee),
+                              ))
+                          .toList(),
+                    ),
+                  ),
           ],
         ),
       ),
@@ -594,7 +614,8 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirmar eliminación'),
-          content: Text('¿Está seguro de que desea eliminar a ${employee.nombres} ${employee.apellidos}?'),
+          content: Text(
+              '¿Está seguro de que desea eliminar a ${employee.nombres} ${employee.apellidos}?'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancelar'),

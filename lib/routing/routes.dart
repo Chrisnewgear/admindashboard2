@@ -4,7 +4,7 @@ const rootRoute = "/";
 const overviewPageDisplayName = "Overview";
 const overviewPageRoute = "/overview";
 
-const driversPageDisplayName = "Drivers";
+const driversPageDisplayName = "Visits";
 const driversPageRoute = "/drivers";
 
 const clientsPageDisplayName = "Clients";
