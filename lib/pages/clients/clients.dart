@@ -3,15 +3,13 @@
 import 'dart:math';
 
 import 'package:admindashboard/models/clients.dart';
-import 'package:admindashboard/models/employee.dart';
+import 'package:data_table_2/data_table_2.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:admindashboard/models/employee.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
-import 'package:data_table_2/data_table_2.dart';
 import 'package:intl/intl.dart';
 
 class ClientsPage extends StatefulWidget {
@@ -23,7 +21,7 @@ class ClientsPage extends StatefulWidget {
 
 class _ClientsPageState extends State<ClientsPage> {
   //final _formKey = GlobalKey<FormState>();
-  String selectedRole = 'Cliente';
+  //String selectedRole = 'Cliente';
   //List<String> roles = ['Vendedor', 'Supervisor'];
   List<Clients> clients = [];
 
@@ -35,11 +33,47 @@ class _ClientsPageState extends State<ClientsPage> {
   final TextEditingController _codigoController = TextEditingController();
   final TextEditingController _direccionController = TextEditingController();
   final TextEditingController _empresaController = TextEditingController();
+  final TextEditingController _codVendedorController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loadUsers();
+    _loadUserCodeAndUsers();
+  }
+
+  Future<void> _loadUserCodeAndUsers() async {
+    try {
+      // Get the current user
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        // Fetch the user document from Firestore
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(currentUser.uid)
+            .get();
+
+        if (userDoc.exists) {
+          // Set the _codVendedorController with the user's code
+          setState(() {
+            _codVendedorController.text = userDoc.get('Codigo') ?? '';
+          });
+        }
+      }
+
+      // Load visits
+      await _loadUsers();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading user code and visits: $e');
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              Text('Error al cargar información del usuario y visitas: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> _loadUsers() async {
@@ -100,6 +134,7 @@ class _ClientsPageState extends State<ClientsPage> {
         'Direccion': _direccionController.text,
         'Empresa': _empresaController.text,
         'Codigo': _codigoController.text,
+        'CodVendedor': _codVendedorController.text,
         'updatedAt': Timestamp.now(),
       };
 
@@ -155,10 +190,10 @@ class _ClientsPageState extends State<ClientsPage> {
       _telefonoController.text = client.telefono;
       _codigoController.text = client.codigo;
       _direccionController.text = client.direccion;
+      _codVendedorController.text = client.codVendedor;
       _empresaController.text = client.empresa;
       _fechaIngresoController.text =
           DateFormat('dd/MM/yyyy').format(client.fechaIngreso);
-      //selectedRole = client.role;
     } else {
       _nombresController.clear();
       _apellidosController.clear();
@@ -168,7 +203,7 @@ class _ClientsPageState extends State<ClientsPage> {
       _codigoController.clear();
       _direccionController.clear();
       _empresaController.clear();
-      //selectedRole = 'Vendedor';
+      _codVendedorController.clear();
     }
 
     showDialog(
@@ -176,171 +211,88 @@ class _ClientsPageState extends State<ClientsPage> {
       builder: (BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
           elevation: 0,
           backgroundColor: Colors.transparent,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              // Ajustar el ancho del modal dependiendo del tamaño de la pantalla
               double modalWidth = constraints.maxWidth > 600
-                  ? constraints.maxWidth * 0.4 // Pantallas grandes
-                  : constraints.maxWidth * 0.9; // Pantallas pequeñas
+                  ? constraints.maxWidth * 0.5
+                  : constraints.maxWidth * 0.95;
+              bool isLargeScreen = constraints.maxWidth > 600;
 
               return Container(
-                width: modalWidth, // Se ajusta el ancho del modal
-                padding: const EdgeInsets.all(20),
+                width: modalWidth,
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(
-                      client == null ? 'Nuevo Cliente' : 'Editar Cliente',
-                      style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.w600),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          client == null ? 'Nuevo Cliente' : 'Editar Cliente',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, color: Colors.black54),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     Form(
                       key: _formKey,
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          // Si el ancho es mayor a 600px, usar 2 columnas
-                          bool isLargeScreen = constraints.maxWidth > 600;
-
-                          return Column(
-                            children: [
-                              // Campos de nombres y apellidos
-                              isLargeScreen
-                                  ? Row(
-                                      children: [
-                                        Expanded(
-                                          child: _buildTextField(
-                                              _nombresController, 'Nombres'),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                          child: _buildTextField(
-                                              _apellidosController,
-                                              'Apellidos'),
-                                        ),
-                                      ],
-                                    )
-                                  : Column(
-                                      children: [
-                                        _buildTextField(
-                                            _nombresController, 'Nombres'),
-                                        const SizedBox(height: 15),
-                                        _buildTextField(
-                                            _apellidosController, 'Apellidos'),
-                                      ],
-                                    ),
-                              const SizedBox(height: 15),
-                              // Campos de email y teléfono
-                              isLargeScreen
-                                  ? Row(
-                                      children: [
-                                        Expanded(
-                                          child: _buildTextField(
-                                              _emailController, 'Email',
-                                              isEmail: true),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                          child: _buildTextField(
-                                              _telefonoController, 'Teléfono'),
-                                        ),
-                                      ],
-                                    )
-                                  : Column(
-                                      children: [
-                                        _buildTextField(
-                                            _emailController, 'Email',
-                                            isEmail: true),
-                                        const SizedBox(height: 15),
-                                        _buildTextField(
-                                            _telefonoController, 'Teléfono'),
-                                      ],
-                                    ),
-                              const SizedBox(height: 15),
-                              // Campos de Rol y Fecha de Ingreso
-                              isLargeScreen
-                                  ? Row(
-                                      children: [
-                                        Expanded(
-                                          child: _buildDropdown(selectedRole,
-                                              (String? newValue) {
-                                            selectedRole = newValue!;
-                                          }),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                          child: _buildDatePicker(
-                                              context, _fechaIngresoController),
-                                        ),
-                                      ],
-                                    )
-                                  : Column(
-                                      children: [
-                                        _buildDropdown(selectedRole,
-                                            (String? newValue) {
-                                          selectedRole = newValue!;
-                                        }),
-                                        const SizedBox(height: 15),
-                                        _buildDatePicker(
-                                            context, _fechaIngresoController),
-                                      ],
-                                    ),
-                              const SizedBox(height: 15),
-                              // Campos de Empresa y Direccion
-                              isLargeScreen
-                                  ? Row(
-                                      children: [
-                                        Expanded(
-                                          child: _buildTextField(
-                                              _empresaController, 'Empresa'),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                          child: _buildTextField(
-                                              _direccionController,
-                                              'Direcci¡ón'),
-                                        ),
-                                      ],
-                                    )
-                                  : Column(
-                                      children: [
-                                        _buildTextField(
-                                            _empresaController, 'Empresa'),
-                                        const SizedBox(height: 15),
-                                        _buildTextField(
-                                            _direccionController, 'Direcci¡ón'),
-                                      ],
-                                    ),
-                            ],
-                          );
-                        },
+                      child: Column(
+                        children: [
+                          _buildResponsiveRow(isLargeScreen, [
+                            _buildInputField(_nombresController, 'Nombres'),
+                            _buildInputField(_apellidosController, 'Apellidos'),
+                          ]),
+                          _buildResponsiveRow(isLargeScreen, [
+                            _buildInputField(_emailController, 'Email',
+                                isEmail: true),
+                            _buildInputField(_telefonoController, 'Teléfono'),
+                          ]),
+                          _buildResponsiveRow(isLargeScreen, [
+                            _buildInputField(_empresaController, 'Empresa'),
+                            _buildDatePicker(context, _fechaIngresoController,
+                                'Fecha de Ingreso'),
+                          ]),
+                          _buildInputField(_direccionController, 'Dirección'),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
-                          child: Text('Cancelar',
-                              style: TextStyle(color: Colors.grey[600])),
                           onPressed: () => Navigator.of(context).pop(),
+                          child: Text(
+                            'Cancelar',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 16),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: Colors.indigo,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
+                              borderRadius: BorderRadius.circular(8),
                             ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
@@ -348,18 +300,13 @@ class _ClientsPageState extends State<ClientsPage> {
                               Navigator.of(context).pop();
                             }
                           },
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.save, color: Colors.white),
-                              SizedBox(width: 5),
-                              Text(
-                                'Guardar',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                          child: const Text(
+                            'Guardar',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],
@@ -373,28 +320,103 @@ class _ClientsPageState extends State<ClientsPage> {
       },
     );
   }
-  Widget _buildTextField(TextEditingController controller, String label,
+
+  Widget _buildResponsiveRow(bool isLargeScreen, List<Widget> children) {
+    return isLargeScreen
+        ? Row(
+            children: children
+                .map((child) => Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: child,
+                      ),
+                    ))
+                .toList(),
+          )
+        : Column(children: children);
+  }
+
+  Widget _buildInputField(TextEditingController controller, String label,
       {bool isEmail = false}) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.indigo),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
         ),
-        filled: true,
-        fillColor: Colors.grey[100],
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor ingrese $label';
+          }
+          if (isEmail &&
+              !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+            return 'Por favor ingrese un email válido';
+          }
+          return null;
+        },
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Este campo es requerido';
-        }
-        if (isEmail &&
-            !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-          return 'Ingrese un email válido';
-        }
-        return null;
-      },
+    );
+  }
+
+  Widget _buildDatePicker(
+      BuildContext context, TextEditingController controller, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.indigo),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+          suffixIcon: Icon(Icons.calendar_today, color: Colors.grey[600]),
+        ),
+        readOnly: true,
+        onTap: () async {
+          DateTime? pickedDate = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2101),
+          );
+          if (pickedDate != null) {
+            String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
+            controller.text = formattedDate;
+          }
+        },
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor seleccione una fecha';
+          }
+          return null;
+        },
+      ),
     );
   }
 
@@ -408,26 +430,30 @@ class _ClientsPageState extends State<ClientsPage> {
     _codigoController.dispose();
     _empresaController.dispose();
     _direccionController.dispose();
+    _codVendedorController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Administrar Clientes'),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Administrar Clientes'),
+      // ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Administrar Clientes',
+              'Mis Clientes',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
-            _buildUserTable(),
+            // UserTable( clients: clients,
+            //   onDelete: _deleteClient,
+            //   onLoadUsers: _loadUsers,),
+            _buildUserTable() // Llama al widget desde el archivo externo
           ],
         ),
       ),
@@ -461,8 +487,9 @@ class _ClientsPageState extends State<ClientsPage> {
                 ? const SizedBox(
                     height: 400,
                     child: Center(
-                      child:
-                          CircularProgressIndicator(strokeWidth: 2,), // Use a circular indicator
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ), // Use a circular indicator
                     ),
                   )
                 : SizedBox(
@@ -481,6 +508,17 @@ class _ClientsPageState extends State<ClientsPage> {
                         DataColumn2(
                           label: Center(
                             child: Text('Codigo',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                )),
+                          ),
+                          size: ColumnSize.L,
+                        ),
+                        DataColumn2(
+                          label: Center(
+                            child: Text('Cod. Vendedor',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -568,22 +606,16 @@ class _ClientsPageState extends State<ClientsPage> {
                         ),
                       ],
                       rows: clients
-                        .map((client) => DataRow2(
+                          .map((client) => DataRow2(
                                 cells: [
-                                  DataCell(
-                                      Center(child: Text(client.codigo))),
-                                  DataCell(
-                                      Center(child: Text(client.nombres))),
-                                  DataCell(
-                                      Center(child: Text(client.apellidos))),
-                                  DataCell(
-                                      Center(child: Text(client.email))),
-                                  DataCell(
-                                      Center(child: Text(client.telefono))),
-                                  DataCell(
-                                      Center(child: Text(client.empresa))),
-                                  DataCell(
-                                      Center(child: Text(client.direccion))),
+                                  DataCell(Center(child: Text(client.codigo))),
+                                  DataCell(Center(child: Text(client.codVendedor))),
+                                  DataCell(Center(child: Text(client.nombres))),
+                                  DataCell(Center(child: Text(client.apellidos))),
+                                  DataCell(Center(child: Text(client.email))),
+                                  DataCell(Center(child: Text(client.telefono))),
+                                  DataCell(Center(child: Text(client.empresa))),
+                                  DataCell(Center(child: Text(client.direccion))),
                                   // ... (otras celdas) ...
                                   DataCell(
                                     Row(
@@ -595,7 +627,7 @@ class _ClientsPageState extends State<ClientsPage> {
                                         PopupMenuButton<String>(
                                           onSelected: (value) {
                                             if (value == 'Eliminar') {
-                                              _deleteEmployee(client);
+                                              _deleteClient(client);
                                             } else if (value ==
                                                 'Deshabilitar') {
                                               //_disableEmployee(employee);
@@ -640,7 +672,7 @@ class _ClientsPageState extends State<ClientsPage> {
     );
   }
 
-  void _deleteEmployee(Clients client) async {
+  void _deleteClient(Clients client) async {
     // Mostrar un diálogo de confirmación
     bool confirmDelete = await showDialog(
       context: context,
@@ -731,32 +763,32 @@ class _ClientsPageState extends State<ClientsPage> {
     );
   }
 
-  Widget _buildDatePicker(
-      BuildContext context, TextEditingController controller) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: 'Fecha Ingreso',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        filled: true,
-        fillColor: Colors.grey[100],
-        suffixIcon: const Icon(Icons.calendar_today),
-      ),
-      onTap: () async {
-        DateTime? pickedDate = await showDatePicker(
-          context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2101),
-        );
-        if (pickedDate != null) {
-          String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
-          controller.text = formattedDate;
-        }
-      },
-      readOnly: true,
-    );
-  }
+  // Widget _buildDatePicker(
+  //     BuildContext context, TextEditingController controller) {
+  //   return TextFormField(
+  //     controller: controller,
+  //     decoration: InputDecoration(
+  //       labelText: 'Fecha Ingreso',
+  //       border: OutlineInputBorder(
+  //         borderRadius: BorderRadius.circular(10),
+  //       ),
+  //       filled: true,
+  //       fillColor: Colors.grey[100],
+  //       suffixIcon: const Icon(Icons.calendar_today),
+  //     ),
+  //     onTap: () async {
+  //       DateTime? pickedDate = await showDatePicker(
+  //         context: context,
+  //         initialDate: DateTime.now(),
+  //         firstDate: DateTime(2000),
+  //         lastDate: DateTime(2101),
+  //       );
+  //       if (pickedDate != null) {
+  //         String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
+  //         controller.text = formattedDate;
+  //       }
+  //     },
+  //     readOnly: true,
+  //   );
+  // }
 }

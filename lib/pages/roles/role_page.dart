@@ -379,9 +379,9 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Administrar Roles'),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Administrar Roles'),
+      // ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

@@ -9,6 +9,7 @@ class Clients {
   final String codigo;
   final DateTime fechaIngreso;
   final String empresa;
+  final String codVendedor;
 
   Clients({
     required this.nombres,
@@ -19,6 +20,7 @@ class Clients {
     this.codigo = '',
     required this.fechaIngreso,
     required this.empresa,
+    required this.codVendedor,
   });
 
   factory Clients.fromFirestore(DocumentSnapshot doc) {
@@ -26,11 +28,12 @@ class Clients {
     return Clients(
       nombres: data['Nombre'] ?? '',
       apellidos: data['Apellidos'] ?? '',
-      email: data['Email'] ?? '',
+      email: data['email'] ?? '',
       telefono: data['Telefono'] ?? '',
       direccion: data['Direccion'] ?? '',
       codigo: data['Codigo'] ?? '',
       empresa: data['Empresa'] ?? '',
+      codVendedor: data['CodVendedor'] ?? '',
       fechaIngreso: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),

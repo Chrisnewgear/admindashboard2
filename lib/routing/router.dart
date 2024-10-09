@@ -13,7 +13,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case overviewPageRoute:
       return _getPageRoute(const OverviewPage());
     case driversPageRoute:
-      return _getPageRoute(const DriversPage());
+      return _getPageRoute(const VisitsManagementWidget());
     case clientsPageRoute:
       return _getPageRoute(const ClientsPage());
     case roleManagementWidgetPageRoute:
