@@ -133,29 +133,6 @@ class _ClientsPageState extends State<ClientsPage> {
     }
   }
 
-  // Future<void> _loadUsers() async {
-  //   try {
-  //     final querySnapshot =
-  //         await FirebaseFirestore.instance.collection('Clients').get();
-  //     setState(() {
-  //       clients = querySnapshot.docs
-  //           .map((doc) => Clients.fromFirestore(doc))
-  //           .toList();
-  //     });
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       print('Error loading clients: $e');
-  //     }
-  //     // Puedes mostrar un mensaje de error al usuario si lo deseas
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text('Error al cargar los clientes: $e'),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //   }
-  // }
-
   Future<String> _getNextClientCode() async {
     Random random = Random();
     String code = '';
@@ -180,89 +157,6 @@ class _ClientsPageState extends State<ClientsPage> {
 
     return code;
   }
-
-  // Future<void> _saveOrUpdateClient(Clients? existingClient) async {
-  //   try {
-  //     // Obtener el código del vendedor actual
-  //     //currentVendorCode = _codVendedorController.text;
-
-  //     if (kDebugMode) {
-  //       print('Código del vendedor actual: $currentVendorCode');
-  //     }
-
-  //     final clientData = {
-  //       'Nombre': _nombresController.text,
-  //       'Apellidos': _apellidosController.text,
-  //       'email': _emailController.text,
-  //       'Telefono': _telefonoController.text,
-  //       'Direccion': _direccionController.text,
-  //       'Empresa': _empresaController.text,
-  //       'Codigo': _codigoController.text,
-  //       'CodVendedor': currentVendorCode, // Usar el código del vendedor actual
-  //       'updatedAt': Timestamp.now(),
-  //     };
-
-  //     if (kDebugMode) {
-  //       print('Datos del cliente a guardar: $clientData');
-  //     }
-
-  //     if (existingClient == null) {
-  //       // Crear un nuevo cliente
-  //       final nextCode = await _getNextClientCode();
-  //       clientData['Codigo'] = nextCode;
-  //       clientData['createdAt'] = Timestamp.now();
-
-  //       DocumentReference docRef = await FirebaseFirestore.instance
-  //           .collection('Clients')
-  //           .add(clientData);
-
-  //       if (kDebugMode) {
-  //         print('Nuevo cliente creado con ID: ${docRef.id}');
-  //       }
-  //     } else {
-  //       // Actualizar cliente existente
-  //       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-  //           .collection('Clients')
-  //           .where('Codigo', isEqualTo: existingClient.codigo)
-  //           .limit(1)
-  //           .get();
-
-  //       if (querySnapshot.docs.isNotEmpty) {
-  //         await querySnapshot.docs.first.reference.update(clientData);
-
-  //         if (kDebugMode) {
-  //           print('Cliente actualizado con código: ${existingClient.codigo}');
-  //         }
-  //       } else {
-  //         throw Exception('No se encontró el cliente a actualizar');
-  //       }
-  //     }
-
-  //     // Recargar la lista de clientes
-  //     await _loadUsers();
-
-  //     // Mostrar mensaje de éxito
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text(existingClient == null
-  //             ? 'Cliente creado exitosamente'
-  //             : 'Cliente actualizado exitosamente'),
-  //         backgroundColor: Colors.green,
-  //       ),
-  //     );
-  //   } catch (e) {
-  //     // Mostrar mensaje de error
-  //     if (kDebugMode) {
-  //       print('Error al guardar/actualizar cliente: $e');
-  //     }
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text('Error: ${e.toString()}'),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //   }
-  // }
 
   Future<void> _saveOrUpdateClient(Clients? existingClient) async {
     try {
@@ -356,147 +250,6 @@ class _ClientsPageState extends State<ClientsPage> {
     }
   }
 
-  // void _showFormDialog(BuildContext context, Clients? client) {
-  //   final formKey = GlobalKey<FormState>();
-
-  //   if (client != null) {
-  //     _nombresController.text = client.nombres;
-  //     _apellidosController.text = client.apellidos;
-  //     _emailController.text = client.email;
-  //     _telefonoController.text = client.telefono;
-  //     _codigoController.text = client.codigo;
-  //     _direccionController.text = client.direccion;
-  //     //_codVendedorController.text = client.codVendedor;
-  //     _empresaController.text = client.empresa;
-  //     _fechaIngresoController.text =
-  //         DateFormat('dd/MM/yyyy').format(client.fechaIngreso);
-  //   } else {
-  //     _nombresController.clear();
-  //     _apellidosController.clear();
-  //     _emailController.clear();
-  //     _telefonoController.clear();
-  //     _fechaIngresoController.clear();
-  //     _codigoController.clear();
-  //     _direccionController.clear();
-  //     _empresaController.clear();
-  //     _codVendedorController.clear();
-  //   }
-
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return Dialog(
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(16),
-  //         ),
-  //         elevation: 0,
-  //         backgroundColor: Colors.transparent,
-  //         child: LayoutBuilder(
-  //           builder: (context, constraints) {
-  //             double modalWidth = constraints.maxWidth > 600
-  //                 ? constraints.maxWidth * 0.5
-  //                 : constraints.maxWidth * 0.95;
-  //             bool isLargeScreen = constraints.maxWidth > 600;
-
-  //             return Container(
-  //               width: modalWidth,
-  //               padding: const EdgeInsets.all(24),
-  //               decoration: BoxDecoration(
-  //                 color: Colors.white,
-  //                 borderRadius: BorderRadius.circular(16),
-  //               ),
-  //               child: Column(
-  //                 mainAxisSize: MainAxisSize.min,
-  //                 crossAxisAlignment: CrossAxisAlignment.start,
-  //                 children: <Widget>[
-  //                   Row(
-  //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                     children: [
-  //                       Text(
-  //                         client == null ? 'Nuevo Cliente' : 'Editar Cliente',
-  //                         style: const TextStyle(
-  //                           fontSize: 24,
-  //                           fontWeight: FontWeight.bold,
-  //                           color: Colors.black87,
-  //                         ),
-  //                       ),
-  //                       IconButton(
-  //                         icon: const Icon(Icons.close, color: Colors.black54),
-  //                         onPressed: () => Navigator.of(context).pop(),
-  //                       ),
-  //                     ],
-  //                   ),
-  //                   const SizedBox(height: 24),
-  //                   Form(
-  //                     key: formKey,
-  //                     child: Column(
-  //                       children: [
-  //                         _buildResponsiveRow(isLargeScreen, [
-  //                           _buildInputField(_nombresController, 'Nombres'),
-  //                           _buildInputField(_apellidosController, 'Apellidos'),
-  //                         ]),
-  //                         _buildResponsiveRow(isLargeScreen, [
-  //                           _buildInputField(_emailController, 'Email',
-  //                               isEmail: true),
-  //                           _buildInputField(_telefonoController, 'Teléfono'),
-  //                         ]),
-  //                         _buildResponsiveRow(isLargeScreen, [
-  //                           _buildInputField(_empresaController, 'Empresa'),
-  //                           _buildDatePicker(context, _fechaIngresoController,
-  //                               'Fecha de Ingreso'),
-  //                         ]),
-  //                         _buildInputField(_direccionController, 'Dirección'),
-  //                       ],
-  //                     ),
-  //                   ),
-  //                   const SizedBox(height: 24),
-  //                   Row(
-  //                     mainAxisAlignment: MainAxisAlignment.end,
-  //                     children: [
-  //                       TextButton(
-  //                         onPressed: () => Navigator.of(context).pop(),
-  //                         child: Text(
-  //                           'Cancelar',
-  //                           style: TextStyle(color: Colors.grey[600]),
-  //                         ),
-  //                       ),
-  //                       const SizedBox(width: 16),
-  //                       ElevatedButton(
-  //                         style: ElevatedButton.styleFrom(
-  //                           backgroundColor: Colors.indigo,
-  //                           shape: RoundedRectangleBorder(
-  //                             borderRadius: BorderRadius.circular(8),
-  //                           ),
-  //                           padding: const EdgeInsets.symmetric(
-  //                               horizontal: 24, vertical: 12),
-  //                         ),
-  //                         onPressed: () {
-  //                           if (formKey.currentState!.validate()) {
-  //                             _saveOrUpdateClient(client);
-  //                             Navigator.of(context).pop();
-  //                           }
-  //                         },
-  //                         child: const Text(
-  //                           'Guardar',
-  //                           style: TextStyle(
-  //                             fontSize: 16,
-  //                             fontWeight: FontWeight.bold,
-  //                             color: Colors.white,
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     ],
-  //                   ),
-  //                 ],
-  //               ),
-  //             );
-  //           },
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   void _showFormDialog(BuildContext context, Clients? client) {
     final formKey = GlobalKey<FormState>();
     final ValueNotifier<bool> isEditable = ValueNotifier<bool>(client == null);
@@ -509,13 +262,15 @@ class _ClientsPageState extends State<ClientsPage> {
       _codigoController.text = client.codigo;
       _direccionController.text = client.direccion;
       _empresaController.text = client.empresa;
-      _fechaIngresoController.text = DateFormat('dd/MM/yyyy').format(client.fechaIngreso);
+      _fechaIngresoController.text =
+          DateFormat('dd/MM/yyyy').format(client.fechaIngreso);
     } else {
       _nombresController.clear();
       _apellidosController.clear();
       _emailController.clear();
       _telefonoController.clear();
-      _fechaIngresoController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
+      _fechaIngresoController.text =
+          DateFormat('dd/MM/yyyy').format(DateTime.now());
       _codigoController.clear();
       _direccionController.clear();
       _empresaController.clear();
@@ -828,203 +583,402 @@ class _ClientsPageState extends State<ClientsPage> {
             // UserTable( clients: clients,
             //   onDelete: _deleteClient,
             //   onLoadUsers: _loadUsers,),
-            _buildUserTable() // Llama al widget desde el archivo externo
+            _buildUserTable(context) // Llama al widget desde el archivo externo
           ],
         ),
       ),
     );
   }
 
-  Widget _buildUserTable() {
-    return Card(
-      elevation: 4,
-      color: Colors.white70,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  // Widget _buildUserTable() {
+  //   return Card(
+  //     elevation: 4,
+  //     color: Colors.white70,
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(16),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Row(
+  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //             children: [
+  //               const Text(
+  //                 'Lista de Clientes',
+  //                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+  //               ),
+  //               ElevatedButton(
+  //                 onPressed: () => _showFormDialog(context, null),
+  //                 child: const Text('Nuevo Cliente'),
+  //               ),
+  //             ],
+  //           ),
+  //           const SizedBox(height: 16),
+  //           clients.isEmpty
+  //               ? const SizedBox(
+  //                   height: 400,
+  //                   child: Center(
+  //                     child: CircularProgressIndicator(
+  //                       strokeWidth: 2,
+  //                     ), // Use a circular indicator
+  //                   ),
+  //                 )
+  //               : SizedBox(
+  //                   height: 400,
+  //                   child: DataTable2(
+  //                     columnSpacing: 12,
+  //                     horizontalMargin: 12,
+  //                     minWidth: 600,
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.grey[100],
+  //                       borderRadius: BorderRadius.circular(8),
+  //                     ),
+  //                     headingRowColor:
+  //                         WidgetStateProperty.all(Colors.grey[200]),
+  //                     columns: const [
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Nombres',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Apellidos',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Email',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Teléfono',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Empresa',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       // DataColumn2(
+  //                       //   label: Center(
+  //                       //     child: Text('Direccion',
+  //                       //         style: TextStyle(
+  //                       //           fontSize: 16,
+  //                       //           fontWeight: FontWeight.bold,
+  //                       //           color: Colors.blue,
+  //                       //         )),
+  //                       //   ),
+  //                       //   size: ColumnSize.L,
+  //                       // ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Fecha Ingreso',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                     ],
+  //                     rows: clients
+  //                         .map((client) => DataRow2(
+  //                               cells: [
+  //                                 DataCell(Center(child: Text(client.nombres))),
+  //                                 DataCell(
+  //                                     Center(child: Text(client.apellidos))),
+  //                                 DataCell(Center(child: Text(client.email))),
+  //                                 DataCell(
+  //                                     Center(child: Text(client.telefono))),
+  //                                 DataCell(Center(child: Text(client.empresa))),
+  //                                 // DataCell(
+  //                                 //     Center(child: Text(client.direccion))),
+  //                                 // ... (otras celdas) ...
+  //                                 DataCell(
+  //                                   Row(
+  //                                     mainAxisAlignment:
+  //                                         MainAxisAlignment.spaceBetween,
+  //                                     children: [
+  //                                       Text(DateFormat('dd/MM/yyyy')
+  //                                           .format(client.fechaIngreso)),
+  //                                       PopupMenuButton<String>(
+  //                                         onSelected: (value) {
+  //                                           if (value == 'Eliminar') {
+  //                                             _deleteClient(client);
+  //                                           } else if (value ==
+  //                                               'Deshabilitar') {
+  //                                             //_disableEmployee(employee);
+  //                                             print(
+  //                                                 'Aqui se va a deshabilitar');
+  //                                           }
+  //                                         },
+  //                                         itemBuilder: (BuildContext context) =>
+  //                                             [
+  //                                           const PopupMenuItem<String>(
+  //                                             value: 'Eliminar',
+  //                                             child: Text('Eliminar'),
+  //                                           ),
+  //                                           const PopupMenuItem<String>(
+  //                                             value: 'Deshabilitar',
+  //                                             child: Text('Deshabilitar'),
+  //                                           ),
+  //                                         ],
+  //                                         icon: const Icon(Icons.more_vert),
+  //                                       ),
+  //                                     ],
+  //                                   ),
+  //                                 ),
+  //                               ],
+  //                               color: WidgetStateProperty.resolveWith<Color?>(
+  //                                 (Set<WidgetState> states) {
+  //                                   if (states.contains(WidgetState.hovered)) {
+  //                                     return Colors.grey[300];
+  //                                   }
+  //                                   return null;
+  //                                 },
+  //                               ),
+  //                               onDoubleTap: () =>
+  //                                   _showFormDialog(context, client),
+  //                             ))
+  //                         .toList(),
+  //                   ),
+  //                 ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  Widget _buildUserTable(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 600;
+
+        return Card(
+          elevation: 4,
+          color: Colors.white70,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Lista de Clientes',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Lista de Clientes',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => _showFormDialog(context, null),
+                      child: const Text('Nuevo Cliente'),
+                    ),
+                  ],
                 ),
-                ElevatedButton(
-                  onPressed: () => _showFormDialog(context, null),
-                  child: const Text('Nuevo Cliente'),
-                ),
+                const SizedBox(height: 16),
+                clients.isEmpty
+                    ? const SizedBox(
+                        height: 400,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      )
+                    : SizedBox(
+                        height: 400,
+                        child: DataTable2(
+                          columnSpacing: 12,
+                          horizontalMargin: 12,
+                          minWidth: isSmallScreen ? 400 : 600,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          headingRowColor:
+                              WidgetStateProperty.all(Colors.grey[200]),
+                          columns: _buildColumns(isSmallScreen),
+                          rows: _buildRows(isSmallScreen),
+                        ),
+                      ),
               ],
             ),
-            const SizedBox(height: 16),
-            clients.isEmpty
-                ? const SizedBox(
-                    height: 400,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ), // Use a circular indicator
-                    ),
-                  )
-                : SizedBox(
-                    height: 400,
-                    child: DataTable2(
-                      columnSpacing: 12,
-                      horizontalMargin: 12,
-                      minWidth: 600,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      headingRowColor:
-                          WidgetStateProperty.all(Colors.grey[200]),
-                      columns: const [
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Nombres',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Apellidos',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Email',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Teléfono',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Empresa',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        // DataColumn2(
-                        //   label: Center(
-                        //     child: Text('Direccion',
-                        //         style: TextStyle(
-                        //           fontSize: 16,
-                        //           fontWeight: FontWeight.bold,
-                        //           color: Colors.blue,
-                        //         )),
-                        //   ),
-                        //   size: ColumnSize.L,
-                        // ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Fecha Ingreso',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                      ],
-                      rows: clients
-                          .map((client) => DataRow2(
-                                cells: [
-                                  DataCell(Center(child: Text(client.nombres))),
-                                  DataCell(
-                                      Center(child: Text(client.apellidos))),
-                                  DataCell(Center(child: Text(client.email))),
-                                  DataCell(
-                                      Center(child: Text(client.telefono))),
-                                  DataCell(Center(child: Text(client.empresa))),
-                                  // DataCell(
-                                  //     Center(child: Text(client.direccion))),
-                                  // ... (otras celdas) ...
-                                  DataCell(
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(DateFormat('dd/MM/yyyy')
-                                            .format(client.fechaIngreso)),
-                                        PopupMenuButton<String>(
-                                          onSelected: (value) {
-                                            if (value == 'Eliminar') {
-                                              _deleteClient(client);
-                                            } else if (value ==
-                                                'Deshabilitar') {
-                                              //_disableEmployee(employee);
-                                              print(
-                                                  'Aqui se va a deshabilitar');
-                                            }
-                                          },
-                                          itemBuilder: (BuildContext context) =>
-                                              [
-                                            const PopupMenuItem<String>(
-                                              value: 'Eliminar',
-                                              child: Text('Eliminar'),
-                                            ),
-                                            const PopupMenuItem<String>(
-                                              value: 'Deshabilitar',
-                                              child: Text('Deshabilitar'),
-                                            ),
-                                          ],
-                                          icon: const Icon(Icons.more_vert),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                                color: WidgetStateProperty.resolveWith<Color?>(
-                                  (Set<WidgetState> states) {
-                                    if (states.contains(WidgetState.hovered)) {
-                                      return Colors.grey[300];
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                onDoubleTap: () =>
-                                    _showFormDialog(context, client),
-                              ))
-                          .toList(),
-                    ),
-                  ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
+  }
+
+  List<DataColumn2> _buildColumns(bool isSmallScreen) {
+    final List<DataColumn2> baseColumns = [
+      const DataColumn2(
+        label: Center(
+          child: Text('Nombres',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              )),
+        ),
+        size: ColumnSize.L,
+      ),
+      const DataColumn2(
+        label: Center(
+          child: Text('Apellidos',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              )),
+        ),
+        size: ColumnSize.L,
+      ),
+      const DataColumn2(
+        label: Center(
+          child: Text('Empresa',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              )),
+        ),
+        size: ColumnSize.L,
+      ),
+      const DataColumn2(
+        label: Center(
+          child: Text('Fecha Ingreso',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              )),
+        ),
+        size: ColumnSize.L,
+      ),
+    ];
+
+    if (!isSmallScreen) {
+      baseColumns.insert(
+          2,
+          const DataColumn2(
+            label: Center(
+              child: Text('Email',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  )),
+            ),
+            size: ColumnSize.L,
+          ));
+      baseColumns.insert(
+          3,
+          const DataColumn2(
+            label: Center(
+              child: Text('Teléfono',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  )),
+            ),
+            size: ColumnSize.L,
+          ));
+    }
+
+    return baseColumns;
+  }
+
+  List<DataRow2> _buildRows(bool isSmallScreen) {
+    return clients.map((client) {
+      final List<DataCell> baseCells = [
+        DataCell(Center(child: Text(client.nombres))),
+        DataCell(Center(child: Text(client.apellidos))),
+        DataCell(Center(child: Text(client.empresa))),
+        DataCell(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(DateFormat('dd/MM/yyyy').format(client.fechaIngreso)),
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'Eliminar') {
+                    _deleteClient(client);
+                  } else if (value == 'Deshabilitar') {
+                    print('Aqui se va a deshabilitar');
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: 'Eliminar',
+                    child: Text('Eliminar'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'Deshabilitar',
+                    child: Text('Deshabilitar'),
+                  ),
+                ],
+                icon: const Icon(Icons.more_vert),
+              ),
+            ],
+          ),
+        ),
+      ];
+
+      if (!isSmallScreen) {
+        baseCells.insert(2, DataCell(Center(child: Text(client.email))));
+        baseCells.insert(3, DataCell(Center(child: Text(client.telefono))));
+      }
+
+      return DataRow2(
+        cells: baseCells,
+        color: WidgetStateProperty.resolveWith<Color?>(
+          (Set<WidgetState> states) {
+            if (states.contains(WidgetState.hovered)) {
+              return Colors.grey[300];
+            }
+            return null;
+          },
+        ),
+        onDoubleTap: () => _showFormDialog(context, client),
+      );
+    }).toList();
   }
 
   void _deleteClient(Clients client) async {
@@ -1032,20 +986,71 @@ class _ClientsPageState extends State<ClientsPage> {
     bool confirmDelete = await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar eliminación'),
-          content: Text(
-              '¿Está seguro de que desea eliminar a ${client.nombres} ${client.apellidos}?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () => Navigator.of(context).pop(false),
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            width: 400, // Ajusta el tamaño según tu diseño
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Confirmar eliminación',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '¿Está seguro de que desea eliminar a ${client.nombres} ${client.apellidos}?',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red, // Color del botón "Guardar"
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                      child: const Text('Eliminar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            TextButton(
-              child: const Text('Eliminar'),
-              onPressed: () => Navigator.of(context).pop(true),
-            ),
-          ],
+          ),
         );
       },
     );
@@ -1083,67 +1088,4 @@ class _ClientsPageState extends State<ClientsPage> {
       }
     }
   }
-
-  // Color _getRoleColor(String role) {
-  //   switch (role.toLowerCase()) {
-  //     case 'admin':
-  //       return Colors.black87;
-  //     case 'supervisor':
-  //       return Colors.green[400]!;
-  //     case 'vendedor':
-  //       return Colors.blue[300]!;
-  //     default:
-  //       return Colors.grey[400]!;
-  //   }
-  // }
-
-  // Widget _buildDropdown(String selectedRole, Function(String?) onChanged) {
-  //   return DropdownButtonFormField<String>(
-  //     value: selectedRole,
-  //     items: ['Vendedor', 'Supervisor', 'Admin', 'None'].map((String value) {
-  //       return DropdownMenuItem<String>(
-  //         value: value,
-  //         child: Text(value),
-  //       );
-  //     }).toList(),
-  //     onChanged: onChanged,
-  //     decoration: InputDecoration(
-  //       labelText: 'Role',
-  //       border: OutlineInputBorder(
-  //         borderRadius: BorderRadius.circular(10),
-  //       ),
-  //       filled: true,
-  //       fillColor: Colors.grey[100],
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildDatePicker(
-  //     BuildContext context, TextEditingController controller) {
-  //   return TextFormField(
-  //     controller: controller,
-  //     decoration: InputDecoration(
-  //       labelText: 'Fecha Ingreso',
-  //       border: OutlineInputBorder(
-  //         borderRadius: BorderRadius.circular(10),
-  //       ),
-  //       filled: true,
-  //       fillColor: Colors.grey[100],
-  //       suffixIcon: const Icon(Icons.calendar_today),
-  //     ),
-  //     onTap: () async {
-  //       DateTime? pickedDate = await showDatePicker(
-  //         context: context,
-  //         initialDate: DateTime.now(),
-  //         firstDate: DateTime(2000),
-  //         lastDate: DateTime(2101),
-  //       );
-  //       if (pickedDate != null) {
-  //         String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
-  //         controller.text = formattedDate;
-  //       }
-  //     },
-  //     readOnly: true,
-  //   );
-  // }
 }
