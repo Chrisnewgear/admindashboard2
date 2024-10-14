@@ -167,7 +167,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   }
 
   void showClientVisitFormDialog(BuildContext context, Visitas? visita) {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
 
     if (visita != null) {
       _accionesController.text = visita.acciones;
@@ -218,7 +218,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                     ),
                     const SizedBox(height: 20),
                     Form(
-                      key: _formKey,
+                      key: formKey,
                       child: LayoutBuilder(
                         builder: (context, constraints) {
                           bool isLargeScreen = constraints.maxWidth > 600;
@@ -319,7 +319,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                             ),
                           ),
                           onPressed: () {
-                            if (_formKey.currentState!.validate()) {
+                            if (formKey.currentState!.validate()) {
                               _saveOrUpdateVisit(visita);
                               Navigator.of(context).pop();
                             }
@@ -436,6 +436,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   Widget _buildUserTable() {
     return Card(
       elevation: 4,
+      color: Colors.white70,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),

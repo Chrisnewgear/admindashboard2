@@ -143,7 +143,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
   }
 
   void _showFormDialog(BuildContext context, Employee? employee) {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
 
     if (employee != null) {
       _nombresController.text = employee.nombres;
@@ -169,164 +169,110 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
       builder: (BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
           elevation: 0,
           backgroundColor: Colors.transparent,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              // Ajustar el ancho del modal dependiendo del tamaño de la pantalla
               double modalWidth = constraints.maxWidth > 600
-                  ? constraints.maxWidth * 0.4 // Pantallas grandes
-                  : constraints.maxWidth * 0.9; // Pantallas pequeñas
+                  ? constraints.maxWidth * 0.5
+                  : constraints.maxWidth * 0.95;
+              bool isLargeScreen = constraints.maxWidth > 600;
 
               return Container(
-                width: modalWidth, // Se ajusta el ancho del modal
-                padding: const EdgeInsets.all(20),
+                width: modalWidth,
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(
-                      employee == null ? 'Nuevo Empleado' : 'Editar Empleado',
-                      style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.w600),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          employee == null
+                              ? 'Nuevo Empleado'
+                              : 'Editar Empleado',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, color: Colors.black54),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     Form(
-                      key: _formKey,
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          // Si el ancho es mayor a 600px, usar 2 columnas
-                          bool isLargeScreen = constraints.maxWidth > 600;
-
-                          return Column(
-                            children: [
-                              // Campos de nombres y apellidos
-                              isLargeScreen
-                                  ? Row(
-                                      children: [
-                                        Expanded(
-                                          child: _buildTextField(
-                                              _nombresController, 'Nombres'),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                          child: _buildTextField(
-                                              _apellidosController,
-                                              'Apellidos'),
-                                        ),
-                                      ],
-                                    )
-                                  : Column(
-                                      children: [
-                                        _buildTextField(
-                                            _nombresController, 'Nombres'),
-                                        const SizedBox(height: 15),
-                                        _buildTextField(
-                                            _apellidosController, 'Apellidos'),
-                                      ],
-                                    ),
-                              const SizedBox(height: 15),
-                              // Campos de email y teléfono
-                              isLargeScreen
-                                  ? Row(
-                                      children: [
-                                        Expanded(
-                                          child: _buildTextField(
-                                              _emailController, 'Email',
-                                              isEmail: true),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                          child: _buildTextField(
-                                              _telefonoController, 'Teléfono'),
-                                        ),
-                                      ],
-                                    )
-                                  : Column(
-                                      children: [
-                                        _buildTextField(
-                                            _emailController, 'Email',
-                                            isEmail: true),
-                                        const SizedBox(height: 15),
-                                        _buildTextField(
-                                            _telefonoController, 'Teléfono'),
-                                      ],
-                                    ),
-                              const SizedBox(height: 15),
-                              // Campos de Rol y Fecha de Ingreso
-                              isLargeScreen
-                                  ? Row(
-                                      children: [
-                                        Expanded(
-                                          child: _buildDropdown(selectedRole,
-                                              (String? newValue) {
-                                            selectedRole = newValue!;
-                                          }),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                          child: _buildDatePicker(
-                                              context, _fechaIngresoController),
-                                        ),
-                                      ],
-                                    )
-                                  : Column(
-                                      children: [
-                                        _buildDropdown(selectedRole,
-                                            (String? newValue) {
-                                          selectedRole = newValue!;
-                                        }),
-                                        const SizedBox(height: 15),
-                                        _buildDatePicker(
-                                            context, _fechaIngresoController),
-                                      ],
-                                    ),
-                            ],
-                          );
-                        },
+                      key: formKey,
+                      child: Column(
+                        children: [
+                          _buildResponsiveRow(isLargeScreen, [
+                            _buildInputField(_nombresController, 'Nombres'),
+                            _buildInputField(_apellidosController, 'Apellidos'),
+                          ]),
+                          _buildResponsiveRow(isLargeScreen, [
+                            _buildInputField(_emailController, 'Email',
+                                isEmail: true),
+                            _buildInputField(_telefonoController, 'Teléfono'),
+                          ]),
+                          _buildResponsiveRow(isLargeScreen, [
+                            _buildDropdown(
+                              selectedRole,
+                              (String? newValue) {
+                                setState(() {
+                                  selectedRole = newValue!;
+                                });
+                              },
+                            ),
+                            _buildDatePicker(context, _fechaIngresoController,
+                                'Fecha de Ingreso'),
+                          ]),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
-                          child: Text('Cancelar',
-                              style: TextStyle(color: Colors.grey[600])),
                           onPressed: () => Navigator.of(context).pop(),
+                          child: Text(
+                            'Cancelar',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 16),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: Colors.indigo,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
+                              borderRadius: BorderRadius.circular(8),
                             ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
                           ),
                           onPressed: () {
-                            if (_formKey.currentState!.validate()) {
+                            if (formKey.currentState!.validate()) {
                               _saveOrUpdateEmployee(employee);
                               Navigator.of(context).pop();
                             }
                           },
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.save, color: Colors.white),
-                              SizedBox(width: 5),
-                              Text(
-                                'Guardar',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                          child: const Text(
+                            'Guardar',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],
@@ -340,28 +286,56 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
       },
     );
   }
-  Widget _buildTextField(TextEditingController controller, String label,
+
+  Widget _buildResponsiveRow(bool isLargeScreen, List<Widget> children) {
+    return isLargeScreen
+        ? Row(
+            children: children
+                .map((child) => Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: child,
+                      ),
+                    ))
+                .toList(),
+          )
+        : Column(children: children);
+  }
+
+  Widget _buildInputField(TextEditingController controller, String label,
       {bool isEmail = false}) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.indigo),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
         ),
-        filled: true,
-        fillColor: Colors.grey[100],
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor ingrese $label';
+          }
+          if (isEmail &&
+              !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+            return 'Por favor ingrese un email válido';
+          }
+          return null;
+        },
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Este campo es requerido';
-        }
-        if (isEmail &&
-            !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-          return 'Ingrese un email válido';
-        }
-        return null;
-      },
     );
   }
 
@@ -402,6 +376,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
   Widget _buildUserTable() {
     return Card(
       elevation: 4,
+      color: Colors.white70,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -426,8 +401,9 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                 ? const SizedBox(
                     height: 400,
                     child: Center(
-                      child:
-                          CircularProgressIndicator(), // Use a circular indicator
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ), // Use a circular indicator
                     ),
                   )
                 : SizedBox(
@@ -522,7 +498,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                         ),
                       ],
                       rows: employees
-                        .map((employee) => DataRow2(
+                          .map((employee) => DataRow2(
                                 cells: [
                                   DataCell(
                                       Center(child: Text(employee.codigo))),
@@ -677,53 +653,112 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
     }
   }
 
-  Widget _buildDropdown(String selectedRole, Function(String?) onChanged) {
-    return DropdownButtonFormField<String>(
-      value: selectedRole,
-      items: ['Vendedor', 'Supervisor', 'Admin', 'None'].map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        labelText: 'Role',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+  Widget _buildDropdown(String currentValue, Function(String?) onChanged) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: DropdownButtonFormField<String>(
+        value: currentValue,
+        items: ['Vendedor', 'Supervisor', 'Admin', 'None'].map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          labelText: 'Role',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.indigo),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
         ),
-        filled: true,
-        fillColor: Colors.grey[100],
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor seleccione un role';
+          }
+          return null;
+        },
       ),
     );
   }
 
   Widget _buildDatePicker(
-      BuildContext context, TextEditingController controller) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: 'Fecha Ingreso',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+      BuildContext context, TextEditingController controller, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.indigo),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50], // Fondo claro como en los otros campos
+          suffixIcon: const Icon(
+            Icons.calendar_today_outlined, // Ícono más moderno
+            color: Colors.indigo, // Cambiar color acorde a la paleta
+          ),
         ),
-        filled: true,
-        fillColor: Colors.grey[100],
-        suffixIcon: const Icon(Icons.calendar_today),
+        readOnly: true,
+        onTap: () async {
+          DateTime? pickedDate = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2101),
+            builder: (BuildContext context, Widget? child) {
+              return Theme(
+                data: ThemeData.light().copyWith(
+                  colorScheme: const ColorScheme.light(
+                    primary: Colors.indigo, // Color del encabezado
+                    onPrimary: Colors.white, // Color del texto del encabezado
+                    onSurface: Colors.indigo, // Color del texto de los días
+                  ),
+                  textButtonTheme: TextButtonThemeData(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.indigo,
+                      backgroundColor:
+                          Colors.transparent, // Color de los botones
+                    ),
+                  ),
+                ),
+                child: child!,
+              );
+            },
+          );
+          if (pickedDate != null) {
+            String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
+            controller.text = formattedDate;
+          }
+        },
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor seleccione una fecha';
+          }
+          return null;
+        },
       ),
-      onTap: () async {
-        DateTime? pickedDate = await showDatePicker(
-          context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2101),
-        );
-        if (pickedDate != null) {
-          String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
-          controller.text = formattedDate;
-        }
-      },
-      readOnly: true,
     );
   }
 }

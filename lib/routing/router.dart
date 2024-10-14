@@ -1,6 +1,6 @@
 import 'package:admindashboard/pages/404/error.dart';
 import 'package:admindashboard/pages/clients/clients.dart';
-import 'package:admindashboard/pages/drivers/drivers.dart';
+import 'package:admindashboard/pages/visits/visits.dart';
 import 'package:admindashboard/pages/overview/overview.dart';
 import 'package:admindashboard/pages/profile/profile_page.dart';
 import 'package:admindashboard/pages/roles/role_page.dart';

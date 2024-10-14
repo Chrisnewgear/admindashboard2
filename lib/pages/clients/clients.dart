@@ -23,6 +23,7 @@ class _ClientsPageState extends State<ClientsPage> {
   //final _formKey = GlobalKey<FormState>();
   //String selectedRole = 'Cliente';
   //List<String> roles = ['Vendedor', 'Supervisor'];
+  String currentVendorCode = '';
   List<Clients> clients = [];
 
   final TextEditingController _nombresController = TextEditingController();
@@ -46,6 +47,10 @@ class _ClientsPageState extends State<ClientsPage> {
       // Get the current user
       User? currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
+        if (kDebugMode) {
+          print('Current user UID: ${currentUser.uid}');
+        }
+
         // Fetch the user document from Firestore
         DocumentSnapshot userDoc = await FirebaseFirestore.instance
             .collection('Users')
@@ -53,23 +58,42 @@ class _ClientsPageState extends State<ClientsPage> {
             .get();
 
         if (userDoc.exists) {
+          if (kDebugMode) {
+            print('User document data: ${userDoc.data()}');
+          }
+
           // Set the _codVendedorController with the user's code
+          String userCode = userDoc.get('Codigo') ?? '';
           setState(() {
-            _codVendedorController.text = userDoc.get('Codigo') ?? '';
+            _codVendedorController.text = userCode;
+            currentVendorCode = _codVendedorController.text;
           });
+
+          if (kDebugMode) {
+            print('Código de vendedor cargado: $userCode');
+            print('Código de vendedor cargado: $userCode');
+          }
+        } else {
+          if (kDebugMode) {
+            print('User document does not exist for UID: ${currentUser.uid}');
+          }
+        }
+      } else {
+        if (kDebugMode) {
+          print('No user is currently logged in');
         }
       }
 
-      // Load visits
+      // Load clients
       await _loadUsers();
     } catch (e) {
       if (kDebugMode) {
-        print('Error loading user code and visits: $e');
+        print('Error loading user code and clients: $e');
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content:
-              Text('Error al cargar información del usuario y visitas: $e'),
+              Text('Error al cargar información del usuario y clientes: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -78,8 +102,18 @@ class _ClientsPageState extends State<ClientsPage> {
 
   Future<void> _loadUsers() async {
     try {
-      final querySnapshot =
-          await FirebaseFirestore.instance.collection('Clients').get();
+      // Obtener el usuario actualmente autenticado
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No hay usuario autenticado');
+      }
+
+      // Consultar la colección 'Clients' filtrando por el UserId del usuario actual
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Clients')
+          .where('UserId', isEqualTo: user.uid)
+          .get();
+
       setState(() {
         clients = querySnapshot.docs
             .map((doc) => Clients.fromFirestore(doc))
@@ -89,7 +123,7 @@ class _ClientsPageState extends State<ClientsPage> {
       if (kDebugMode) {
         print('Error loading clients: $e');
       }
-      // Puedes mostrar un mensaje de error al usuario si lo deseas
+      // Mostrar un mensaje de error al usuario
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error al cargar los clientes: $e'),
@@ -98,6 +132,29 @@ class _ClientsPageState extends State<ClientsPage> {
       );
     }
   }
+
+  // Future<void> _loadUsers() async {
+  //   try {
+  //     final querySnapshot =
+  //         await FirebaseFirestore.instance.collection('Clients').get();
+  //     setState(() {
+  //       clients = querySnapshot.docs
+  //           .map((doc) => Clients.fromFirestore(doc))
+  //           .toList();
+  //     });
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       print('Error loading clients: $e');
+  //     }
+  //     // Puedes mostrar un mensaje de error al usuario si lo deseas
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Error al cargar los clientes: $e'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   }
+  // }
 
   Future<String> _getNextClientCode() async {
     Random random = Random();
@@ -124,8 +181,106 @@ class _ClientsPageState extends State<ClientsPage> {
     return code;
   }
 
+  // Future<void> _saveOrUpdateClient(Clients? existingClient) async {
+  //   try {
+  //     // Obtener el código del vendedor actual
+  //     //currentVendorCode = _codVendedorController.text;
+
+  //     if (kDebugMode) {
+  //       print('Código del vendedor actual: $currentVendorCode');
+  //     }
+
+  //     final clientData = {
+  //       'Nombre': _nombresController.text,
+  //       'Apellidos': _apellidosController.text,
+  //       'email': _emailController.text,
+  //       'Telefono': _telefonoController.text,
+  //       'Direccion': _direccionController.text,
+  //       'Empresa': _empresaController.text,
+  //       'Codigo': _codigoController.text,
+  //       'CodVendedor': currentVendorCode, // Usar el código del vendedor actual
+  //       'updatedAt': Timestamp.now(),
+  //     };
+
+  //     if (kDebugMode) {
+  //       print('Datos del cliente a guardar: $clientData');
+  //     }
+
+  //     if (existingClient == null) {
+  //       // Crear un nuevo cliente
+  //       final nextCode = await _getNextClientCode();
+  //       clientData['Codigo'] = nextCode;
+  //       clientData['createdAt'] = Timestamp.now();
+
+  //       DocumentReference docRef = await FirebaseFirestore.instance
+  //           .collection('Clients')
+  //           .add(clientData);
+
+  //       if (kDebugMode) {
+  //         print('Nuevo cliente creado con ID: ${docRef.id}');
+  //       }
+  //     } else {
+  //       // Actualizar cliente existente
+  //       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+  //           .collection('Clients')
+  //           .where('Codigo', isEqualTo: existingClient.codigo)
+  //           .limit(1)
+  //           .get();
+
+  //       if (querySnapshot.docs.isNotEmpty) {
+  //         await querySnapshot.docs.first.reference.update(clientData);
+
+  //         if (kDebugMode) {
+  //           print('Cliente actualizado con código: ${existingClient.codigo}');
+  //         }
+  //       } else {
+  //         throw Exception('No se encontró el cliente a actualizar');
+  //       }
+  //     }
+
+  //     // Recargar la lista de clientes
+  //     await _loadUsers();
+
+  //     // Mostrar mensaje de éxito
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text(existingClient == null
+  //             ? 'Cliente creado exitosamente'
+  //             : 'Cliente actualizado exitosamente'),
+  //         backgroundColor: Colors.green,
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     // Mostrar mensaje de error
+  //     if (kDebugMode) {
+  //       print('Error al guardar/actualizar cliente: $e');
+  //     }
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Error: ${e.toString()}'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   }
+  // }
+
   Future<void> _saveOrUpdateClient(Clients? existingClient) async {
     try {
+      // Obtener el código del vendedor actual
+      // currentVendorCode = _codVendedorController.text;
+
+      if (kDebugMode) {
+        print('Código del vendedor actual: $currentVendorCode');
+      }
+
+      // Obtener el UserId del usuario actualmente logeado
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No hay ningún usuario logeado.');
+      }
+
+      final userId = user.uid;
+
       final clientData = {
         'Nombre': _nombresController.text,
         'Apellidos': _apellidosController.text,
@@ -134,33 +289,51 @@ class _ClientsPageState extends State<ClientsPage> {
         'Direccion': _direccionController.text,
         'Empresa': _empresaController.text,
         'Codigo': _codigoController.text,
-        'CodVendedor': _codVendedorController.text,
+        'CodVendedor': currentVendorCode, // Usar el código del vendedor actual
+        'UserId': userId, // Guardar el UserId del usuario logeado
         'updatedAt': Timestamp.now(),
       };
 
+      if (kDebugMode) {
+        print('Datos del cliente a guardar: $clientData');
+      }
+
       if (existingClient == null) {
-        // Create a new employee
+        // Crear un nuevo cliente
         final nextCode = await _getNextClientCode();
         clientData['Codigo'] = nextCode;
         clientData['createdAt'] = Timestamp.now();
-        await FirebaseFirestore.instance.collection('Clients').add(clientData);
+
+        DocumentReference docRef = await FirebaseFirestore.instance
+            .collection('Clients')
+            .add(clientData);
+
+        if (kDebugMode) {
+          print('Nuevo cliente creado con ID: ${docRef.id}');
+        }
       } else {
-        // Update existing employee
-        await FirebaseFirestore.instance
+        // Actualizar cliente existente
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
             .collection('Clients')
             .where('Codigo', isEqualTo: existingClient.codigo)
-            .get()
-            .then((querySnapshot) {
-          if (querySnapshot.docs.isNotEmpty) {
-            querySnapshot.docs.first.reference.update(clientData);
+            .limit(1)
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          await querySnapshot.docs.first.reference.update(clientData);
+
+          if (kDebugMode) {
+            print('Cliente actualizado con código: ${existingClient.codigo}');
           }
-        });
+        } else {
+          throw Exception('No se encontró el cliente a actualizar');
+        }
       }
 
-      // Reload the users list
+      // Recargar la lista de clientes
       await _loadUsers();
 
-      // Show success message
+      // Mostrar mensaje de éxito
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(existingClient == null
@@ -170,7 +343,10 @@ class _ClientsPageState extends State<ClientsPage> {
         ),
       );
     } catch (e) {
-      // Show error message
+      // Mostrar mensaje de error
+      if (kDebugMode) {
+        print('Error al guardar/actualizar cliente: $e');
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
@@ -180,8 +356,150 @@ class _ClientsPageState extends State<ClientsPage> {
     }
   }
 
+  // void _showFormDialog(BuildContext context, Clients? client) {
+  //   final formKey = GlobalKey<FormState>();
+
+  //   if (client != null) {
+  //     _nombresController.text = client.nombres;
+  //     _apellidosController.text = client.apellidos;
+  //     _emailController.text = client.email;
+  //     _telefonoController.text = client.telefono;
+  //     _codigoController.text = client.codigo;
+  //     _direccionController.text = client.direccion;
+  //     //_codVendedorController.text = client.codVendedor;
+  //     _empresaController.text = client.empresa;
+  //     _fechaIngresoController.text =
+  //         DateFormat('dd/MM/yyyy').format(client.fechaIngreso);
+  //   } else {
+  //     _nombresController.clear();
+  //     _apellidosController.clear();
+  //     _emailController.clear();
+  //     _telefonoController.clear();
+  //     _fechaIngresoController.clear();
+  //     _codigoController.clear();
+  //     _direccionController.clear();
+  //     _empresaController.clear();
+  //     _codVendedorController.clear();
+  //   }
+
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return Dialog(
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(16),
+  //         ),
+  //         elevation: 0,
+  //         backgroundColor: Colors.transparent,
+  //         child: LayoutBuilder(
+  //           builder: (context, constraints) {
+  //             double modalWidth = constraints.maxWidth > 600
+  //                 ? constraints.maxWidth * 0.5
+  //                 : constraints.maxWidth * 0.95;
+  //             bool isLargeScreen = constraints.maxWidth > 600;
+
+  //             return Container(
+  //               width: modalWidth,
+  //               padding: const EdgeInsets.all(24),
+  //               decoration: BoxDecoration(
+  //                 color: Colors.white,
+  //                 borderRadius: BorderRadius.circular(16),
+  //               ),
+  //               child: Column(
+  //                 mainAxisSize: MainAxisSize.min,
+  //                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                 children: <Widget>[
+  //                   Row(
+  //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                     children: [
+  //                       Text(
+  //                         client == null ? 'Nuevo Cliente' : 'Editar Cliente',
+  //                         style: const TextStyle(
+  //                           fontSize: 24,
+  //                           fontWeight: FontWeight.bold,
+  //                           color: Colors.black87,
+  //                         ),
+  //                       ),
+  //                       IconButton(
+  //                         icon: const Icon(Icons.close, color: Colors.black54),
+  //                         onPressed: () => Navigator.of(context).pop(),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                   const SizedBox(height: 24),
+  //                   Form(
+  //                     key: formKey,
+  //                     child: Column(
+  //                       children: [
+  //                         _buildResponsiveRow(isLargeScreen, [
+  //                           _buildInputField(_nombresController, 'Nombres'),
+  //                           _buildInputField(_apellidosController, 'Apellidos'),
+  //                         ]),
+  //                         _buildResponsiveRow(isLargeScreen, [
+  //                           _buildInputField(_emailController, 'Email',
+  //                               isEmail: true),
+  //                           _buildInputField(_telefonoController, 'Teléfono'),
+  //                         ]),
+  //                         _buildResponsiveRow(isLargeScreen, [
+  //                           _buildInputField(_empresaController, 'Empresa'),
+  //                           _buildDatePicker(context, _fechaIngresoController,
+  //                               'Fecha de Ingreso'),
+  //                         ]),
+  //                         _buildInputField(_direccionController, 'Dirección'),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                   const SizedBox(height: 24),
+  //                   Row(
+  //                     mainAxisAlignment: MainAxisAlignment.end,
+  //                     children: [
+  //                       TextButton(
+  //                         onPressed: () => Navigator.of(context).pop(),
+  //                         child: Text(
+  //                           'Cancelar',
+  //                           style: TextStyle(color: Colors.grey[600]),
+  //                         ),
+  //                       ),
+  //                       const SizedBox(width: 16),
+  //                       ElevatedButton(
+  //                         style: ElevatedButton.styleFrom(
+  //                           backgroundColor: Colors.indigo,
+  //                           shape: RoundedRectangleBorder(
+  //                             borderRadius: BorderRadius.circular(8),
+  //                           ),
+  //                           padding: const EdgeInsets.symmetric(
+  //                               horizontal: 24, vertical: 12),
+  //                         ),
+  //                         onPressed: () {
+  //                           if (formKey.currentState!.validate()) {
+  //                             _saveOrUpdateClient(client);
+  //                             Navigator.of(context).pop();
+  //                           }
+  //                         },
+  //                         child: const Text(
+  //                           'Guardar',
+  //                           style: TextStyle(
+  //                             fontSize: 16,
+  //                             fontWeight: FontWeight.bold,
+  //                             color: Colors.white,
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ],
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
   void _showFormDialog(BuildContext context, Clients? client) {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
+    final ValueNotifier<bool> isEditable = ValueNotifier<bool>(client == null);
 
     if (client != null) {
       _nombresController.text = client.nombres;
@@ -190,16 +508,14 @@ class _ClientsPageState extends State<ClientsPage> {
       _telefonoController.text = client.telefono;
       _codigoController.text = client.codigo;
       _direccionController.text = client.direccion;
-      _codVendedorController.text = client.codVendedor;
       _empresaController.text = client.empresa;
-      _fechaIngresoController.text =
-          DateFormat('dd/MM/yyyy').format(client.fechaIngreso);
+      _fechaIngresoController.text = DateFormat('dd/MM/yyyy').format(client.fechaIngreso);
     } else {
       _nombresController.clear();
       _apellidosController.clear();
       _emailController.clear();
       _telefonoController.clear();
-      _fechaIngresoController.clear();
+      _fechaIngresoController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
       _codigoController.clear();
       _direccionController.clear();
       _empresaController.clear();
@@ -252,31 +568,64 @@ class _ClientsPageState extends State<ClientsPage> {
                     ),
                     const SizedBox(height: 24),
                     Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          _buildResponsiveRow(isLargeScreen, [
-                            _buildInputField(_nombresController, 'Nombres'),
-                            _buildInputField(_apellidosController, 'Apellidos'),
-                          ]),
-                          _buildResponsiveRow(isLargeScreen, [
-                            _buildInputField(_emailController, 'Email',
-                                isEmail: true),
-                            _buildInputField(_telefonoController, 'Teléfono'),
-                          ]),
-                          _buildResponsiveRow(isLargeScreen, [
-                            _buildInputField(_empresaController, 'Empresa'),
-                            _buildDatePicker(context, _fechaIngresoController,
-                                'Fecha de Ingreso'),
-                          ]),
-                          _buildInputField(_direccionController, 'Dirección'),
-                        ],
+                      key: formKey,
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: isEditable,
+                        builder: (context, editable, _) {
+                          return Column(
+                            children: [
+                              _buildResponsiveRow(isLargeScreen, [
+                                _buildInputField(_nombresController, 'Nombres',
+                                    enabled: editable),
+                                _buildInputField(
+                                    _apellidosController, 'Apellidos',
+                                    enabled: editable),
+                              ]),
+                              _buildResponsiveRow(isLargeScreen, [
+                                _buildInputField(_emailController, 'Email',
+                                    isEmail: true, enabled: editable),
+                                _buildInputField(
+                                    _telefonoController, 'Teléfono',
+                                    enabled: editable),
+                              ]),
+                              _buildResponsiveRow(isLargeScreen, [
+                                _buildInputField(_empresaController, 'Empresa',
+                                    enabled: editable),
+                                _buildDatePicker(context,
+                                    _fechaIngresoController, 'Fecha de Ingreso',
+                                    enabled: editable),
+                              ]),
+                              _buildResponsiveRow(isLargeScreen, [
+                                _buildInputField(
+                                    _direccionController, 'Dirección',
+                                    enabled: editable),
+                              ])
+                            ],
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(height: 24),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // Botón de Editar solo se muestra cuando se está editando un cliente existente
+                        if (client != null)
+                          ElevatedButton(
+                            onPressed: () {
+                              isEditable.value = !isEditable.value;
+                            },
+                            child: ValueListenableBuilder<bool>(
+                              valueListenable: isEditable,
+                              builder: (context, editable, _) {
+                                return Text(
+                                  editable ? 'Cancelar Edición' : 'Editar',
+                                );
+                              },
+                            ),
+                          ),
+                        const Spacer(),
+                        // Botones de Cancelar y Guardar
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
                           child: Text(
@@ -295,7 +644,7 @@ class _ClientsPageState extends State<ClientsPage> {
                                 horizontal: 24, vertical: 12),
                           ),
                           onPressed: () {
-                            if (_formKey.currentState!.validate()) {
+                            if (formKey.currentState!.validate()) {
                               _saveOrUpdateClient(client);
                               Navigator.of(context).pop();
                             }
@@ -337,10 +686,11 @@ class _ClientsPageState extends State<ClientsPage> {
   }
 
   Widget _buildInputField(TextEditingController controller, String label,
-      {bool isEmail = false}) {
+      {bool isEmail = false, required bool enabled}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
+        enabled: enabled,
         controller: controller,
         decoration: InputDecoration(
           labelText: label,
@@ -354,7 +704,7 @@ class _ClientsPageState extends State<ClientsPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.indigo),
+            borderSide: const BorderSide(color: Colors.indigo),
           ),
           filled: true,
           fillColor: Colors.grey[50],
@@ -374,13 +724,16 @@ class _ClientsPageState extends State<ClientsPage> {
   }
 
   Widget _buildDatePicker(
-      BuildContext context, TextEditingController controller, String label) {
+      BuildContext context, TextEditingController controller, String label,
+      {required bool enabled}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
+        enabled: enabled,
         controller: controller,
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -391,11 +744,14 @@ class _ClientsPageState extends State<ClientsPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.indigo),
+            borderSide: const BorderSide(color: Colors.indigo),
           ),
           filled: true,
-          fillColor: Colors.grey[50],
-          suffixIcon: Icon(Icons.calendar_today, color: Colors.grey[600]),
+          fillColor: Colors.grey[50], // Fondo claro como en los otros campos
+          suffixIcon: const Icon(
+            Icons.calendar_today_outlined, // Ícono más moderno
+            color: Colors.indigo, // Cambiar color acorde a la paleta
+          ),
         ),
         readOnly: true,
         onTap: () async {
@@ -404,6 +760,25 @@ class _ClientsPageState extends State<ClientsPage> {
             initialDate: DateTime.now(),
             firstDate: DateTime(2000),
             lastDate: DateTime(2101),
+            builder: (BuildContext context, Widget? child) {
+              return Theme(
+                data: ThemeData.light().copyWith(
+                  colorScheme: const ColorScheme.light(
+                    primary: Colors.indigo, // Color del encabezado
+                    onPrimary: Colors.white, // Color del texto del encabezado
+                    onSurface: Colors.indigo, // Color del texto de los días
+                  ),
+                  textButtonTheme: TextButtonThemeData(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.indigo,
+                      backgroundColor:
+                          Colors.transparent, // Color de los botones
+                    ),
+                  ),
+                ),
+                child: child!,
+              );
+            },
           );
           if (pickedDate != null) {
             String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
@@ -463,6 +838,7 @@ class _ClientsPageState extends State<ClientsPage> {
   Widget _buildUserTable() {
     return Card(
       elevation: 4,
+      color: Colors.white70,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -505,28 +881,6 @@ class _ClientsPageState extends State<ClientsPage> {
                       headingRowColor:
                           WidgetStateProperty.all(Colors.grey[200]),
                       columns: const [
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Codigo',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Cod. Vendedor',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
                         DataColumn2(
                           label: Center(
                             child: Text('Nombres',
@@ -582,17 +936,17 @@ class _ClientsPageState extends State<ClientsPage> {
                           ),
                           size: ColumnSize.L,
                         ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Direccion',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
+                        // DataColumn2(
+                        //   label: Center(
+                        //     child: Text('Direccion',
+                        //         style: TextStyle(
+                        //           fontSize: 16,
+                        //           fontWeight: FontWeight.bold,
+                        //           color: Colors.blue,
+                        //         )),
+                        //   ),
+                        //   size: ColumnSize.L,
+                        // ),
                         DataColumn2(
                           label: Center(
                             child: Text('Fecha Ingreso',
@@ -608,14 +962,15 @@ class _ClientsPageState extends State<ClientsPage> {
                       rows: clients
                           .map((client) => DataRow2(
                                 cells: [
-                                  DataCell(Center(child: Text(client.codigo))),
-                                  DataCell(Center(child: Text(client.codVendedor))),
                                   DataCell(Center(child: Text(client.nombres))),
-                                  DataCell(Center(child: Text(client.apellidos))),
+                                  DataCell(
+                                      Center(child: Text(client.apellidos))),
                                   DataCell(Center(child: Text(client.email))),
-                                  DataCell(Center(child: Text(client.telefono))),
+                                  DataCell(
+                                      Center(child: Text(client.telefono))),
                                   DataCell(Center(child: Text(client.empresa))),
-                                  DataCell(Center(child: Text(client.direccion))),
+                                  // DataCell(
+                                  //     Center(child: Text(client.direccion))),
                                   // ... (otras celdas) ...
                                   DataCell(
                                     Row(
@@ -729,39 +1084,39 @@ class _ClientsPageState extends State<ClientsPage> {
     }
   }
 
-  Color _getRoleColor(String role) {
-    switch (role.toLowerCase()) {
-      case 'admin':
-        return Colors.black87;
-      case 'supervisor':
-        return Colors.green[400]!;
-      case 'vendedor':
-        return Colors.blue[300]!;
-      default:
-        return Colors.grey[400]!;
-    }
-  }
+  // Color _getRoleColor(String role) {
+  //   switch (role.toLowerCase()) {
+  //     case 'admin':
+  //       return Colors.black87;
+  //     case 'supervisor':
+  //       return Colors.green[400]!;
+  //     case 'vendedor':
+  //       return Colors.blue[300]!;
+  //     default:
+  //       return Colors.grey[400]!;
+  //   }
+  // }
 
-  Widget _buildDropdown(String selectedRole, Function(String?) onChanged) {
-    return DropdownButtonFormField<String>(
-      value: selectedRole,
-      items: ['Vendedor', 'Supervisor', 'Admin', 'None'].map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        labelText: 'Role',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        filled: true,
-        fillColor: Colors.grey[100],
-      ),
-    );
-  }
+  // Widget _buildDropdown(String selectedRole, Function(String?) onChanged) {
+  //   return DropdownButtonFormField<String>(
+  //     value: selectedRole,
+  //     items: ['Vendedor', 'Supervisor', 'Admin', 'None'].map((String value) {
+  //       return DropdownMenuItem<String>(
+  //         value: value,
+  //         child: Text(value),
+  //       );
+  //     }).toList(),
+  //     onChanged: onChanged,
+  //     decoration: InputDecoration(
+  //       labelText: 'Role',
+  //       border: OutlineInputBorder(
+  //         borderRadius: BorderRadius.circular(10),
+  //       ),
+  //       filled: true,
+  //       fillColor: Colors.grey[100],
+  //     ),
+  //   );
+  // }
 
   // Widget _buildDatePicker(
   //     BuildContext context, TextEditingController controller) {
