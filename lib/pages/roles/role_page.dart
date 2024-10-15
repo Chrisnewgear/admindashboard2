@@ -23,7 +23,7 @@ class RoleManagementWidget extends StatefulWidget {
 class _RoleManagementWidgetState extends State<RoleManagementWidget> {
   //final _formKey = GlobalKey<FormState>();
   String selectedRole = 'Vendedor';
-  List<String> roles = ['Vendedor', 'Supervisor'];
+  List<String> roles = ['Vendedor', 'Supervisor', 'Admin', 'None'];
   List<Employee> employees = [];
 
   final TextEditingController _nombresController = TextEditingController();

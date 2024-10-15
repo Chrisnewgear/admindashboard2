@@ -14,7 +14,10 @@ class VisitsManagementWidget extends StatefulWidget {
 }
 
 class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
+  String selectedPurpose = 'Venta';
+  List<String> purpose = ['Venta', 'Seguimiento', 'Renovación', 'Resolución'];
   List<Visitas> visitas = [];
+
 
   final TextEditingController _accionesController = TextEditingController();
   final TextEditingController _codVendedorController = TextEditingController();
@@ -23,6 +26,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   final TextEditingController _notasController = TextEditingController();
   final TextEditingController _prodServicioController = TextEditingController();
   final TextEditingController _propVisitaController = TextEditingController();
+
 
   @override
   void initState() {
@@ -43,14 +47,15 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
 
         if (userDoc.exists) {
           // Set the _codVendedorController with the user's code
+          String codVendedor = userDoc.get('Codigo') ?? '';
           setState(() {
-            _codVendedorController.text = userDoc.get('Codigo') ?? '';
+            _codVendedorController.text = codVendedor;
           });
+
+          // Load visits corresponding to the user's code
+          await _loadVisits(codVendedor);
         }
       }
-
-      // Load visits
-      await _loadVisits();
     } catch (e) {
       if (kDebugMode) {
         print('Error loading user code and visits: $e');
@@ -65,10 +70,14 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     }
   }
 
-  Future<void> _loadVisits() async {
+  Future<void> _loadVisits(String codVendedor) async {
     try {
-      final querySnapshot =
-          await FirebaseFirestore.instance.collection('Visits').get();
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Visits')
+          .where('CodVendedor',
+              isEqualTo: codVendedor) // Filtrar por CodVendedor
+          .get();
+
       setState(() {
         visitas = querySnapshot.docs
             .map((doc) => Visitas.fromFirestore(doc))
@@ -86,6 +95,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       );
     }
   }
+
   // Future<String> _getNextUserCode() async {
   //   Random random = Random();
   //   String code = '';
@@ -113,39 +123,51 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
 
   Future<void> _saveOrUpdateVisit(Visitas? existingVisit) async {
     try {
+      // Obtener el usuario actualmente logueado
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No hay ningún usuario logueado.');
+      }
+
+      // Obtener el código del vendedor y el UserId
+      final userId = user.uid;
+      final codVendedor = _codVendedorController.text;
+
+      // Datos de la visita a guardar o actualizar
       final visitData = {
         'Acciones': _accionesController.text,
-        'CodVendedor': _codVendedorController.text,
+        'CodVendedor': codVendedor, // Código del vendedor logueado
         'Hora': _horaController.text,
         'Notas': _notasController.text,
         'ProductoServicio': _prodServicioController.text,
-        'PropositoVisita': _propVisitaController.text,
+        'PropositoVisita': selectedPurpose,
+        'UserId': userId, // UserId del usuario logueado
         'Fecha': Timestamp.fromDate(
             DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
       };
 
       if (existingVisit == null) {
-        // Create a new visit
+        // Crear una nueva visita
         await FirebaseFirestore.instance.collection('Visits').add(visitData);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Visita agendada exitosamente')),
         );
       } else {
-        // Update existing visit
+        // Actualizar visita existente
         await FirebaseFirestore.instance
             .collection('Visits')
             .doc(existingVisit
-                .id) // Assuming you have an 'id' field in your Visitas model
+                .id) // Suponiendo que tienes un campo 'id' en Visitas
             .update(visitData);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Visita actualizada exitosamente')),
         );
       }
 
-      // Reload the visits list
-      await _loadVisits();
+      // Recargar la lista de visitas filtradas por CodVendedor
+      await _loadVisits(codVendedor);
 
-      // Clear the form fields
+      // Limpiar los campos del formulario
       _clearFormFields();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -180,11 +202,10 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     } else {
       _accionesController.clear();
       _prodServicioController.clear();
-      _propVisitaController.clear();
+      selectedPurpose = 'Venta'; // Reset selectedPurpose();
       _notasController.clear();
       _horaController.clear();
-      _fechaController.text =
-          DateFormat('dd/MM/yyyy').format(DateTime.now());
+      _fechaController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
     }
 
     showDialog(
@@ -227,98 +248,35 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                           bool isLargeScreen = constraints.maxWidth > 600;
                           return Column(
                             children: [
-                              // isLargeScreen
-                              //     ? Row(
-                              //         children: [
-                              //           Expanded(
-                              //               child: _buildTextField(
-                              //                   _accionesController,
-                              //                   'Acciones')),
-                              //           const SizedBox(width: 20),
-                              //           Expanded(
-                              //               child: _buildTextField(
-                              //                   _codVendedorController,
-                              //                   'Cod. Vendedor')),
-                              //         ],
-                              //       )
-                              //     : Column(
-                              //         children: [
-                              //           _buildTextField(
-                              //               _accionesController, 'Acciones'),
-                              //           const SizedBox(height: 15),
-                              //           _buildTextField(_codVendedorController,
-                              //               'Cod. Vendedor'),
-                              //         ],
-                              //       ),
-                              // const SizedBox(height: 15),
-                              // isLargeScreen
-                              //     ? Row(
-                              //         children: [
-                              //           Expanded(
-                              //               child: _buildTextField(
-                              //                   _prodServicioController,
-                              //                   'Producto/Servicio')),
-                              //           const SizedBox(width: 20),
-                              //           Expanded(
-                              //               child: _buildTextField(
-                              //                   _propVisitaController,
-                              //                   'Propósito de Visita')),
-                              //         ],
-                              //       )
-                              //     : Column(
-                              //         children: [
-                              //           _buildTextField(_prodServicioController,
-                              //               'Producto/Servicio'),
-                              //           const SizedBox(height: 15),
-                              //           _buildTextField(_propVisitaController,
-                              //               'Propósito de Visita'),
-                              //         ],
-                              //       ),
-                              // const SizedBox(height: 15),
-                              // isLargeScreen
-                              //     ? Row(
-                              //         children: [
-                              //           Expanded(
-                              //               child: _buildDatePicker(context,
-                              //                   _fechaController, 'Fecha')),
-                              //           const SizedBox(width: 20),
-                              //           Expanded(
-                              //               child: _buildTimePicker(context,
-                              //                   _horaController, 'Hora')),
-                              //         ],
-                              //       )
-                              //     : Column(
-                              //         children: [
-                              //           _buildDatePicker(
-                              //               context, _fechaController, 'Fecha'),
-                              //           const SizedBox(height: 15),
-                              //           _buildTimePicker(
-                              //               context, _horaController, 'Hora'),
-                              //         ],
-                              //       ),
-                              // const SizedBox(height: 15),
-                              // _buildTextField(_notasController, 'Notas',
-                              //     maxLines: 3),
-
                               _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(_accionesController, 'Acciones',
+                                _buildInputField(
+                                    _codVendedorController, 'Cod. Vendedor',
                                     enabled: editable),
                                 _buildInputField(
-                                    _prodServicioController, 'producto/Servicio',
+                                    _accionesController, 'Acciones',
                                     enabled: editable),
                               ]),
                               _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(_propVisitaController, 'Visita',
-                                    isEmail: true, enabled: editable),
-                                _buildInputField(
-                                    _notasController, 'Notas',
+                                _buildInputField(_prodServicioController,
+                                    'Producto/Servicio',
                                     enabled: editable),
+                                _buildDropdown(selectedPurpose,
+                                    (String? newValue) {
+                                  setState(() {
+                                    selectedPurpose = newValue!;
+                                  });
+                                }, enabled: editable),
                               ]),
                               _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(_horaController, 'Hora',
+                                _buildDatePicker(context, _fechaController,
+                                    'Fecha de Ingreso',
                                     enabled: editable),
-                                _buildDatePicker(context,
-                                    _fechaController, 'Fecha de Ingreso',
+                                _buildTimePicker(
+                                    context, _horaController, 'Hora',
+                                    enabled: false),
+                              ]),
+                              _buildResponsiveRow(isLargeScreen, [
+                                _buildNotesField(_notasController, 'Notas',
                                     enabled: editable),
                               ]),
                             ],
@@ -328,20 +286,41 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                     ),
                     const SizedBox(height: 20),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // Botón de Editar solo se muestra cuando se está editando un cliente existente
+                        if (visita != null)
+                          ElevatedButton(
+                            onPressed: () {
+                              isEditable.value = !isEditable.value;
+                            },
+                            child: ValueListenableBuilder<bool>(
+                              valueListenable: isEditable,
+                              builder: (context, editable, _) {
+                                return Text(
+                                  editable ? 'Cancelar Edición' : 'Editar',
+                                );
+                              },
+                            ),
+                          ),
+                        const Spacer(),
+                        // Botones de Cancelar y Guardar
                         TextButton(
-                          child: Text('Cancelar',
-                              style: TextStyle(color: Colors.grey[600])),
                           onPressed: () => Navigator.of(context).pop(),
+                          child: Text(
+                            'Cancelar',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 16),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: Colors.indigo,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
+                              borderRadius: BorderRadius.circular(8),
                             ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
                           ),
                           onPressed: () {
                             if (formKey.currentState!.validate()) {
@@ -349,16 +328,13 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                               Navigator.of(context).pop();
                             }
                           },
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.save, color: Colors.white),
-                              SizedBox(width: 5),
-                              Text('Guardar',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold)),
-                            ],
+                          child: const Text(
+                            'Guardar',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],
@@ -451,9 +427,9 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
           ),
           filled: true,
           fillColor: Colors.grey[50], // Fondo claro como en los otros campos
-          suffixIcon: const Icon(
+          suffixIcon: Icon(
             Icons.calendar_today_outlined, // Ícono más moderno
-            color: Colors.indigo, // Cambiar color acorde a la paleta
+            color: enabled ? Colors.grey[600] : Colors.grey[400] // Cambiar color acorde a la paleta
           ),
         ),
         readOnly: true,
@@ -498,55 +474,133 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     );
   }
 
-  // Widget _buildDatePicker(
-  //     BuildContext context, TextEditingController controller, String label) {
+  Widget _buildDropdown(String currentValue, Function(String?) onChanged,
+      {required bool enabled}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: DropdownButtonFormField<String>(
+        value: currentValue,
+        items: ['Venta', 'Seguimiento', 'Renovación', 'Resolución']
+            .map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        onChanged: enabled ? onChanged : null,
+        decoration: InputDecoration(
+          labelText: 'Propósito',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.indigo),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor seleccione un motivo de visita';
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
+  Widget _buildTimePicker(
+      BuildContext context, TextEditingController controller, String label,
+      {required bool enabled}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        enabled: enabled,
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.indigo),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          suffixIcon: Icon(Icons.access_time,
+              color: enabled ? Colors.grey[600] : Colors.grey[400]),
+        ),
+        readOnly: true,
+        onTap: enabled
+            ? () async {
+                final TimeOfDay? picked = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.now(),
+                );
+                if (picked != null) {
+                  controller.text = picked.format(context);
+                }
+              }
+            : null,
+        validator: (value) => value!.isEmpty ? 'Seleccione una hora' : null,
+      ),
+    );
+  }
+
+  Widget _buildNotesField(TextEditingController controller, String label,
+      {required bool enabled}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        enabled: enabled,
+        controller: controller,
+        maxLines: null, // Permite múltiples líneas
+        keyboardType: TextInputType
+            .multiline, // Configura el teclado para entrada de texto largo
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.indigo),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+        ),
+        // Sin validación porque no es un campo obligatorio
+      ),
+    );
+  }
+
+  // Widget _buildTextField(TextEditingController controller, String label,
+  //     {int maxLines = 1}) {
   //   return TextFormField(
   //     controller: controller,
   //     decoration: InputDecoration(labelText: label),
-  //     readOnly: true,
-  //     onTap: () async {
-  //       final DateTime? picked = await showDatePicker(
-  //         context: context,
-  //         initialDate: DateTime.now(),
-  //         firstDate: DateTime(2000),
-  //         lastDate: DateTime(2025),
-  //       );
-  //       if (picked != null) {
-  //         controller.text = DateFormat('dd/MM/yyyy').format(picked);
-  //       }
-  //     },
-  //     validator: (value) => value!.isEmpty ? 'Seleccione una fecha' : null,
+  //     maxLines: maxLines,
+  //     validator: (value) => value!.isEmpty ? 'Este campo es requerido' : null,
   //   );
   // }
-
-  Widget _buildTimePicker(
-      BuildContext context, TextEditingController controller, String label) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(labelText: label),
-      readOnly: true,
-      onTap: () async {
-        final TimeOfDay? picked = await showTimePicker(
-          context: context,
-          initialTime: TimeOfDay.now(),
-        );
-        if (picked != null) {
-          controller.text = picked.format(context);
-        }
-      },
-      validator: (value) => value!.isEmpty ? 'Seleccione una hora' : null,
-    );
-  }
-
-  Widget _buildTextField(TextEditingController controller, String label,
-      {int maxLines = 1}) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(labelText: label),
-      maxLines: maxLines,
-      validator: (value) => value!.isEmpty ? 'Este campo es requerido' : null,
-    );
-  }
 
   @override
   void dispose() {
@@ -628,17 +682,17 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                       headingRowColor:
                           WidgetStateProperty.all(Colors.grey[200]),
                       columns: const [
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Cod. Vendedor',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
+                        // DataColumn2(
+                        //   label: Center(
+                        //     child: Text('Cod. Vendedor',
+                        //         style: TextStyle(
+                        //           fontSize: 16,
+                        //           fontWeight: FontWeight.bold,
+                        //           color: Colors.blue,
+                        //         )),
+                        //   ),
+                        //   size: ColumnSize.L,
+                        // ),
                         DataColumn2(
                           label: Center(
                             child: Text('Acciones',
@@ -650,28 +704,28 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                           ),
                           size: ColumnSize.L,
                         ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Hora',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Notas',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
+                        // DataColumn2(
+                        //   label: Center(
+                        //     child: Text('Hora',
+                        //         style: TextStyle(
+                        //           fontSize: 16,
+                        //           fontWeight: FontWeight.bold,
+                        //           color: Colors.blue,
+                        //         )),
+                        //   ),
+                        //   size: ColumnSize.L,
+                        // ),
+                        // DataColumn2(
+                        //   label: Center(
+                        //     child: Text('Notas',
+                        //         style: TextStyle(
+                        //           fontSize: 16,
+                        //           fontWeight: FontWeight.bold,
+                        //           color: Colors.blue,
+                        //         )),
+                        //   ),
+                        //   size: ColumnSize.L,
+                        // ),
                         DataColumn2(
                           label: Center(
                             child: Text('Producto/Servicio',
@@ -709,12 +763,12 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                       rows: visitas
                           .map((visita) => DataRow2(
                                 cells: [
-                                  DataCell(
-                                      Center(child: Text(visita.codVendedor))),
+                                  // DataCell(
+                                  //     Center(child: Text(visita.codVendedor))),
                                   DataCell(
                                       Center(child: Text(visita.acciones))),
-                                  DataCell(Center(child: Text(visita.hora))),
-                                  DataCell(Center(child: Text(visita.notas))),
+                                  // DataCell(Center(child: Text(visita.hora))),
+                                  // DataCell(Center(child: Text(visita.notas))),
                                   DataCell(Center(
                                       child: Text(visita.productoServicio))),
                                   DataCell(
