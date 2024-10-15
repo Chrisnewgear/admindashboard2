@@ -168,6 +168,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
 
   void showClientVisitFormDialog(BuildContext context, Visitas? visita) {
     final formKey = GlobalKey<FormState>();
+    final ValueNotifier<bool> isEditable = ValueNotifier<bool>(visita == null);
 
     if (visita != null) {
       _accionesController.text = visita.acciones;
@@ -182,7 +183,8 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       _propVisitaController.clear();
       _notasController.clear();
       _horaController.clear();
-      _fechaController.clear();
+      _fechaController.text =
+          DateFormat('dd/MM/yyyy').format(DateTime.now());
     }
 
     showDialog(
@@ -219,83 +221,106 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                     const SizedBox(height: 20),
                     Form(
                       key: formKey,
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: isEditable,
+                        builder: (context, editable, _) {
                           bool isLargeScreen = constraints.maxWidth > 600;
                           return Column(
                             children: [
-                              isLargeScreen
-                                  ? Row(
-                                      children: [
-                                        Expanded(
-                                            child: _buildTextField(
-                                                _accionesController,
-                                                'Acciones')),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                            child: _buildTextField(
-                                                _codVendedorController,
-                                                'Cod. Vendedor')),
-                                      ],
-                                    )
-                                  : Column(
-                                      children: [
-                                        _buildTextField(
-                                            _accionesController, 'Acciones'),
-                                        const SizedBox(height: 15),
-                                        _buildTextField(_codVendedorController,
-                                            'Cod. Vendedor'),
-                                      ],
-                                    ),
-                              const SizedBox(height: 15),
-                              isLargeScreen
-                                  ? Row(
-                                      children: [
-                                        Expanded(
-                                            child: _buildTextField(
-                                                _prodServicioController,
-                                                'Producto/Servicio')),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                            child: _buildTextField(
-                                                _propVisitaController,
-                                                'Propósito de Visita')),
-                                      ],
-                                    )
-                                  : Column(
-                                      children: [
-                                        _buildTextField(_prodServicioController,
-                                            'Producto/Servicio'),
-                                        const SizedBox(height: 15),
-                                        _buildTextField(_propVisitaController,
-                                            'Propósito de Visita'),
-                                      ],
-                                    ),
-                              const SizedBox(height: 15),
-                              isLargeScreen
-                                  ? Row(
-                                      children: [
-                                        Expanded(
-                                            child: _buildDatePicker(context,
-                                                _fechaController, 'Fecha')),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                            child: _buildTimePicker(context,
-                                                _horaController, 'Hora')),
-                                      ],
-                                    )
-                                  : Column(
-                                      children: [
-                                        _buildDatePicker(
-                                            context, _fechaController, 'Fecha'),
-                                        const SizedBox(height: 15),
-                                        _buildTimePicker(
-                                            context, _horaController, 'Hora'),
-                                      ],
-                                    ),
-                              const SizedBox(height: 15),
-                              _buildTextField(_notasController, 'Notas',
-                                  maxLines: 3),
+                              // isLargeScreen
+                              //     ? Row(
+                              //         children: [
+                              //           Expanded(
+                              //               child: _buildTextField(
+                              //                   _accionesController,
+                              //                   'Acciones')),
+                              //           const SizedBox(width: 20),
+                              //           Expanded(
+                              //               child: _buildTextField(
+                              //                   _codVendedorController,
+                              //                   'Cod. Vendedor')),
+                              //         ],
+                              //       )
+                              //     : Column(
+                              //         children: [
+                              //           _buildTextField(
+                              //               _accionesController, 'Acciones'),
+                              //           const SizedBox(height: 15),
+                              //           _buildTextField(_codVendedorController,
+                              //               'Cod. Vendedor'),
+                              //         ],
+                              //       ),
+                              // const SizedBox(height: 15),
+                              // isLargeScreen
+                              //     ? Row(
+                              //         children: [
+                              //           Expanded(
+                              //               child: _buildTextField(
+                              //                   _prodServicioController,
+                              //                   'Producto/Servicio')),
+                              //           const SizedBox(width: 20),
+                              //           Expanded(
+                              //               child: _buildTextField(
+                              //                   _propVisitaController,
+                              //                   'Propósito de Visita')),
+                              //         ],
+                              //       )
+                              //     : Column(
+                              //         children: [
+                              //           _buildTextField(_prodServicioController,
+                              //               'Producto/Servicio'),
+                              //           const SizedBox(height: 15),
+                              //           _buildTextField(_propVisitaController,
+                              //               'Propósito de Visita'),
+                              //         ],
+                              //       ),
+                              // const SizedBox(height: 15),
+                              // isLargeScreen
+                              //     ? Row(
+                              //         children: [
+                              //           Expanded(
+                              //               child: _buildDatePicker(context,
+                              //                   _fechaController, 'Fecha')),
+                              //           const SizedBox(width: 20),
+                              //           Expanded(
+                              //               child: _buildTimePicker(context,
+                              //                   _horaController, 'Hora')),
+                              //         ],
+                              //       )
+                              //     : Column(
+                              //         children: [
+                              //           _buildDatePicker(
+                              //               context, _fechaController, 'Fecha'),
+                              //           const SizedBox(height: 15),
+                              //           _buildTimePicker(
+                              //               context, _horaController, 'Hora'),
+                              //         ],
+                              //       ),
+                              // const SizedBox(height: 15),
+                              // _buildTextField(_notasController, 'Notas',
+                              //     maxLines: 3),
+
+                              _buildResponsiveRow(isLargeScreen, [
+                                _buildInputField(_accionesController, 'Acciones',
+                                    enabled: editable),
+                                _buildInputField(
+                                    _prodServicioController, 'producto/Servicio',
+                                    enabled: editable),
+                              ]),
+                              _buildResponsiveRow(isLargeScreen, [
+                                _buildInputField(_propVisitaController, 'Visita',
+                                    isEmail: true, enabled: editable),
+                                _buildInputField(
+                                    _notasController, 'Notas',
+                                    enabled: editable),
+                              ]),
+                              _buildResponsiveRow(isLargeScreen, [
+                                _buildInputField(_horaController, 'Hora',
+                                    enabled: editable),
+                                _buildDatePicker(context,
+                                    _fechaController, 'Fecha de Ingreso',
+                                    enabled: editable),
+                              ]),
                             ],
                           );
                         },
@@ -348,26 +373,151 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     );
   }
 
-  Widget _buildDatePicker(
-      BuildContext context, TextEditingController controller, String label) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(labelText: label),
-      readOnly: true,
-      onTap: () async {
-        final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2025),
-        );
-        if (picked != null) {
-          controller.text = DateFormat('dd/MM/yyyy').format(picked);
-        }
-      },
-      validator: (value) => value!.isEmpty ? 'Seleccione una fecha' : null,
+  Widget _buildResponsiveRow(bool isLargeScreen, List<Widget> children) {
+    return isLargeScreen
+        ? Row(
+            children: children
+                .map((child) => Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: child,
+                      ),
+                    ))
+                .toList(),
+          )
+        : Column(children: children);
+  }
+
+  Widget _buildInputField(TextEditingController controller, String label,
+      {bool isEmail = false, required bool enabled}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        enabled: enabled,
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.indigo),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor ingrese $label';
+          }
+          if (isEmail &&
+              !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+            return 'Por favor ingrese un email válido';
+          }
+          return null;
+        },
+      ),
     );
   }
+
+  Widget _buildDatePicker(
+      BuildContext context, TextEditingController controller, String label,
+      {required bool enabled}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        enabled: enabled,
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.indigo),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50], // Fondo claro como en los otros campos
+          suffixIcon: const Icon(
+            Icons.calendar_today_outlined, // Ícono más moderno
+            color: Colors.indigo, // Cambiar color acorde a la paleta
+          ),
+        ),
+        readOnly: true,
+        onTap: () async {
+          DateTime? pickedDate = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2101),
+            builder: (BuildContext context, Widget? child) {
+              return Theme(
+                data: ThemeData.light().copyWith(
+                  colorScheme: const ColorScheme.light(
+                    primary: Colors.indigo, // Color del encabezado
+                    onPrimary: Colors.white, // Color del texto del encabezado
+                    onSurface: Colors.indigo, // Color del texto de los días
+                  ),
+                  textButtonTheme: TextButtonThemeData(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.indigo,
+                      backgroundColor:
+                          Colors.transparent, // Color de los botones
+                    ),
+                  ),
+                ),
+                child: child!,
+              );
+            },
+          );
+          if (pickedDate != null) {
+            String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
+            controller.text = formattedDate;
+          }
+        },
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor seleccione una fecha';
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
+  // Widget _buildDatePicker(
+  //     BuildContext context, TextEditingController controller, String label) {
+  //   return TextFormField(
+  //     controller: controller,
+  //     decoration: InputDecoration(labelText: label),
+  //     readOnly: true,
+  //     onTap: () async {
+  //       final DateTime? picked = await showDatePicker(
+  //         context: context,
+  //         initialDate: DateTime.now(),
+  //         firstDate: DateTime(2000),
+  //         lastDate: DateTime(2025),
+  //       );
+  //       if (picked != null) {
+  //         controller.text = DateFormat('dd/MM/yyyy').format(picked);
+  //       }
+  //     },
+  //     validator: (value) => value!.isEmpty ? 'Seleccione una fecha' : null,
+  //   );
+  // }
 
   Widget _buildTimePicker(
       BuildContext context, TextEditingController controller, String label) {
