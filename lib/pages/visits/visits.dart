@@ -4,7 +4,8 @@ import 'package:admindashboard/models/visits.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:data_table_2/data_table_2.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Add this import
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geolocator/geolocator.dart';
 
 class VisitsManagementWidget extends StatefulWidget {
   const VisitsManagementWidget({super.key});
@@ -121,63 +122,180 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   //   return code;
   // }
 
-  Future<void> _saveOrUpdateVisit(Visitas? existingVisit) async {
-    try {
-      // Obtener el usuario actualmente logueado
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        throw Exception('No hay ningún usuario logueado.');
-      }
+  // Future<void> _saveOrUpdateVisit(Visitas? existingVisit) async {
+  //   try {
+  //     // Obtener el usuario actualmente logueado
+  //     final user = FirebaseAuth.instance.currentUser;
+  //     if (user == null) {
+  //       throw Exception('No hay ningún usuario logueado.');
+  //     }
 
-      // Obtener el código del vendedor y el UserId
-      final userId = user.uid;
-      final codVendedor = _codVendedorController.text;
+  //     // Obtener el código del vendedor y el UserId
+  //     final userId = user.uid;
+  //     final codVendedor = _codVendedorController.text;
 
-      // Datos de la visita a guardar o actualizar
-      final visitData = {
-        'Acciones': _accionesController.text,
-        'CodVendedor': codVendedor, // Código del vendedor logueado
-        'Hora': _horaController.text,
-        'Notas': _notasController.text,
-        'ProductoServicio': _prodServicioController.text,
-        'PropositoVisita': selectedPurpose,
-        'UserId': userId, // UserId del usuario logueado
-        'Fecha': Timestamp.fromDate(
-            DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
-      };
+  //     // Datos de la visita a guardar o actualizar
+  //     final visitData = {
+  //       'Acciones': _accionesController.text,
+  //       'CodVendedor': codVendedor, // Código del vendedor logueado
+  //       'Hora': _horaController.text,
+  //       'Notas': _notasController.text,
+  //       'ProductoServicio': _prodServicioController.text,
+  //       'PropositoVisita': selectedPurpose,
+  //       'UserId': userId, // UserId del usuario logueado
+  //       'Fecha': Timestamp.fromDate(
+  //           DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
+  //     };
 
-      if (existingVisit == null) {
-        // Crear una nueva visita
-        await FirebaseFirestore.instance.collection('Visits').add(visitData);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Visita agendada exitosamente')),
-        );
-      } else {
-        // Actualizar visita existente
-        await FirebaseFirestore.instance
-            .collection('Visits')
-            .doc(existingVisit
-                .id) // Suponiendo que tienes un campo 'id' en Visitas
-            .update(visitData);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Visita actualizada exitosamente')),
-        );
-      }
+  //     if (existingVisit == null) {
+  //       // Crear una nueva visita
+  //       await FirebaseFirestore.instance.collection('Visits').add(visitData);
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('Visita agendada exitosamente')),
+  //       );
+  //     } else {
+  //       // Actualizar visita existente
+  //       await FirebaseFirestore.instance
+  //           .collection('Visits')
+  //           .doc(existingVisit
+  //               .id) // Suponiendo que tienes un campo 'id' en Visitas
+  //           .update(visitData);
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('Visita actualizada exitosamente')),
+  //       );
+  //     }
 
-      // Recargar la lista de visitas filtradas por CodVendedor
-      await _loadVisits(codVendedor);
+  //     // Recargar la lista de visitas filtradas por CodVendedor
+  //     await _loadVisits(codVendedor);
 
-      // Limpiar los campos del formulario
-      _clearFormFields();
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+  //     // Limpiar los campos del formulario
+  //     _clearFormFields();
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Error: ${e.toString()}'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   }
+  // }
+
+  Future<void> _saveOrUpdateVisit(BuildContext context, Visitas? existingVisit) async {
+  try {
+    // Obtener el usuario actualmente logueado
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No hay ningún usuario logueado.');
     }
+
+    // Obtener el código del vendedor y el UserId
+    final userId = user.uid;
+    final codVendedor = _codVendedorController.text;
+
+    // Obtener la ubicación actual del dispositivo
+    GeoPoint? geoPoint = await _getCurrentLocation(context);
+    if (geoPoint == null) {
+      _showSnackBar(context, 'No se pudo obtener la ubicación actual.');
+      throw Exception('No se pudo obtener la ubicación actual.');
+    }
+
+    // Datos de la visita a guardar o actualizar
+    final visitData = {
+      'Acciones': _accionesController.text,
+      'CodVendedor': codVendedor,
+      'Hora': _horaController.text,
+      'Notas': _notasController.text,
+      'ProductoServicio': _prodServicioController.text,
+      'PropositoVisita': selectedPurpose,
+      'UserId': userId,
+      'Fecha': Timestamp.fromDate(
+          DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
+      'Location': geoPoint
+    };
+
+    if (existingVisit == null) {
+      // Crear una nueva visita
+      await FirebaseFirestore.instance.collection('Visits').add(visitData);
+      _showSnackBar(context, 'Visita agendada exitosamente');
+    } else {
+      // Actualizar visita existente
+      await FirebaseFirestore.instance
+          .collection('Visits')
+          .doc(existingVisit.id)
+          .update(visitData);
+      _showSnackBar(context, 'Visita actualizada exitosamente');
+    }
+
+    // Recargar la lista de visitas filtradas por CodVendedor
+    await _loadVisits(codVendedor);
+
+    // Limpiar los campos del formulario
+    _clearFormFields();
+  } catch (e) {
+    _showSnackBar(context, 'Error: ${e.toString()}', isError: true);
   }
+}
+
+Future<GeoPoint?> _getCurrentLocation(BuildContext context) async {
+  try {
+    // Verificar permisos
+    bool serviceEnabled;
+    try {
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    } catch (e) {
+      print("Error al verificar el servicio de ubicación: $e");
+      _showSnackBar(context, 'Error al verificar el servicio de ubicación. Por favor, reinicia la aplicación.');
+      return null;
+    }
+
+    if (!serviceEnabled) {
+      _showSnackBar(context, 'Los servicios de ubicación están desactivados.');
+      return null;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        _showSnackBar(context, 'Permisos de ubicación denegados');
+        return null;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      _showSnackBar(context, 'Los permisos de ubicación están permanentemente denegados');
+      return null;
+    }
+
+    // // Obtener la posición
+    // Position position = await Geolocator.getCurrentPosition(
+    //   desiredAccuracy: LocationAccuracy.high
+    // );
+
+     // Obtener la posición usando LocationSettings
+    Position position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 10),
+      ),
+    );
+
+    return GeoPoint(position.latitude, position.longitude);
+  } catch (e) {
+    print("Error detallado al obtener la ubicación: $e");
+    _showSnackBar(context, 'Error al obtener la ubicación. Por favor, verifica los permisos e intenta de nuevo.');
+    return null;
+  }
+}
+
+void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      backgroundColor: isError ? Colors.red : null,
+    ),
+  );
+}
 
   void _clearFormFields() {
     _accionesController.clear();
@@ -202,9 +320,9 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     } else {
       _accionesController.clear();
       _prodServicioController.clear();
-      selectedPurpose = 'Venta'; // Reset selectedPurpose();
+      selectedPurpose = 'Venta';
       _notasController.clear();
-      _horaController.clear();
+      _horaController.text = DateFormat('HH:mm').format(DateTime.now()); // Asignar la hora actual del servidor
       _fechaController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
     }
 
@@ -251,7 +369,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                               _buildResponsiveRow(isLargeScreen, [
                                 _buildInputField(
                                     _codVendedorController, 'Cod. Vendedor',
-                                    enabled: editable),
+                                    enabled: false),
                                 _buildInputField(
                                     _accionesController, 'Acciones',
                                     enabled: editable),
@@ -270,7 +388,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                               _buildResponsiveRow(isLargeScreen, [
                                 _buildDatePicker(context, _fechaController,
                                     'Fecha de Ingreso',
-                                    enabled: editable),
+                                    enabled: false),
                                 _buildTimePicker(
                                     context, _horaController, 'Hora',
                                     enabled: false),
@@ -324,7 +442,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                           ),
                           onPressed: () {
                             if (formKey.currentState!.validate()) {
-                              _saveOrUpdateVisit(visita);
+                              _saveOrUpdateVisit( context, visita );
                               Navigator.of(context).pop();
                             }
                           },
@@ -521,7 +639,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
-        enabled: enabled,
+        enabled: false, // Cambiar a false para que el usuario no pueda modificar la hora
         controller: controller,
         decoration: InputDecoration(
           labelText: label,
@@ -541,21 +659,10 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
           fillColor: Colors.grey[50],
           floatingLabelBehavior: FloatingLabelBehavior.always,
           suffixIcon: Icon(Icons.access_time,
-              color: enabled ? Colors.grey[600] : Colors.grey[400]),
+              color: Colors.grey[400]),
         ),
         readOnly: true,
-        onTap: enabled
-            ? () async {
-                final TimeOfDay? picked = await showTimePicker(
-                  context: context,
-                  initialTime: TimeOfDay.now(),
-                );
-                if (picked != null) {
-                  controller.text = picked.format(context);
-                }
-              }
-            : null,
-        validator: (value) => value!.isEmpty ? 'Seleccione una hora' : null,
+        validator: (value) => value!.isEmpty ? 'Hora requerida' : null,
       ),
     );
   }
@@ -828,24 +935,122 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     );
   }
 
-  Future<void> _deleteVisit(Visitas visita) async {
+  // Future<void> _deleteVisit(Visitas visita) async {
+  //   // Mostrar un diálogo de confirmación
+  //   bool? confirmDelete = await showDialog<bool>(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text('Confirmar eliminación'),
+  //         content: const Text('¿Está seguro de que desea eliminar la visita?'),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             child: const Text('Cancelar'),
+  //             onPressed: () => Navigator.of(context).pop(false),
+  //           ),
+  //           TextButton(
+  //             child: const Text('Eliminar'),
+  //             onPressed: () => Navigator.of(context).pop(true),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+
+  //   if (confirmDelete == true) {
+  //     try {
+  //       // Eliminar el documento directamente usando su ID
+  //       await FirebaseFirestore.instance
+  //           .collection('Visits')
+  //           .doc(visita.id)
+  //           .delete();
+
+  //       // Actualizar la lista de visitas localmente
+  //       setState(() {
+  //         visitas.removeWhere((v) => v.id == visita.id);
+  //       });
+
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('Visita eliminada con éxito')),
+  //       );
+  //     } catch (e) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Error al eliminar la visita: $e')),
+  //       );
+  //     }
+  //   }
+  // }
+
+  void _deleteVisit(Visitas visita) async {
     // Mostrar un diálogo de confirmación
-    bool? confirmDelete = await showDialog<bool>(
+    bool confirmDelete = await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar eliminación'),
-          content: const Text('¿Está seguro de que desea eliminar la visita?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () => Navigator.of(context).pop(false),
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            width: 400, // Ajusta el tamaño según tu diseño
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Confirmar eliminación',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  '¿Está seguro de que desea eliminar esta visita?',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red, // Color del botón "Guardar"
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                      child: const Text('Eliminar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            TextButton(
-              child: const Text('Eliminar'),
-              onPressed: () => Navigator.of(context).pop(true),
-            ),
-          ],
+          ),
         );
       },
     );
@@ -873,4 +1078,6 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       }
     }
   }
+
+
 }
