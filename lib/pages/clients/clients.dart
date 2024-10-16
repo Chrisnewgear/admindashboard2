@@ -42,15 +42,69 @@ class _ClientsPageState extends State<ClientsPage> {
     _loadUserCodeAndUsers();
   }
 
+  // Future<void> _loadUserCodeAndUsers() async {
+  //   try {
+  //     // Get the current user
+  //     User? currentUser = FirebaseAuth.instance.currentUser;
+  //     if (currentUser != null) {
+  //       if (kDebugMode) {
+  //         print('Current user UID: ${currentUser.uid}');
+  //       }
+
+  //       // Fetch the user document from Firestore
+  //       DocumentSnapshot userDoc = await FirebaseFirestore.instance
+  //           .collection('Users')
+  //           .doc(currentUser.uid)
+  //           .get();
+
+  //       if (userDoc.exists) {
+  //         if (kDebugMode) {
+  //           print('User document data: ${userDoc.data()}');
+  //         }
+
+  //         // Set the _codVendedorController with the user's code
+  //         String userCode = userDoc.get('Codigo') ?? '';
+  //         setState(() {
+  //           _codVendedorController.text = userCode;
+  //           currentVendorCode = _codVendedorController.text;
+  //         });
+
+  //         if (kDebugMode) {
+  //           print('Código de vendedor cargado: $userCode');
+  //           print('Código de vendedor cargado: $userCode');
+  //         }
+  //       } else {
+  //         if (kDebugMode) {
+  //           print('User document does not exist for UID: ${currentUser.uid}');
+  //         }
+  //       }
+  //     } else {
+  //       if (kDebugMode) {
+  //         print('No user is currently logged in');
+  //       }
+  //     }
+
+  //     // Load clients
+  //     await _loadUsers();
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       print('Error loading user code and clients: $e');
+  //     }
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content:
+  //             Text('Error al cargar información del usuario y clientes: $e'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   }
+  // }
+
   Future<void> _loadUserCodeAndUsers() async {
     try {
       // Get the current user
       User? currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
-        if (kDebugMode) {
-          print('Current user UID: ${currentUser.uid}');
-        }
-
         // Fetch the user document from Firestore
         DocumentSnapshot userDoc = await FirebaseFirestore.instance
             .collection('Users')
@@ -58,38 +112,17 @@ class _ClientsPageState extends State<ClientsPage> {
             .get();
 
         if (userDoc.exists) {
-          if (kDebugMode) {
-            print('User document data: ${userDoc.data()}');
-          }
-
           // Set the _codVendedorController with the user's code
           String userCode = userDoc.get('Codigo') ?? '';
           setState(() {
             _codVendedorController.text = userCode;
             currentVendorCode = _codVendedorController.text;
           });
-
-          if (kDebugMode) {
-            print('Código de vendedor cargado: $userCode');
-            print('Código de vendedor cargado: $userCode');
-          }
-        } else {
-          if (kDebugMode) {
-            print('User document does not exist for UID: ${currentUser.uid}');
-          }
-        }
-      } else {
-        if (kDebugMode) {
-          print('No user is currently logged in');
         }
       }
 
-      // Load clients
       await _loadUsers();
     } catch (e) {
-      if (kDebugMode) {
-        print('Error loading user code and clients: $e');
-      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content:
@@ -120,9 +153,6 @@ class _ClientsPageState extends State<ClientsPage> {
             .toList();
       });
     } catch (e) {
-      if (kDebugMode) {
-        print('Error loading clients: $e');
-      }
       // Mostrar un mensaje de error al usuario
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -158,22 +188,104 @@ class _ClientsPageState extends State<ClientsPage> {
     return code;
   }
 
+  // Future<void> _saveOrUpdateClient(Clients? existingClient) async {
+  //   try {
+  //     // Obtener el código del vendedor actual
+  //     // currentVendorCode = _codVendedorController.text;
+
+  //     if (kDebugMode) {
+  //       print('Código del vendedor actual: $currentVendorCode');
+  //     }
+
+  //     // Obtener el UserId del usuario actualmente logeado
+  //     final user = FirebaseAuth.instance.currentUser;
+  //     if (user == null) {
+  //       throw Exception('No hay ningún usuario logeado.');
+  //     }
+
+  //     final userId = user.uid;
+
+  //     final clientData = {
+  //       'Nombre': _nombresController.text,
+  //       'Apellidos': _apellidosController.text,
+  //       'email': _emailController.text,
+  //       'Telefono': _telefonoController.text,
+  //       'Direccion': _direccionController.text,
+  //       'Empresa': _empresaController.text,
+  //       'Codigo': _codigoController.text,
+  //       'CodVendedor': currentVendorCode, // Usar el código del vendedor actual
+  //       'UserId': userId, // Guardar el UserId del usuario logeado
+  //       'updatedAt': Timestamp.now(),
+  //     };
+
+  //     if (kDebugMode) {
+  //       print('Datos del cliente a guardar: $clientData');
+  //     }
+
+  //     if (existingClient == null) {
+  //       // Crear un nuevo cliente
+  //       final nextCode = await _getNextClientCode();
+  //       clientData['Codigo'] = nextCode;
+  //       clientData['createdAt'] = Timestamp.now();
+
+  //       DocumentReference docRef = await FirebaseFirestore.instance
+  //           .collection('Clients')
+  //           .add(clientData);
+
+  //       if (kDebugMode) {
+  //         print('Nuevo cliente creado con ID: ${docRef.id}');
+  //       }
+  //     } else {
+  //       // Actualizar cliente existente
+  //       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+  //           .collection('Clients')
+  //           .where('Codigo', isEqualTo: existingClient.codigo)
+  //           .limit(1)
+  //           .get();
+
+  //       if (querySnapshot.docs.isNotEmpty) {
+  //         await querySnapshot.docs.first.reference.update(clientData);
+
+  //         if (kDebugMode) {
+  //           print('Cliente actualizado con código: ${existingClient.codigo}');
+  //         }
+  //       } else {
+  //         throw Exception('No se encontró el cliente a actualizar');
+  //       }
+  //     }
+
+  //     // Recargar la lista de clientes
+  //     await _loadUsers();
+
+  //     // Mostrar mensaje de éxito
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text(existingClient == null
+  //             ? 'Cliente creado exitosamente'
+  //             : 'Cliente actualizado exitosamente'),
+  //         backgroundColor: Colors.green,
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     // Mostrar mensaje de error
+  //     if (kDebugMode) {
+  //       print('Error al guardar/actualizar cliente: $e');
+  //     }
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Error: ${e.toString()}'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   }
+  // }
+
   Future<void> _saveOrUpdateClient(Clients? existingClient) async {
     try {
-      // Obtener el código del vendedor actual
-      // currentVendorCode = _codVendedorController.text;
-
-      if (kDebugMode) {
-        print('Código del vendedor actual: $currentVendorCode');
-      }
-
-      // Obtener el UserId del usuario actualmente logeado
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         throw Exception('No hay ningún usuario logeado.');
       }
-
-      final userId = user.uid;
 
       final clientData = {
         'Nombre': _nombresController.text,
@@ -182,52 +294,32 @@ class _ClientsPageState extends State<ClientsPage> {
         'Telefono': _telefonoController.text,
         'Direccion': _direccionController.text,
         'Empresa': _empresaController.text,
-        'Codigo': _codigoController.text,
-        'CodVendedor': currentVendorCode, // Usar el código del vendedor actual
-        'UserId': userId, // Guardar el UserId del usuario logeado
+        'CodVendedor': currentVendorCode,
+        'UserId': user.uid,
         'updatedAt': Timestamp.now(),
       };
 
-      if (kDebugMode) {
-        print('Datos del cliente a guardar: $clientData');
-      }
-
       if (existingClient == null) {
-        // Crear un nuevo cliente
-        final nextCode = await _getNextClientCode();
-        clientData['Codigo'] = nextCode;
+        clientData['Codigo'] = await _getNextClientCode();
         clientData['createdAt'] = Timestamp.now();
-
-        DocumentReference docRef = await FirebaseFirestore.instance
-            .collection('Clients')
-            .add(clientData);
-
-        if (kDebugMode) {
-          print('Nuevo cliente creado con ID: ${docRef.id}');
-        }
+        await FirebaseFirestore.instance.collection('Clients').add(clientData);
       } else {
-        // Actualizar cliente existente
-        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        await FirebaseFirestore.instance
             .collection('Clients')
             .where('Codigo', isEqualTo: existingClient.codigo)
             .limit(1)
-            .get();
-
-        if (querySnapshot.docs.isNotEmpty) {
-          await querySnapshot.docs.first.reference.update(clientData);
-
-          if (kDebugMode) {
-            print('Cliente actualizado con código: ${existingClient.codigo}');
+            .get()
+            .then((querySnapshot) {
+          if (querySnapshot.docs.isNotEmpty) {
+            return querySnapshot.docs.first.reference.update(clientData);
+          } else {
+            throw Exception('No se encontró el cliente a actualizar');
           }
-        } else {
-          throw Exception('No se encontró el cliente a actualizar');
-        }
+        });
       }
 
-      // Recargar la lista de clientes
       await _loadUsers();
 
-      // Mostrar mensaje de éxito
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(existingClient == null
@@ -237,10 +329,6 @@ class _ClientsPageState extends State<ClientsPage> {
         ),
       );
     } catch (e) {
-      // Mostrar mensaje de error
-      if (kDebugMode) {
-        print('Error al guardar/actualizar cliente: $e');
-      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
@@ -813,12 +901,26 @@ class _ClientsPageState extends State<ClientsPage> {
                 ),
                 const SizedBox(height: 16),
                 clients.isEmpty
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 400,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
+                        child: FutureBuilder(
+                          future: Future.delayed(const Duration(seconds: 1)),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              );
+                            } else {
+                              return const Center(
+                                child: Text(
+                                  "No hay clientes para mostrar",
+                                  style: TextStyle(fontSize: 18),
+                                ),
+                              );
+                            }
+                          },
                         ),
                       )
                     : SizedBox(
@@ -1036,7 +1138,8 @@ class _ClientsPageState extends State<ClientsPage> {
                     const SizedBox(width: 10),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red, // Color del botón "Guardar"
+                        backgroundColor:
+                            Colors.red, // Color del botón "Guardar"
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -1044,7 +1147,11 @@ class _ClientsPageState extends State<ClientsPage> {
                       onPressed: () {
                         Navigator.of(context).pop(true);
                       },
-                      child: const Text('Eliminar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                      child: const Text('Eliminar',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
                     ),
                   ],
                 ),

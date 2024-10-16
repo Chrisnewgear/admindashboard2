@@ -398,14 +398,26 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
             ),
             const SizedBox(height: 16),
             employees.isEmpty
-                ? const SizedBox(
-                    height: 400,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ), // Use a circular indicator
-                    ),
-                  )
+                ? SizedBox(
+                  height: 400,
+                  child: FutureBuilder(
+                    future: Future.delayed(const Duration(seconds: 1)),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        );
+                      } else {
+                        return const Center(
+                          child: Text(
+                            "No hay usuarios para mostrar",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                )
                 : SizedBox(
                     height: 400,
                     child: DataTable2(

@@ -18,7 +18,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   String selectedPurpose = 'Venta';
   List<String> purpose = ['Venta', 'Seguimiento', 'Renovación', 'Resolución'];
   List<Visitas> visitas = [];
-
+  String currentVendorCode = '';
 
   final TextEditingController _accionesController = TextEditingController();
   final TextEditingController _codVendedorController = TextEditingController();
@@ -27,7 +27,6 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   final TextEditingController _notasController = TextEditingController();
   final TextEditingController _prodServicioController = TextEditingController();
   final TextEditingController _propVisitaController = TextEditingController();
-
 
   @override
   void initState() {
@@ -48,19 +47,20 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
 
         if (userDoc.exists) {
           // Set the _codVendedorController with the user's code
-          String codVendedor = userDoc.get('Codigo') ?? '';
+          String userCode = userDoc.get('Codigo') ?? '';
           setState(() {
-            _codVendedorController.text = codVendedor;
+            _codVendedorController.text = userCode;
+            currentVendorCode = _codVendedorController.text;
           });
 
           // Load visits corresponding to the user's code
-          await _loadVisits(codVendedor);
+          await _loadVisits(currentUser.uid);
         }
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error loading user code and visits: $e');
-      }
+      // if (kDebugMode) {
+      //   print('Error loading user code and visits: $e');
+      // }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content:
@@ -73,10 +73,15 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
 
   Future<void> _loadVisits(String codVendedor) async {
     try {
+      // Obtener el usuario actualmente autenticado
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No hay usuario autenticado');
+      }
+
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Visits')
-          .where('CodVendedor',
-              isEqualTo: codVendedor) // Filtrar por CodVendedor
+          .where('UserId', isEqualTo: codVendedor) // Filtrar por UserId
           .get();
 
       setState(() {
@@ -85,9 +90,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
             .toList();
       });
     } catch (e) {
-      if (kDebugMode) {
-        print('Error loading visits: $e');
-      }
+      // Mostrar un mensaje de error al usuario
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error al cargar las visitas: $e'),
@@ -180,122 +183,147 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   //   }
   // }
 
-  Future<void> _saveOrUpdateVisit(BuildContext context, Visitas? existingVisit) async {
-  try {
-    // Obtener el usuario actualmente logueado
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      throw Exception('No hay ningún usuario logueado.');
-    }
+  Future<void> _saveOrUpdateVisit(
+    BuildContext context, Visitas? existingVisit) async {
+    // Obtener el ScaffoldMessenger fuera del try-catch
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-    // Obtener el código del vendedor y el UserId
-    final userId = user.uid;
-    final codVendedor = _codVendedorController.text;
-
-    // Obtener la ubicación actual del dispositivo
-    GeoPoint? geoPoint = await _getCurrentLocation(context);
-    if (geoPoint == null) {
-      _showSnackBar(context, 'No se pudo obtener la ubicación actual.');
-      throw Exception('No se pudo obtener la ubicación actual.');
-    }
-
-    // Datos de la visita a guardar o actualizar
-    final visitData = {
-      'Acciones': _accionesController.text,
-      'CodVendedor': codVendedor,
-      'Hora': _horaController.text,
-      'Notas': _notasController.text,
-      'ProductoServicio': _prodServicioController.text,
-      'PropositoVisita': selectedPurpose,
-      'UserId': userId,
-      'Fecha': Timestamp.fromDate(
-          DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
-      'Location': geoPoint
-    };
-
-    if (existingVisit == null) {
-      // Crear una nueva visita
-      await FirebaseFirestore.instance.collection('Visits').add(visitData);
-      _showSnackBar(context, 'Visita agendada exitosamente');
-    } else {
-      // Actualizar visita existente
-      await FirebaseFirestore.instance
-          .collection('Visits')
-          .doc(existingVisit.id)
-          .update(visitData);
-      _showSnackBar(context, 'Visita actualizada exitosamente');
-    }
-
-    // Recargar la lista de visitas filtradas por CodVendedor
-    await _loadVisits(codVendedor);
-
-    // Limpiar los campos del formulario
-    _clearFormFields();
-  } catch (e) {
-    _showSnackBar(context, 'Error: ${e.toString()}', isError: true);
-  }
-}
-
-Future<GeoPoint?> _getCurrentLocation(BuildContext context) async {
-  try {
-    // Verificar permisos
-    bool serviceEnabled;
     try {
-      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No hay ningún usuario logueado.');
+      }
+
+      GeoPoint? geoPoint = await _getCurrentLocation(context);
+      if (geoPoint == null) {
+        throw Exception('No se pudo obtener la ubicación actual.');
+      }
+
+      final visitData = {
+        'Acciones': _accionesController.text,
+        'CodVendedor': currentVendorCode,
+        'Hora': _horaController.text,
+        'Notas': _notasController.text,
+        'ProductoServicio': _prodServicioController.text,
+        'PropositoVisita': selectedPurpose,
+        'UserId': user.uid,
+        'Fecha': Timestamp.fromDate(
+            DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
+        'Location': geoPoint,
+        'updatedAt': Timestamp.now(),
+      };
+
+      if (existingVisit == null) {
+        visitData['createdAt'] = Timestamp.now();
+        await FirebaseFirestore.instance.collection('Visits').add(visitData);
+      } else {
+        await FirebaseFirestore.instance
+            .collection('Visits')
+            .doc(existingVisit.id)
+            .update(visitData);
+      }
+
+      await _loadVisits(user.uid);
+
+      _clearFormFields();
+
+      // Usar scaffoldMessenger.showSnackBar fuera del try-catch
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text(existingVisit == null
+                ? 'Visita creada exitosamente'
+                : 'Visita actualizada exitosamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      });
     } catch (e) {
-      print("Error al verificar el servicio de ubicación: $e");
-      _showSnackBar(context, 'Error al verificar el servicio de ubicación. Por favor, reinicia la aplicación.');
-      return null;
+      // Usar scaffoldMessenger.showSnackBar fuera del try-catch
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      });
     }
+  }
+  // void _showErrorMessage(BuildContext context, String errorMessage) {
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       content: Text('Error: $errorMessage'),
+  //       backgroundColor: Colors.red,
+  //     ),
+  //   );
+  // }
 
-    if (!serviceEnabled) {
-      _showSnackBar(context, 'Los servicios de ubicación están desactivados.');
-      return null;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        _showSnackBar(context, 'Permisos de ubicación denegados');
+  Future<GeoPoint?> _getCurrentLocation(BuildContext context) async {
+    try {
+      // Verificar permisos
+      bool serviceEnabled;
+      try {
+        serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      } catch (e) {
+        print("Error al verificar el servicio de ubicación: $e");
+        _showSnackBar(context,
+            'Error al verificar el servicio de ubicación. Por favor, reinicia la aplicación.');
         return null;
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      _showSnackBar(context, 'Los permisos de ubicación están permanentemente denegados');
+      if (!serviceEnabled) {
+        _showSnackBar(
+            context, 'Los servicios de ubicación están desactivados.');
+        return null;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _showSnackBar(context, 'Permisos de ubicación denegados');
+          return null;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        _showSnackBar(context,
+            'Los permisos de ubicación están permanentemente denegados');
+        return null;
+      }
+
+      // // Obtener la posición
+      // Position position = await Geolocator.getCurrentPosition(
+      //   desiredAccuracy: LocationAccuracy.high
+      // );
+
+      // Obtener la posición usando LocationSettings
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+
+      return GeoPoint(position.latitude, position.longitude);
+    } catch (e) {
+      print("Error detallado al obtener la ubicación: $e");
+      _showSnackBar(context,
+          'Error al obtener la ubicación. Por favor, verifica los permisos e intenta de nuevo.');
       return null;
     }
+  }
 
-    // // Obtener la posición
-    // Position position = await Geolocator.getCurrentPosition(
-    //   desiredAccuracy: LocationAccuracy.high
-    // );
-
-     // Obtener la posición usando LocationSettings
-    Position position = await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 10),
+  void _showSnackBar(BuildContext context, String message,
+      {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : null,
       ),
     );
-
-    return GeoPoint(position.latitude, position.longitude);
-  } catch (e) {
-    print("Error detallado al obtener la ubicación: $e");
-    _showSnackBar(context, 'Error al obtener la ubicación. Por favor, verifica los permisos e intenta de nuevo.');
-    return null;
   }
-}
-
-void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(message),
-      backgroundColor: isError ? Colors.red : null,
-    ),
-  );
-}
 
   void _clearFormFields() {
     _accionesController.clear();
@@ -322,7 +350,8 @@ void _showSnackBar(BuildContext context, String message, {bool isError = false})
       _prodServicioController.clear();
       selectedPurpose = 'Venta';
       _notasController.clear();
-      _horaController.text = DateFormat('HH:mm').format(DateTime.now()); // Asignar la hora actual del servidor
+      _horaController.text = DateFormat('HH:mm')
+          .format(DateTime.now()); // Asignar la hora actual del servidor
       _fechaController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
     }
 
@@ -442,7 +471,7 @@ void _showSnackBar(BuildContext context, String message, {bool isError = false})
                           ),
                           onPressed: () {
                             if (formKey.currentState!.validate()) {
-                              _saveOrUpdateVisit( context, visita );
+                              _saveOrUpdateVisit(context, visita);
                               Navigator.of(context).pop();
                             }
                           },
@@ -545,10 +574,11 @@ void _showSnackBar(BuildContext context, String message, {bool isError = false})
           ),
           filled: true,
           fillColor: Colors.grey[50], // Fondo claro como en los otros campos
-          suffixIcon: Icon(
-            Icons.calendar_today_outlined, // Ícono más moderno
-            color: enabled ? Colors.grey[600] : Colors.grey[400] // Cambiar color acorde a la paleta
-          ),
+          suffixIcon: Icon(Icons.calendar_today_outlined, // Ícono más moderno
+              color: enabled
+                  ? Colors.grey[600]
+                  : Colors.grey[400] // Cambiar color acorde a la paleta
+              ),
         ),
         readOnly: true,
         onTap: () async {
@@ -639,7 +669,8 @@ void _showSnackBar(BuildContext context, String message, {bool isError = false})
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
-        enabled: false, // Cambiar a false para que el usuario no pueda modificar la hora
+        enabled:
+            false, // Cambiar a false para que el usuario no pueda modificar la hora
         controller: controller,
         decoration: InputDecoration(
           labelText: label,
@@ -658,8 +689,7 @@ void _showSnackBar(BuildContext context, String message, {bool isError = false})
           filled: true,
           fillColor: Colors.grey[50],
           floatingLabelBehavior: FloatingLabelBehavior.always,
-          suffixIcon: Icon(Icons.access_time,
-              color: Colors.grey[400]),
+          suffixIcon: Icon(Icons.access_time, color: Colors.grey[400]),
         ),
         readOnly: true,
         validator: (value) => value!.isEmpty ? 'Hora requerida' : null,
@@ -769,11 +799,25 @@ void _showSnackBar(BuildContext context, String message, {bool isError = false})
             ),
             const SizedBox(height: 16),
             visitas.isEmpty
-                ? const SizedBox(
+                ? SizedBox(
                     height: 400,
-                    child: Center(
-                      child:
-                          CircularProgressIndicator(), // Use a circular indicator
+                    child: FutureBuilder(
+                      future: Future.delayed(const Duration(seconds: 1)),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          );
+                        } else {
+                          return const Center(
+                            child: Text(
+                              "No hay visitas para mostrar",
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          );
+                        }
+                      },
                     ),
                   )
                 : SizedBox(
@@ -880,40 +924,50 @@ void _showSnackBar(BuildContext context, String message, {bool isError = false})
                                       child: Text(visita.productoServicio))),
                                   DataCell(
                                       Center(child: Text(visita.propVisita))),
+                                  // DataCell(
+                                  //   Row(
+                                  //     mainAxisAlignment:
+                                  //         MainAxisAlignment.spaceBetween,
+                                  //     children: [
+                                  //       Text(DateFormat('dd/MM/yyyy')
+                                  //           .format(visita.fecha)),
+                                  //       PopupMenuButton<String>(
+                                  //         onSelected: (value) {
+                                  //           if (value == 'Eliminar') {
+                                  //             _deleteVisit(visita);
+                                  //           } else if (value ==
+                                  //               'Deshabilitar') {
+                                  //             //_disableEmployee(employee);
+                                  //             print(
+                                  //                 'Aqui se va a deshabilitar');
+                                  //           }
+                                  //         },
+                                  //         itemBuilder: (BuildContext context) =>
+                                  //             [
+                                  //           const PopupMenuItem<String>(
+                                  //             value: 'Eliminar',
+                                  //             child: Text('Eliminar'),
+                                  //           ),
+                                  //           const PopupMenuItem<String>(
+                                  //             value: 'Deshabilitar',
+                                  //             child: Text('Deshabilitar'),
+                                  //           ),
+                                  //         ],
+                                  //         icon: const Icon(Icons.more_vert),
+                                  //       ),
+                                  //     ],
+                                  //   ),
+                                  // ),
                                   DataCell(
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(DateFormat('dd/MM/yyyy')
-                                            .format(visita.fecha)),
-                                        PopupMenuButton<String>(
-                                          onSelected: (value) {
-                                            if (value == 'Eliminar') {
-                                              _deleteVisit(visita);
-                                            } else if (value ==
-                                                'Deshabilitar') {
-                                              //_disableEmployee(employee);
-                                              print(
-                                                  'Aqui se va a deshabilitar');
-                                            }
-                                          },
-                                          itemBuilder: (BuildContext context) =>
-                                              [
-                                            const PopupMenuItem<String>(
-                                              value: 'Eliminar',
-                                              child: Text('Eliminar'),
-                                            ),
-                                            const PopupMenuItem<String>(
-                                              value: 'Deshabilitar',
-                                              child: Text('Deshabilitar'),
-                                            ),
-                                          ],
-                                          icon: const Icon(Icons.more_vert),
-                                        ),
-                                      ],
-                                    ),
+                                    Center(child: Text((
+                                        DateFormat('dd/MM/yyyy').format(
+                                          visita.fecha
+                                        )
+                                      ))
+                                    )
                                   ),
+                                  // DataCell(
+                                  //     Center(child: Text(visita.propVisita))),
                                 ],
                                 color: WidgetStateProperty.resolveWith<Color?>(
                                   (Set<WidgetState> states) {
@@ -1036,7 +1090,8 @@ void _showSnackBar(BuildContext context, String message, {bool isError = false})
                     const SizedBox(width: 10),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red, // Color del botón "Guardar"
+                        backgroundColor:
+                            Colors.red, // Color del botón "Guardar"
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -1044,7 +1099,11 @@ void _showSnackBar(BuildContext context, String message, {bool isError = false})
                       onPressed: () {
                         Navigator.of(context).pop(true);
                       },
-                      child: const Text('Eliminar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                      child: const Text('Eliminar',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
                     ),
                   ],
                 ),
@@ -1078,6 +1137,4 @@ void _showSnackBar(BuildContext context, String message, {bool isError = false})
       }
     }
   }
-
-
 }
