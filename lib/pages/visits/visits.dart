@@ -1,8 +1,7 @@
-import 'package:admindashboard/pages/visits/visitas_dataTable_Source.dart';
+import 'package:admindashboard/pages/visits/visitas_datatable_source.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:admindashboard/models/visits.dart';
-import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -335,7 +334,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     _fechaController.clear();
   }
 
-  void showClientVisitFormDialog(BuildContext context, Visitas? visita) {
+  void _showClientVisitFormDialog(BuildContext context, Visitas? visita) {
     final formKey = GlobalKey<FormState>();
     final ValueNotifier<bool> isEditable = ValueNotifier<bool>(visita == null);
 
@@ -754,27 +753,29 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Administrar Roles'),
-      // ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Agendar Visitas',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+  return Scaffold(
+    body: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Agendar Visitas',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 24),
+          Expanded(
+            child: ResponsiveUserTable(
+              visitas: visitas,
+              deleteVisit: (visita) => _deleteVisit(visita),
+              showClientVisitFormDialog: (context, visita) => _showClientVisitFormDialog(context, visita),
             ),
-            const SizedBox(height: 24),
-            _buildUserTable(),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
-
+    ),
+  );
+}
   // Widget _buildUserTable() {
   //   return Card(
   //     elevation: 4,
@@ -1026,93 +1027,94 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   //   );
   // }
 
-  Widget _buildUserTable() {
-  final visitasDataSource = VisitasDataTableSource(visitas, _deleteVisit);
+//   Widget _buildUserTable() {
+//   final visitasDataSource = VisitasDataTableSource(visitas, _deleteVisit);
 
-  return Card(
-    elevation: 0,
-    color: Colors.white,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Mis visitas',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              ElevatedButton(
-                onPressed: () => showClientVisitFormDialog(context, null),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.blue,
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text('Agendar Visita'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (visitas.isEmpty)
-            SizedBox(
-              height: 400,
-              child: FutureBuilder(
-                future: Future.delayed(const Duration(seconds: 1)),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    );
-                  } else {
-                    return const Center(
-                      child: Text(
-                        "No hay visitas para mostrar",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    );
-                  }
-                },
-              ),
-            )
-          else
-            Theme(
-              data: Theme.of(context).copyWith(
-                dividerColor: Colors.grey[300],
-                dataTableTheme: DataTableThemeData(
-                  headingTextStyle: TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  dataTextStyle: TextStyle(color: Colors.black87),
-                ),
-              ),
-              child: PaginatedDataTable(
-                header: null,
-                columns: const [
-                  DataColumn(label: Text('Acciones')),
-                  DataColumn(label: Text('Productos/Servicios')),
-                  DataColumn(label: Text('Proposito Visita')),
-                  DataColumn(label: Text('Fecha')),
-                  DataColumn(label: Text('')),
-                ],
-                source: visitasDataSource,
-                rowsPerPage: 10,
-                columnSpacing: 24,
-                horizontalMargin: 0,
-                showCheckboxColumn: false,
-              ),
-            ),
-        ],
-      ),
-    ),
-  );
-}
+//   return Card(
+//     elevation: 0,
+//     color: Colors.white,
+//     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+//     child: Padding(
+//       padding: const EdgeInsets.all(16),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               const Text(
+//                 'Mis visitas',
+//                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+//               ),
+//               ElevatedButton(
+//                 onPressed: () => showClientVisitFormDialog(context, null),
+//                 style: ElevatedButton.styleFrom(
+//                   foregroundColor: Colors.blue,
+//                   backgroundColor: Colors.white,
+//                   shape: RoundedRectangleBorder(
+//                     borderRadius: BorderRadius.circular(8),
+//                   ),
+//                 ),
+
+//                 child: const Text('Nueva Visita'),
+//               ),
+//             ],
+//           ),
+//           const SizedBox(height: 16),
+//           if (visitas.isEmpty)
+//             SizedBox(
+//               height: 400,
+//               child: FutureBuilder(
+//                 future: Future.delayed(const Duration(seconds: 1)),
+//                 builder: (context, snapshot) {
+//                   if (snapshot.connectionState == ConnectionState.waiting) {
+//                     return const Center(
+//                       child: CircularProgressIndicator(strokeWidth: 2),
+//                     );
+//                   } else {
+//                     return const Center(
+//                       child: Text(
+//                         "No hay visitas para mostrar",
+//                         style: TextStyle(fontSize: 18),
+//                       ),
+//                     );
+//                   }
+//                 },
+//               ),
+//             )
+//           else
+//             Theme(
+//               data: Theme.of(context).copyWith(
+//                 dividerColor: Colors.grey[300],
+//                 dataTableTheme: DataTableThemeData(
+//                   headingTextStyle: TextStyle(
+//                     color: Colors.blue,
+//                     fontWeight: FontWeight.bold,
+//                   ),
+//                   dataTextStyle: TextStyle(color: Colors.black87),
+//                 ),
+//               ),
+//               child: PaginatedDataTable(
+//                 header: null,
+//                 columns: const [
+//                   DataColumn(label: Text('Acciones')),
+//                   DataColumn(label: Text('Productos/Servicios')),
+//                   DataColumn(label: Text('Proposito Visita')),
+//                   DataColumn(label: Text('Fecha')),
+//                   DataColumn(label: Text('')),
+//                 ],
+//                 source: visitasDataSource,
+//                 rowsPerPage: 10,
+//                 columnSpacing: 24,
+//                 horizontalMargin: 0,
+//                 showCheckboxColumn: false,
+//               ),
+//             ),
+//         ],
+//       ),
+//     ),
+//   );
+// }
 
   // Future<void> _deleteVisit(Visitas visita) async {
   //   // Mostrar un diálogo de confirmación
