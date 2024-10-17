@@ -1,3 +1,4 @@
+import 'package:admindashboard/pages/visits/visitas_dataTable_Source.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:admindashboard/models/visits.dart';
@@ -184,7 +185,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   // }
 
   Future<void> _saveOrUpdateVisit(
-    BuildContext context, Visitas? existingVisit) async {
+      BuildContext context, Visitas? existingVisit) async {
     // Obtener el ScaffoldMessenger fuera del try-catch
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
@@ -774,220 +775,344 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     );
   }
 
+  // Widget _buildUserTable() {
+  //   return Card(
+  //     elevation: 4,
+  //     color: Colors.white70,
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(16),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Row(
+  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //             children: [
+  //               const Text(
+  //                 'Mis visitas',
+  //                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+  //               ),
+  //               ElevatedButton(
+  //                 onPressed: () => showClientVisitFormDialog(context, null),
+  //                 child: const Text('Agendar Visita'),
+  //               ),
+  //             ],
+  //           ),
+  //           const SizedBox(height: 16),
+  //           visitas.isEmpty
+  //               ? SizedBox(
+  //                   height: 400,
+  //                   child: FutureBuilder(
+  //                     future: Future.delayed(const Duration(seconds: 1)),
+  //                     builder: (context, snapshot) {
+  //                       if (snapshot.connectionState ==
+  //                           ConnectionState.waiting) {
+  //                         return const Center(
+  //                           child: CircularProgressIndicator(strokeWidth: 2),
+  //                         );
+  //                       } else {
+  //                         return const Center(
+  //                           child: Text(
+  //                             "No hay visitas para mostrar",
+  //                             style: TextStyle(fontSize: 18),
+  //                           ),
+  //                         );
+  //                       }
+  //                     },
+  //                   ),
+  //                 )
+  //               : SizedBox(
+  //                   height: 400,
+  //                   child: DataTable2(
+  //                     columnSpacing: 12,
+  //                     horizontalMargin: 12,
+  //                     minWidth: 600,
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.grey[100],
+  //                       borderRadius: BorderRadius.circular(8),
+  //                     ),
+  //                     headingRowColor:
+  //                         WidgetStateProperty.all(Colors.grey[200]),
+  //                     columns: const [
+  //                       // DataColumn2(
+  //                       //   label: Center(
+  //                       //     child: Text('Cod. Vendedor',
+  //                       //         style: TextStyle(
+  //                       //           fontSize: 16,
+  //                       //           fontWeight: FontWeight.bold,
+  //                       //           color: Colors.blue,
+  //                       //         )),
+  //                       //   ),
+  //                       //   size: ColumnSize.L,
+  //                       // ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Acciones',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       // DataColumn2(
+  //                       //   label: Center(
+  //                       //     child: Text('Hora',
+  //                       //         style: TextStyle(
+  //                       //           fontSize: 16,
+  //                       //           fontWeight: FontWeight.bold,
+  //                       //           color: Colors.blue,
+  //                       //         )),
+  //                       //   ),
+  //                       //   size: ColumnSize.L,
+  //                       // ),
+  //                       // DataColumn2(
+  //                       //   label: Center(
+  //                       //     child: Text('Notas',
+  //                       //         style: TextStyle(
+  //                       //           fontSize: 16,
+  //                       //           fontWeight: FontWeight.bold,
+  //                       //           color: Colors.blue,
+  //                       //         )),
+  //                       //   ),
+  //                       //   size: ColumnSize.L,
+  //                       // ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Producto/Servicio',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Proposito Visita',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Fecha',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.S,
+  //                       ),
+  //                     ],
+  //                     rows: visitas
+  //                         .map((visita) => DataRow2(
+  //                               cells: [
+  //                                 // DataCell(
+  //                                 //     Center(child: Text(visita.codVendedor))),
+  //                                 DataCell(
+  //                                     Center(child: Text(visita.acciones))),
+  //                                 // DataCell(Center(child: Text(visita.hora))),
+  //                                 // DataCell(Center(child: Text(visita.notas))),
+  //                                 DataCell(Center(
+  //                                     child: Text(visita.productoServicio))),
+  //                                 DataCell(
+  //                                     Center(child: Text(visita.propVisita))),
+  //                                 // DataCell(
+  //                                 //   Row(
+  //                                 //     mainAxisAlignment:
+  //                                 //         MainAxisAlignment.spaceBetween,
+  //                                 //     children: [
+  //                                 //       Text(DateFormat('dd/MM/yyyy')
+  //                                 //           .format(visita.fecha)),
+  //                                 //       PopupMenuButton<String>(
+  //                                 //         onSelected: (value) {
+  //                                 //           if (value == 'Eliminar') {
+  //                                 //             _deleteVisit(visita);
+  //                                 //           } else if (value ==
+  //                                 //               'Deshabilitar') {
+  //                                 //             //_disableEmployee(employee);
+  //                                 //             print(
+  //                                 //                 'Aqui se va a deshabilitar');
+  //                                 //           }
+  //                                 //         },
+  //                                 //         itemBuilder: (BuildContext context) =>
+  //                                 //             [
+  //                                 //           const PopupMenuItem<String>(
+  //                                 //             value: 'Eliminar',
+  //                                 //             child: Text('Eliminar'),
+  //                                 //           ),
+  //                                 //           const PopupMenuItem<String>(
+  //                                 //             value: 'Deshabilitar',
+  //                                 //             child: Text('Deshabilitar'),
+  //                                 //           ),
+  //                                 //         ],
+  //                                 //         icon: const Icon(Icons.more_vert),
+  //                                 //       ),
+  //                                 //     ],
+  //                                 //   ),
+  //                                 // ),
+  //                                 DataCell(Center(
+  //                                     child: Text((DateFormat('dd/MM/yyyy')
+  //                                         .format(visita.fecha))))),
+  //                                 DataCell(
+  //                                   Row(
+  //                                     mainAxisAlignment: MainAxisAlignment
+  //                                         .end, // Alinear al final
+  //                                     children: [
+  //                                       PopupMenuButton<String>(
+  //                                         onSelected: (value) {
+  //                                           if (value == 'Eliminar') {
+  //                                             deleteVisit(visita);
+  //                                           } else if (value ==
+  //                                               'Deshabilitar') {
+  //                                             //_disableEmployee(employee);
+  //                                             print(
+  //                                                 'Aqui se va a deshabilitar');
+  //                                           }
+  //                                         },
+  //                                         itemBuilder: (BuildContext context) =>
+  //                                             [
+  //                                           const PopupMenuItem<String>(
+  //                                             value: 'Eliminar',
+  //                                             child: Text('Eliminar'),
+  //                                           ),
+  //                                           const PopupMenuItem<String>(
+  //                                             value: 'Deshabilitar',
+  //                                             child: Text('Deshabilitar'),
+  //                                           ),
+  //                                         ],
+  //                                         icon: const Icon(Icons.more_vert),
+  //                                       ),
+  //                                     ],
+  //                                   ),
+  //                                 ),
+  //                               ],
+  //                               color: WidgetStateProperty.resolveWith<Color?>(
+  //                                 (Set<WidgetState> states) {
+  //                                   if (states.contains(WidgetState.hovered)) {
+  //                                     return Colors.grey[300];
+  //                                   }
+  //                                   return null;
+  //                                 },
+  //                               ),
+  //                               onDoubleTap: () =>
+  //                                   showClientVisitFormDialog(context, visita),
+  //                             ))
+  //                         .toList(),
+  //                   ),
+  //                 ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Widget _buildUserTable() {
-    return Card(
-      elevation: 4,
-      color: Colors.white70,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Mis visitas',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                ElevatedButton(
-                  onPressed: () => showClientVisitFormDialog(context, null),
-                  child: const Text('Agendar Visita'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            visitas.isEmpty
-                ? SizedBox(
-                    height: 400,
-                    child: FutureBuilder(
-                      future: Future.delayed(const Duration(seconds: 1)),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          );
-                        } else {
-                          return const Center(
-                            child: Text(
-                              "No hay visitas para mostrar",
-                              style: TextStyle(fontSize: 18),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                  )
-                : SizedBox(
-                    height: 400,
-                    child: DataTable2(
-                      columnSpacing: 12,
-                      horizontalMargin: 12,
-                      minWidth: 600,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      headingRowColor:
-                          WidgetStateProperty.all(Colors.grey[200]),
-                      columns: const [
-                        // DataColumn2(
-                        //   label: Center(
-                        //     child: Text('Cod. Vendedor',
-                        //         style: TextStyle(
-                        //           fontSize: 16,
-                        //           fontWeight: FontWeight.bold,
-                        //           color: Colors.blue,
-                        //         )),
-                        //   ),
-                        //   size: ColumnSize.L,
-                        // ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Acciones',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        // DataColumn2(
-                        //   label: Center(
-                        //     child: Text('Hora',
-                        //         style: TextStyle(
-                        //           fontSize: 16,
-                        //           fontWeight: FontWeight.bold,
-                        //           color: Colors.blue,
-                        //         )),
-                        //   ),
-                        //   size: ColumnSize.L,
-                        // ),
-                        // DataColumn2(
-                        //   label: Center(
-                        //     child: Text('Notas',
-                        //         style: TextStyle(
-                        //           fontSize: 16,
-                        //           fontWeight: FontWeight.bold,
-                        //           color: Colors.blue,
-                        //         )),
-                        //   ),
-                        //   size: ColumnSize.L,
-                        // ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Producto/Servicio',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Proposito Visita',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Fecha',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                      ],
-                      rows: visitas
-                          .map((visita) => DataRow2(
-                                cells: [
-                                  // DataCell(
-                                  //     Center(child: Text(visita.codVendedor))),
-                                  DataCell(
-                                      Center(child: Text(visita.acciones))),
-                                  // DataCell(Center(child: Text(visita.hora))),
-                                  // DataCell(Center(child: Text(visita.notas))),
-                                  DataCell(Center(
-                                      child: Text(visita.productoServicio))),
-                                  DataCell(
-                                      Center(child: Text(visita.propVisita))),
-                                  // DataCell(
-                                  //   Row(
-                                  //     mainAxisAlignment:
-                                  //         MainAxisAlignment.spaceBetween,
-                                  //     children: [
-                                  //       Text(DateFormat('dd/MM/yyyy')
-                                  //           .format(visita.fecha)),
-                                  //       PopupMenuButton<String>(
-                                  //         onSelected: (value) {
-                                  //           if (value == 'Eliminar') {
-                                  //             _deleteVisit(visita);
-                                  //           } else if (value ==
-                                  //               'Deshabilitar') {
-                                  //             //_disableEmployee(employee);
-                                  //             print(
-                                  //                 'Aqui se va a deshabilitar');
-                                  //           }
-                                  //         },
-                                  //         itemBuilder: (BuildContext context) =>
-                                  //             [
-                                  //           const PopupMenuItem<String>(
-                                  //             value: 'Eliminar',
-                                  //             child: Text('Eliminar'),
-                                  //           ),
-                                  //           const PopupMenuItem<String>(
-                                  //             value: 'Deshabilitar',
-                                  //             child: Text('Deshabilitar'),
-                                  //           ),
-                                  //         ],
-                                  //         icon: const Icon(Icons.more_vert),
-                                  //       ),
-                                  //     ],
-                                  //   ),
-                                  // ),
-                                  DataCell(
-                                    Center(child: Text((
-                                        DateFormat('dd/MM/yyyy').format(
-                                          visita.fecha
-                                        )
-                                      ))
-                                    )
-                                  ),
-                                  // DataCell(
-                                  //     Center(child: Text(visita.propVisita))),
-                                ],
-                                color: WidgetStateProperty.resolveWith<Color?>(
-                                  (Set<WidgetState> states) {
-                                    if (states.contains(WidgetState.hovered)) {
-                                      return Colors.grey[300];
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                onDoubleTap: () =>
-                                    showClientVisitFormDialog(context, visita),
-                              ))
-                          .toList(),
-                    ),
+  final visitasDataSource = VisitasDataTableSource(visitas, _deleteVisit);
+
+  return Card(
+    elevation: 0,
+    color: Colors.white,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Mis visitas',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              ElevatedButton(
+                onPressed: () => showClientVisitFormDialog(context, null),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.blue,
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-          ],
-        ),
+                ),
+                child: const Text('Agendar Visita'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (visitas.isEmpty)
+            SizedBox(
+              height: 400,
+              child: FutureBuilder(
+                future: Future.delayed(const Duration(seconds: 1)),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    );
+                  } else {
+                    return const Center(
+                      child: Text(
+                        "No hay visitas para mostrar",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    );
+                  }
+                },
+              ),
+            )
+          else
+            Theme(
+              data: Theme.of(context).copyWith(
+                dividerColor: Colors.grey[300],
+                dataTableTheme: DataTableThemeData(
+                  headingTextStyle: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  dataTextStyle: TextStyle(color: Colors.black87),
+                ),
+              ),
+              child: PaginatedDataTable(
+                header: null,
+                columns: const [
+                  DataColumn(label: Text('Acciones')),
+                  DataColumn(label: Text('Productos/Servicios')),
+                  DataColumn(label: Text('Proposito Visita')),
+                  DataColumn(label: Text('Fecha')),
+                  DataColumn(label: Text('')),
+                ],
+                source: visitasDataSource,
+                rowsPerPage: 10,
+                columnSpacing: 24,
+                horizontalMargin: 0,
+                showCheckboxColumn: false,
+              ),
+            ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   // Future<void> _deleteVisit(Visitas visita) async {
   //   // Mostrar un diálogo de confirmación
