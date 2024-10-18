@@ -32,12 +32,10 @@ class ResponsiveUserTable extends StatelessWidget {
                   children: [
                     const Text(
                       'Mis visitas',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     ElevatedButton(
-                      onPressed: () =>
-                          showClientVisitFormDialog(context, null),
+                      onPressed: () => showClientVisitFormDialog(context, null),
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.blue,
                         backgroundColor: Colors.white,
@@ -50,9 +48,7 @@ class ResponsiveUserTable extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Expanded(
-                  child: _buildTableContent(context, constraints),
-                ),
+                Expanded(child: _buildTableContent(context, constraints)),
               ],
             ),
           ),
@@ -80,36 +76,19 @@ class ResponsiveUserTable extends StatelessWidget {
     );
   }
 
-  // Widget _buildListView() {
-  //   return ListView.builder(
-  //     itemCount: visitas.length,
-  //     itemBuilder: (context, index) {
-  //       final visita = visitas[index];
-  //       return Card(
-  //         child: ListTile(
-  //           title: const Text('Visitas'),
-  //           subtitle: Text(visita.propVisita),
-  //           trailing: IconButton(
-  //             icon: const Icon(Icons.more_vert),
-  //             onPressed: () {}
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   Widget _buildListView() {
     return ListView.builder(
       itemCount: visitas.length,
       itemBuilder: (context, index) {
         final item = visitas[index];
-
         return Card(
           color: Colors.white,
           elevation: 4,
+          margin: const EdgeInsets.symmetric(vertical: 4),
           child: ListTile(
-            title: Text(item.acciones),
+            title: Text(item.acciones, textAlign: TextAlign.center),
+            subtitle: Text('${item.productoServicio} - ${DateFormat('dd/MM/yyyy').format(item.fecha)}',
+                textAlign: TextAlign.center),
             trailing: PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
               onSelected: (String result) {
@@ -141,29 +120,33 @@ class ResponsiveUserTable extends StatelessWidget {
 
     return Theme(
       data: Theme.of(context).copyWith(
+        cardColor: Colors.white,
         dividerColor: Colors.grey[300],
-        dataTableTheme: const DataTableThemeData(
+        dataTableTheme: DataTableThemeData(
           headingTextStyle: TextStyle(
-            color: Colors.blue,
+            color: Colors.blue[700],
             fontWeight: FontWeight.bold,
           ),
-          dataTextStyle: TextStyle(color: Colors.black87),
+          dataTextStyle: const TextStyle(color: Colors.black87),
         ),
       ),
       child: PaginatedDataTable(
         header: null,
         columns: const [
-          DataColumn(label: Text('Acciones')),
-          DataColumn(label: Text('Producto/Servicio')),
-          DataColumn(label: Text('Propisito Visita')),
-          DataColumn(label: Text('Fecha')),
-          DataColumn(label: Text('')),
+          DataColumn(label: Center(child: Text('Acciones'))),
+          DataColumn(label: Center(child: Text('Producto/Servicio'))),
+          DataColumn(label: Center(child: Text('Propósito Visita'))),
+          DataColumn(label: Center(child: Text('Fecha'))),
+          DataColumn(label: Text('')), // Última columna sin centrar
         ],
         source: visitasDataSource,
-        rowsPerPage: 10,
-        columnSpacing: 100,
-        horizontalMargin: 40,
+        rowsPerPage: 5,
+        columnSpacing: 40,
+        horizontalMargin: 20,
         showCheckboxColumn: false,
+        headingRowHeight: 40,
+        dataRowMaxHeight: 60,
+        dataRowMinHeight: 48,
       ),
     );
   }
@@ -184,17 +167,24 @@ class VisitasDataTableSource extends DataTableSource {
   DataRow getRow(int index) {
     final visita = visitas[index];
     return DataRow(
+      color: WidgetStateProperty.resolveWith<Color?>(
+        (Set<WidgetState> states) {
+          if (index % 2 == 0) return Colors.grey.withOpacity(0.1);
+          return null;
+        },
+      ),
       cells: [
-        DataCell(Text(visita.acciones)),
-        DataCell(Text(visita.productoServicio)),
-        DataCell(Text(visita.propVisita)),
-        DataCell(Center(child: Text((DateFormat('dd/MM/yyyy').format(visita.fecha))))),
+        DataCell(Center(child: Text(visita.acciones))),
+        DataCell(Center(child: Text(visita.productoServicio))),
+        DataCell(Center(child: Text(visita.propVisita))),
+        DataCell(Center(child: Text(DateFormat('dd/MM/yyyy').format(visita.fecha)))),
         DataCell(PopupMenuButton(
           icon: const Icon(Icons.more_vert),
           itemBuilder: (context) => [
             PopupMenuItem(
-                child: const Text('Editar'),
-                onTap: () => showClientVisitFormDialog(context, visita)),
+              child: const Text('Editar'),
+              onTap: () => showClientVisitFormDialog(context, visita),
+            ),
             PopupMenuItem(
               child: const Text('Eliminar'),
               onTap: () => deleteVisit(visita),
