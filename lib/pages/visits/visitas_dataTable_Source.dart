@@ -19,7 +19,7 @@ class ResponsiveUserTable extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Card(
-          elevation: 0,
+          elevation: 4,
           color: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           child: Padding(
@@ -36,7 +36,8 @@ class ResponsiveUserTable extends StatelessWidget {
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     ElevatedButton(
-                      onPressed: () => showClientVisitFormDialog(context, visitas),
+                      onPressed: () =>
+                          showClientVisitFormDialog(context, null),
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.blue,
                         backgroundColor: Colors.white,
@@ -99,44 +100,41 @@ class ResponsiveUserTable extends StatelessWidget {
   // }
 
   Widget _buildListView() {
-  return ListView.builder(
-    itemCount: visitas.length, // Suponiendo que tienes una lista _items
-    itemBuilder: (context, index) {
-      final item = visitas[index];
+    return ListView.builder(
+      itemCount: visitas.length,
+      itemBuilder: (context, index) {
+        final item = visitas[index];
 
-      return Card(
-        color: Colors.white,
-        elevation: 4,
-        child: ListTile(
-          title: const Text('{visitas.}'), // Reemplaza con el campo que uses
-          trailing: PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert), // Ícono more_vert
-            onSelected: (String result) {
-              if (result == 'Editar') {
-                // Aquí llamas tu lógica para editar
-                //_deleteItem(item);
-                showClientVisitFormDialog(context, item);
-              } else if (result == 'Eliminar') {
-                // Aquí llamas tu lógica para eliminar
-                deleteVisit(item);
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'Editar',
-                child: Text('Editar'),
-              ),
-              const PopupMenuItem<String>( 
-                value: 'Eliminar',
-                child: Text('Eliminar'),
-              ),
-            ],
+        return Card(
+          color: Colors.white,
+          elevation: 4,
+          child: ListTile(
+            title: Text(item.acciones),
+            trailing: PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              onSelected: (String result) {
+                if (result == 'Editar') {
+                  showClientVisitFormDialog(context, item);
+                } else if (result == 'Eliminar') {
+                  deleteVisit(item);
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'Editar',
+                  child: Text('Editar'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Eliminar',
+                  child: Text('Eliminar'),
+                ),
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   Widget _buildDataTable(BuildContext context) {
     final visitasDataSource = VisitasDataTableSource(visitas, deleteVisit, showClientVisitFormDialog);
@@ -163,8 +161,8 @@ class ResponsiveUserTable extends StatelessWidget {
         ],
         source: visitasDataSource,
         rowsPerPage: 10,
-        columnSpacing: 24,
-        horizontalMargin: 0,
+        columnSpacing: 100,
+        horizontalMargin: 40,
         showCheckboxColumn: false,
       ),
     );
@@ -176,7 +174,11 @@ class VisitasDataTableSource extends DataTableSource {
   final Function(Visitas) deleteVisit;
   final Function(BuildContext, dynamic) showClientVisitFormDialog;
 
-  VisitasDataTableSource(this.visitas, this.deleteVisit, this.showClientVisitFormDialog,);
+  VisitasDataTableSource(
+    this.visitas,
+    this.deleteVisit,
+    this.showClientVisitFormDialog,
+  );
 
   @override
   DataRow getRow(int index) {
@@ -186,15 +188,13 @@ class VisitasDataTableSource extends DataTableSource {
         DataCell(Text(visita.acciones)),
         DataCell(Text(visita.productoServicio)),
         DataCell(Text(visita.propVisita)),
-        DataCell(Center(
-            child: Text((DateFormat('dd/MM/yyyy').format(visita.fecha))))),
+        DataCell(Center(child: Text((DateFormat('dd/MM/yyyy').format(visita.fecha))))),
         DataCell(PopupMenuButton(
           icon: const Icon(Icons.more_vert),
           itemBuilder: (context) => [
             PopupMenuItem(
-              child: const Text('Editar'),
-              onTap: () => showClientVisitFormDialog(context, null)
-            ),
+                child: const Text('Editar'),
+                onTap: () => showClientVisitFormDialog(context, visita)),
             PopupMenuItem(
               child: const Text('Eliminar'),
               onTap: () => deleteVisit(visita),
@@ -214,5 +214,3 @@ class VisitasDataTableSource extends DataTableSource {
   @override
   int get selectedRowCount => 0;
 }
-
-
