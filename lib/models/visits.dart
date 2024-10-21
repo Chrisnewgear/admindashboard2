@@ -9,6 +9,7 @@ class Visitas {
   final String notas;
   final String productoServicio;
   final String propVisita;
+  final String nombreCliente;
 
   Visitas({
     required this.id,
@@ -19,6 +20,7 @@ class Visitas {
     required this.notas,
     required this.productoServicio,
     required this.propVisita,
+    required this.nombreCliente,
   });
 
   factory Visitas.fromFirestore(DocumentSnapshot doc) {
@@ -32,6 +34,7 @@ class Visitas {
       notas: data['Notas'] ?? '',
       productoServicio: data['ProductoServicio'] ?? '',
       propVisita: data['PropositoVisita'] ?? '',
+      nombreCliente: data['NombreCliente'] ?? '',
     );
   }
 }

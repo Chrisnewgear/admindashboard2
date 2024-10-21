@@ -1,5 +1,6 @@
 import 'package:admindashboard/pages/visits/visitas_datatable_source.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:admindashboard/models/visits.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -27,6 +28,8 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   final TextEditingController _notasController = TextEditingController();
   final TextEditingController _prodServicioController = TextEditingController();
   final TextEditingController _propVisitaController = TextEditingController();
+  final TextEditingController _nombreClienteController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -185,15 +188,28 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
 
   Future<void> _saveOrUpdateVisit(
       BuildContext context, Visitas? existingVisit) async {
-    // Obtener el ScaffoldMessenger fuera del try-catch
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     try {
+      // Mostrar el loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(
+            child: SpinKitFadingCircle(
+              color: Colors.blue,
+              size: 50.0,
+            ),
+          );
+        },
+      );
+
+      // Obtener el usuario actual y la ubicación
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         throw Exception('No hay ningún usuario logueado.');
       }
-
       GeoPoint? geoPoint = await _getCurrentLocation(context);
       if (geoPoint == null) {
         throw Exception('No se pudo obtener la ubicación actual.');
@@ -206,6 +222,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
         'Notas': _notasController.text,
         'ProductoServicio': _prodServicioController.text,
         'PropositoVisita': selectedPurpose,
+        'NombreCliente': _nombreClienteController.text,
         'UserId': user.uid,
         'Fecha': Timestamp.fromDate(
             DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
@@ -213,6 +230,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
         'updatedAt': Timestamp.now(),
       };
 
+      // Guardar o actualizar la visita en Firestore
       if (existingVisit == null) {
         visitData['createdAt'] = Timestamp.now();
         await FirebaseFirestore.instance.collection('Visits').add(visitData);
@@ -224,30 +242,27 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       }
 
       await _loadVisits(user.uid);
-
       _clearFormFields();
 
-      // Usar scaffoldMessenger.showSnackBar fuera del try-catch
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text(existingVisit == null
-                ? 'Visita creada exitosamente'
-                : 'Visita actualizada exitosamente'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      });
+      // Cerrar el loading y mostrar el SnackBar
+      Navigator.of(context).pop();
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text(existingVisit == null
+              ? 'Visita creada exitosamente'
+              : 'Visita actualizada exitosamente'),
+          backgroundColor: Colors.green,
+        ),
+      );
     } catch (e) {
-      // Usar scaffoldMessenger.showSnackBar fuera del try-catch
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      });
+      // Cerrar el loading y mostrar el SnackBar con el error
+      Navigator.of(context).pop();
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
   // void _showErrorMessage(BuildContext context, String errorMessage) {
@@ -332,7 +347,175 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     _prodServicioController.clear();
     _propVisitaController.clear();
     _fechaController.clear();
+    _nombreClienteController.clear();
   }
+
+  // void _showClientVisitFormDialog(BuildContext context, Visitas? visita) {
+  //   final formKey = GlobalKey<FormState>();
+  //   final ValueNotifier<bool> isEditable = ValueNotifier<bool>(visita == null);
+
+  //   if (visita != null) {
+  //     _accionesController.text = visita.acciones;
+  //     _prodServicioController.text = visita.productoServicio;
+  //     _propVisitaController.text = visita.propVisita;
+  //     _notasController.text = visita.notas;
+  //     _nombreClienteController.text = visita.nombreCliente;
+  //     _horaController.text = visita.hora;
+  //     _fechaController.text = DateFormat('dd/MM/yyyy').format(visita.fecha);
+  //   } else {
+  //     _accionesController.clear();
+  //     _prodServicioController.clear();
+  //     selectedPurpose = 'Venta';
+  //     _notasController.clear();
+  //     _nombreClienteController.clear();
+  //     _horaController.text = DateFormat('HH:mm')
+  //         .format(DateTime.now()); // Asignar la hora actual del servidor
+  //     _fechaController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
+  //   }
+
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return Dialog(
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(20),
+  //         ),
+  //         elevation: 0,
+  //         backgroundColor: Colors.transparent,
+  //         child: LayoutBuilder(
+  //           builder: (context, constraints) {
+  //             double modalWidth = constraints.maxWidth > 600
+  //                 ? constraints.maxWidth * 0.4
+  //                 : constraints.maxWidth * 0.9;
+
+  //             return Container(
+  //               width: modalWidth,
+  //               padding: const EdgeInsets.all(20),
+  //               decoration: BoxDecoration(
+  //                 color: Colors.white,
+  //                 borderRadius: BorderRadius.circular(20),
+  //               ),
+  //               child: Column(
+  //                 mainAxisSize: MainAxisSize.min,
+  //                 mainAxisAlignment: MainAxisAlignment.center,
+  //                 children: <Widget>[
+  //                   Text(
+  //                     visita == null ? 'Nueva Visita' : 'Editar Visita',
+  //                     style: const TextStyle(
+  //                         fontSize: 22, fontWeight: FontWeight.w600),
+  //                   ),
+  //                   const SizedBox(height: 20),
+  //                   Form(
+  //                     key: formKey,
+  //                     child: ValueListenableBuilder<bool>(
+  //                       valueListenable: isEditable,
+  //                       builder: (context, editable, _) {
+  //                         bool isLargeScreen = constraints.maxWidth > 600;
+  //                         return Column(
+  //                           children: [
+  //                             _buildResponsiveRow(isLargeScreen, [
+  //                               // _buildInputField(
+  //                               //     _codVendedorController, 'Cod. Vendedor',
+  //                               //     enabled: false),
+  //                               _buildInputField(
+  //                                   _nombreClienteController, 'Nombre Cliente',
+  //                                   enabled: editable),
+  //                               _buildInputField(
+  //                                   _accionesController, 'Acciones',
+  //                                   enabled: editable),
+  //                             ]),
+  //                             _buildResponsiveRow(isLargeScreen, [
+  //                               _buildInputField(_prodServicioController,
+  //                                   'Producto/Servicio',
+  //                                   enabled: editable),
+  //                               _buildDropdown(selectedPurpose,
+  //                                   (String? newValue) {
+  //                                 setState(() {
+  //                                   selectedPurpose = newValue!;
+  //                                 });
+  //                               }, enabled: editable),
+  //                             ]),
+  //                             _buildResponsiveRow(isLargeScreen, [
+  //                               _buildDatePicker(context, _fechaController,
+  //                                   'Fecha de Ingreso',
+  //                                   enabled: false),
+  //                               _buildTimePicker(
+  //                                   context, _horaController, 'Hora',
+  //                                   enabled: false),
+  //                             ]),
+  //                             _buildResponsiveRow(isLargeScreen, [
+  //                               _buildNotesField(_notasController, 'Notas',
+  //                                   enabled: editable),
+  //                             ]),
+  //                           ],
+  //                         );
+  //                       },
+  //                     ),
+  //                   ),
+  //                   const SizedBox(height: 20),
+  //                   Row(
+  //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                     children: [
+  //                       // Botón de Editar solo se muestra cuando se está editando un cliente existente
+  //                       if (visita != null)
+  //                         ElevatedButton(
+  //                           onPressed: () {
+  //                             isEditable.value = !isEditable.value;
+  //                           },
+  //                           child: ValueListenableBuilder<bool>(
+  //                             valueListenable: isEditable,
+  //                             builder: (context, editable, _) {
+  //                               return Text(
+  //                                 editable ? 'Cancelar Edición' : 'Editar',
+  //                               );
+  //                             },
+  //                           ),
+  //                         ),
+  //                       const Spacer(),
+  //                       // Botones de Cancelar y Guardar
+  //                       TextButton(
+  //                         onPressed: () => Navigator.of(context).pop(),
+  //                         child: Text(
+  //                           'Cancelar',
+  //                           style: TextStyle(color: Colors.grey[600]),
+  //                         ),
+  //                       ),
+  //                       const SizedBox(width: 16),
+  //                       ElevatedButton(
+  //                         style: ElevatedButton.styleFrom(
+  //                           backgroundColor: Colors.indigo,
+  //                           shape: RoundedRectangleBorder(
+  //                             borderRadius: BorderRadius.circular(8),
+  //                           ),
+  //                           padding: const EdgeInsets.symmetric(
+  //                               horizontal: 24, vertical: 12),
+  //                         ),
+  //                         onPressed: () {
+  //                           if (formKey.currentState!.validate()) {
+  //                             _saveOrUpdateVisit(context, visita);
+  //                             Navigator.of(context).pop();
+  //                           }
+  //                         },
+  //                         child: const Text(
+  //                           'Guardar',
+  //                           style: TextStyle(
+  //                             fontSize: 16,
+  //                             fontWeight: FontWeight.bold,
+  //                             color: Colors.white,
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ],
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   void _showClientVisitFormDialog(BuildContext context, Visitas? visita) {
     final formKey = GlobalKey<FormState>();
@@ -343,6 +526,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       _prodServicioController.text = visita.productoServicio;
       _propVisitaController.text = visita.propVisita;
       _notasController.text = visita.notas;
+      _nombreClienteController.text = visita.nombreCliente;
       _horaController.text = visita.hora;
       _fechaController.text = DateFormat('dd/MM/yyyy').format(visita.fecha);
     } else {
@@ -350,8 +534,8 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       _prodServicioController.clear();
       selectedPurpose = 'Venta';
       _notasController.clear();
-      _horaController.text = DateFormat('HH:mm')
-          .format(DateTime.now()); // Asignar la hora actual del servidor
+      _nombreClienteController.clear();
+      _horaController.text = DateFormat('HH:mm').format(DateTime.now());
       _fechaController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
     }
 
@@ -366,9 +550,14 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
           backgroundColor: Colors.transparent,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              double modalWidth = constraints.maxWidth > 600
-                  ? constraints.maxWidth * 0.4
-                  : constraints.maxWidth * 0.9;
+              double modalWidth;
+              if (constraints.maxWidth > 927) {
+                modalWidth = constraints.maxWidth * 0.4;
+              } else if (constraints.maxWidth > 681) {
+                modalWidth = constraints.maxWidth * 0.7;
+              } else {
+                modalWidth = constraints.maxWidth * 0.9;
+              }
 
               return Container(
                 width: modalWidth,
@@ -392,13 +581,13 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                       child: ValueListenableBuilder<bool>(
                         valueListenable: isEditable,
                         builder: (context, editable, _) {
-                          bool isLargeScreen = constraints.maxWidth > 600;
+                          bool isLargeScreen = constraints.maxWidth > 986;
                           return Column(
                             children: [
                               _buildResponsiveRow(isLargeScreen, [
                                 _buildInputField(
-                                    _codVendedorController, 'Cod. Vendedor',
-                                    enabled: false),
+                                    _nombreClienteController, 'Nombre Cliente',
+                                    enabled: editable),
                                 _buildInputField(
                                     _accionesController, 'Acciones',
                                     enabled: editable),
@@ -435,32 +624,40 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Botón de Editar solo se muestra cuando se está editando un cliente existente
                         if (visita != null)
-                          ElevatedButton(
-                            onPressed: () {
-                              isEditable.value = !isEditable.value;
+                          ValueListenableBuilder<bool>(
+                            valueListenable: isEditable,
+                            builder: (context, editable, _) {
+                              return ElevatedButton.icon(
+                                onPressed: () {
+                                  isEditable.value = !isEditable
+                                      .value; // Cambia el estado de edición
+                                },
+                                icon: editable
+                                    ? const Icon(Icons
+                                        .edit_off) // Ícono cuando está habilitado
+                                    : const Icon(Icons
+                                        .edit), // Ícono cuando está deshabilitado
+                                label: MediaQuery.of(context).size.width < 400
+                                    ? const Text(
+                                        '') // Texto vacío si el ancho es menor a 400px
+                                    : const Text(
+                                        'Editar'), // Mostrar texto en pantallas más grandes
+                              );
                             },
-                            child: ValueListenableBuilder<bool>(
-                              valueListenable: isEditable,
-                              builder: (context, editable, _) {
-                                return Text(
-                                  editable ? 'Cancelar Edición' : 'Editar',
-                                );
-                              },
-                            ),
                           ),
                         const Spacer(),
-                        // Botones de Cancelar y Guardar
-                        TextButton(
+                        TextButton.icon(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: Text(
-                            'Cancelar',
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
+                          icon: const Icon(Icons.cancel),
+                          label: MediaQuery.of(context).size.width < 400
+                              ? const Text(
+                                  '') // Texto vacío si el ancho es menor a 400px
+                              : const Text(
+                                  'Cancelar'), // Mostrar texto en pantallas más grandes
                         ),
-                        const SizedBox(width: 16),
-                        ElevatedButton(
+                        const SizedBox(width: 8),
+                        ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.indigo,
                             shape: RoundedRectangleBorder(
@@ -475,14 +672,12 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                               Navigator.of(context).pop();
                             }
                           },
-                          child: const Text(
-                            'Guardar',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                          icon: const Icon(Icons.save, color: Colors.white,),
+                          label: MediaQuery.of(context).size.width < 400
+                              ? const Text(
+                                  '') // Texto vacío si el ancho es menor a 400px
+                              : const Text(
+                                  'Guardar', style: TextStyle(color: Colors.white)), // Mostrar texto en pantallas más grandes
                         ),
                       ],
                     ),
@@ -748,34 +943,36 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     _notasController.dispose();
     _prodServicioController.dispose();
     _propVisitaController.dispose();
+    _nombreClienteController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-  return Scaffold(
-    body: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Agendar Visitas',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 24),
-          Expanded(
-            child: ResponsiveUserTable(
-              visitas: visitas,
-              deleteVisit: (visita) => _deleteVisit(visita),
-              showClientVisitFormDialog: (context, visita) => _showClientVisitFormDialog(context, visita),
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Agendar Visitas',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-          ),
-        ],
+            const SizedBox(height: 24),
+            Expanded(
+              child: ResponsiveUserTable(
+                visitas: visitas,
+                deleteVisit: (visita) => _deleteVisit(visita),
+                showClientVisitFormDialog: (context, visita) =>
+                    _showClientVisitFormDialog(context, visita),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
   // Widget _buildUserTable() {
   //   return Card(
   //     elevation: 4,
