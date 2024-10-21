@@ -4,7 +4,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:admindashboard/models/visits.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:data_table_2/data_table_2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -187,7 +186,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   // }
 
   Future<void> _saveOrUpdateVisit(
-      BuildContext context, Visitas? existingVisit) async {
+    BuildContext context, Visitas? existingVisit) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     try {
@@ -224,8 +223,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
         'PropositoVisita': selectedPurpose,
         'NombreCliente': _nombreClienteController.text,
         'UserId': user.uid,
-        'Fecha': Timestamp.fromDate(
-            DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
+        'Fecha': Timestamp.fromDate(DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
         'Location': geoPoint,
         'updatedAt': Timestamp.now(),
       };
@@ -961,7 +959,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
             ),
             const SizedBox(height: 24),
             Expanded(
-              child: ResponsiveUserTable(
+              child: ResponsiveVisitasTable(
                 visitas: visitas,
                 deleteVisit: (visita) => _deleteVisit(visita),
                 showClientVisitFormDialog: (context, visita) =>

@@ -1,17 +1,17 @@
-import 'package:admindashboard/models/visits.dart';
+import 'package:admindashboard/models/clients.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ResponsiveVisitasTable extends StatelessWidget {
-  final List<Visitas> visitas;
-  final Function(Visitas) deleteVisit;
+class ResponsiveClientsTable extends StatelessWidget {
+  final List<Clients> clientes;
+  final Function(Clients) deleteClient;
   final Function(BuildContext, dynamic) showClientVisitFormDialog;
 
-  const ResponsiveVisitasTable({
+  const ResponsiveClientsTable({
     super.key,
-    required this.visitas,
-    required this.deleteVisit,
+    required this.clientes,
+    required this.deleteClient,
     required this.showClientVisitFormDialog,
   });
 
@@ -35,7 +35,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Mis visitas',
+                        'Mis clientes',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
@@ -49,7 +49,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text('Nueva Visita'),
+                        child: const Text('Agregar Cliente'),
                       ),
                     ],
                   ),
@@ -65,7 +65,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
   }
 
   Widget _buildTableContent(BuildContext context, BoxConstraints constraints) {
-    if (visitas.isEmpty) {
+    if (clientes.isEmpty) {
       return _buildEmptyState();
     }
 
@@ -77,7 +77,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
   Widget _buildEmptyState() {
     return const Center(
       child: Text(
-        "No hay visitas para mostrar",
+        "No hay clientes para mostrar",
         style: TextStyle(fontSize: 18),
       ),
     );
@@ -129,9 +129,9 @@ class ResponsiveVisitasTable extends StatelessWidget {
 
   Widget _buildListView() {
     return ListView.builder(
-      itemCount: visitas.length,
+      itemCount: clientes.length,
       itemBuilder: (context, index) {
-        final item = visitas[index];
+        final item = clientes[index];
         return GestureDetector(
           onTap: () {
             // Al hacer tap en la tarjeta, mostrar el cuadro de diálogo para editar
@@ -143,12 +143,12 @@ class ResponsiveVisitasTable extends StatelessWidget {
             margin: const EdgeInsets.symmetric(vertical: 4),
             child: ListTile(
               title: Text(
-                item.nombreCliente,
+                '${item.nombres} ${item.apellidos}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               subtitle: Text(
-                '${item.productoServicio} - ${DateFormat('dd/MM/yyyy').format(item.fecha)}',
+                '${item.telefono} - ${DateFormat('dd/MM/yyyy').format(item.fechaIngreso)}',
                 textAlign: TextAlign.center,
               ),
               trailing: PopupMenuButton<String>(
@@ -158,7 +158,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
                     showClientVisitFormDialog(
                         context, item); // Cuadro de diálogo para editar
                   } else if (result == 'Eliminar') {
-                    deleteVisit(item); // Lógica para eliminar
+                    deleteClient(item); // Lógica para eliminar
                   }
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -233,8 +233,8 @@ class ResponsiveVisitasTable extends StatelessWidget {
   // }
 
   Widget _buildDataTable(BuildContext context) {
-    final visitasDataSource = VisitasDataTableSource(
-        visitas, deleteVisit, showClientVisitFormDialog, context);
+    final clientesDataSource = ClientesDataTableSource(
+        clientes, deleteClient, showClientVisitFormDialog, context);
 
     return Theme(
       data: Theme.of(context).copyWith(
@@ -258,7 +258,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
           DataColumn2(
             label: Center(
               child: Text(
-                'NombreCliente',
+                'Nombres',
                 style: TextStyle(color: Colors.white), // Texto blanco
               ),
             ),
@@ -269,7 +269,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
           DataColumn2(
             label: Center(
               child: Text(
-                'Acciones',
+                'Apellidos',
                 style: TextStyle(color: Colors.white), // Texto blanco
               ),
             ),
@@ -278,7 +278,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
           DataColumn2(
             label: Center(
               child: Text(
-                'Producto/Servicio',
+                'Empresa',
                 style: TextStyle(color: Colors.white), // Texto blanco
               ),
             ),
@@ -287,7 +287,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
           DataColumn2(
             label: Center(
               child: Text(
-                'Propósito Visita',
+                'Teléfono',
                 style: TextStyle(color: Colors.white), // Texto blanco
               ),
             ),
@@ -296,7 +296,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
           DataColumn2(
             label: Center(
               child: Text(
-                'Fecha',
+                'Fecha Ingreso',
                 style: TextStyle(color: Colors.white), // Texto blanco
               ),
             ),
@@ -307,7 +307,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
           //   size: ColumnSize.S,
           // ),
         ],
-        source: visitasDataSource,
+        source: clientesDataSource,
         rowsPerPage: 10,
         columnSpacing: 40,
         horizontalMargin: 20,
@@ -321,22 +321,22 @@ class ResponsiveVisitasTable extends StatelessWidget {
   }
 }
 
-class VisitasDataTableSource extends DataTableSource {
-  final List<Visitas> visitas;
-  final Function(Visitas) deleteVisit;
+class ClientesDataTableSource extends DataTableSource {
+  final List<Clients> clientes;
+  final Function(Clients) deleteClient;
   final Function(BuildContext, dynamic) showClientVisitFormDialog;
   final BuildContext context;
 
-  VisitasDataTableSource(
-    this.visitas,
-    this.deleteVisit,
+  ClientesDataTableSource(
+    this.clientes,
+    this.deleteClient,
     this.showClientVisitFormDialog,
     this.context,
   );
 
   @override
   DataRow? getRow(int index) {
-    final visita = visitas[index];
+    final cliente = clientes[index];
     return DataRow(
       color: WidgetStateProperty.resolveWith<Color?>(
         (Set<WidgetState> states) {
@@ -347,28 +347,28 @@ class VisitasDataTableSource extends DataTableSource {
       cells: [
         DataCell(Center(
           child: GestureDetector(
-            onTap: () => showClientVisitFormDialog(context, visita),
-            child: Text(visita.nombreCliente),
+            onTap: () => showClientVisitFormDialog(context, cliente),
+            child: Text(cliente.nombres),
           ),
         )),
-        DataCell(Center(child: Text(visita.acciones))),
-        DataCell(Center(child: Text(visita.productoServicio))),
-        DataCell(Center(child: Text(visita.propVisita))),
+        DataCell(Center(child: Text(cliente.apellidos))),
+        DataCell(Center(child: Text(cliente.empresa))),
+        DataCell(Center(child: Text(cliente.telefono))),
         DataCell(
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Text(DateFormat('dd/MM/yyyy').format(visita.fecha)),
+              Text(DateFormat('dd/MM/yyyy').format(cliente.fechaIngreso)),
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert),
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     child: const Text('Editar'),
-                    onTap: () => showClientVisitFormDialog(context, visita),
+                    onTap: () => showClientVisitFormDialog(context, cliente),
                   ),
                   PopupMenuItem(
                     child: const Text('Eliminar'),
-                    onTap: () => deleteVisit(visita),
+                    onTap: () => deleteClient(cliente),
                   ),
                 ],
               ),
@@ -383,7 +383,7 @@ class VisitasDataTableSource extends DataTableSource {
   bool get isRowCountApproximate => false;
 
   @override
-  int get rowCount => visitas.length;
+  int get rowCount => clientes.length;
 
   @override
   int get selectedRowCount => 0;
