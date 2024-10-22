@@ -1,15 +1,8 @@
-// ignore_for_file: duplicate_import
-
 import 'dart:math';
-
 import 'package:admindashboard/models/employee.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:admindashboard/models/employee.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:data_table_2/data_table_2.dart';
-import 'package:flutter/material.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:intl/intl.dart';
 

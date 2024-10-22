@@ -7,12 +7,14 @@ class ResponsiveVisitasTable extends StatelessWidget {
   final List<Visitas> visitas;
   final Function(Visitas) deleteVisit;
   final Function(BuildContext, dynamic) showClientVisitFormDialog;
+  final bool isLoading;
 
   const ResponsiveVisitasTable({
     super.key,
     required this.visitas,
     required this.deleteVisit,
     required this.showClientVisitFormDialog,
+    required this.isLoading
   });
 
   @override
@@ -24,8 +26,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
           child: Card(
             elevation: 4,
             color: Colors.white,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -36,12 +37,10 @@ class ResponsiveVisitasTable extends StatelessWidget {
                     children: [
                       const Text(
                         '',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       ElevatedButton(
-                        onPressed: () =>
-                            showClientVisitFormDialog(context, null),
+                        onPressed: isLoading ? null : () => showClientVisitFormDialog(context, null),
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.blue,
                           backgroundColor: Colors.white,
@@ -64,13 +63,27 @@ class ResponsiveVisitasTable extends StatelessWidget {
     );
   }
 
+
+
   Widget _buildTableContent(BuildContext context, BoxConstraints constraints) {
+    if (isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Cargando visitas...')
+          ],
+        ),
+      );
+    }
+
     if (visitas.isEmpty) {
       return _buildEmptyState();
     }
 
     final isSmallScreen = constraints.maxWidth < 800;
-
     return isSmallScreen ? _buildListView() : _buildDataTable(context);
   }
 
@@ -82,50 +95,6 @@ class ResponsiveVisitasTable extends StatelessWidget {
       ),
     );
   }
-
-  // Widget _buildListView() {
-  //   return ListView.builder(
-  //     itemCount: visitas.length,
-  //     itemBuilder: (context, index) {
-  //       final item = visitas[index];
-  //       return Card(
-  //         color: Colors.white,
-  //         elevation: 2,
-  //         margin: const EdgeInsets.symmetric(vertical: 4),
-  //         child: ListTile(
-  //           title: Text(
-  //             item.nombreCliente,
-  //             textAlign: TextAlign.center,
-  //             style: TextStyle(fontWeight: FontWeight.bold),
-  //           ),
-  //           subtitle: Text(
-  //               '${item.productoServicio} - ${DateFormat('dd/MM/yyyy').format(item.fecha)}',
-  //               textAlign: TextAlign.center),
-  //           trailing: PopupMenuButton<String>(
-  //             icon: const Icon(Icons.more_vert),
-  //             onSelected: (String result) {
-  //               if (result == 'Editar') {
-  //                 showClientVisitFormDialog(context, item);
-  //               } else if (result == 'Eliminar') {
-  //                 deleteVisit(item);
-  //               }
-  //             },
-  //             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-  //               const PopupMenuItem<String>(
-  //                 value: 'Editar',
-  //                 child: Text('Editar'),
-  //               ),
-  //               const PopupMenuItem<String>(
-  //                 value: 'Eliminar',
-  //                 child: Text('Eliminar'),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 
   Widget _buildListView() {
     return ListView.builder(
@@ -178,59 +147,6 @@ class ResponsiveVisitasTable extends StatelessWidget {
       },
     );
   }
-
-  // Widget _buildDataTable(BuildContext context) {
-  //   final visitasDataSource =
-  //       VisitasDataTableSource(visitas, deleteVisit, showClientVisitFormDialog);
-
-  //   return Theme(
-  //     data: Theme.of(context).copyWith(
-  //       cardColor: Colors.white,
-  //       dividerColor: Colors.grey[300],
-  //       dataTableTheme: DataTableThemeData(
-  //         headingTextStyle: TextStyle(
-  //           color: Colors.blue[700],
-  //           fontWeight: FontWeight.bold,
-  //         ),
-  //         dataTextStyle: const TextStyle(color: Colors.black87),
-  //       ),
-  //     ),
-  //     child: PaginatedDataTable2(
-  //       header: null,
-  //       columns: const [
-  //         DataColumn2(
-  //           label: Center(child: Text('NombreCliente')),
-  //           size: ColumnSize.L,
-  //         ),
-  //         DataColumn2(
-  //             label: Center(child: Text('Acciones')), size: ColumnSize.L),
-  //         DataColumn2(
-  //             label: Center(child: Text('Producto/Servicio')),
-  //             size: ColumnSize.L),
-  //         DataColumn2(
-  //             label: Center(child: Text('Propósito Visita')),
-  //             size: ColumnSize.L),
-  //         DataColumn2(label: Center(child: Text('Fecha')), size: ColumnSize.L),
-  //         DataColumn2(
-  //             label: Text(
-  //               '',
-  //             ),
-  //             size: ColumnSize.S), // Última columna sin centrar
-  //       ],
-  //       source: visitasDataSource,
-  //       rowsPerPage: 5,
-  //       columnSpacing: 40,
-  //       horizontalMargin: 20,
-  //       showCheckboxColumn: false,
-  //       headingRowHeight: 40,
-  //       dataRowHeight: 60,
-  //       dataTextStyle: const TextStyle(color: Colors.black87),
-
-  //       //dataRowMaxHeight: 60,
-  //       //dataRowMinHeight: 48,
-  //     ),
-  //   );
-  // }
 
   Widget _buildDataTable(BuildContext context) {
     final visitasDataSource = VisitasDataTableSource(

@@ -15,6 +15,7 @@ class VisitsManagementWidget extends StatefulWidget {
 }
 
 class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
+  bool isLoading = false;
   String selectedPurpose = 'Venta';
   List<String> purpose = ['Venta', 'Seguimiento', 'Renovación', 'Resolución'];
   List<Visitas> visitas = [];
@@ -74,8 +75,11 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   }
 
   Future<void> _loadVisits(String codVendedor) async {
+    setState(() {
+      isLoading = true; // Activar loading al inicio de la carga
+    });
+
     try {
-      // Obtener el usuario actualmente autenticado
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         throw Exception('No hay usuario autenticado');
@@ -83,16 +87,20 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
 
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Visits')
-          .where('UserId', isEqualTo: codVendedor) // Filtrar por UserId
+          .where('UserId', isEqualTo: codVendedor)
           .get();
 
       setState(() {
         visitas = querySnapshot.docs
             .map((doc) => Visitas.fromFirestore(doc))
             .toList();
+        isLoading = false; // Desactivar loading cuando los datos están listos
       });
     } catch (e) {
-      // Mostrar un mensaje de error al usuario
+      setState(() {
+        isLoading = false; // Desactivar loading incluso si hay error
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error al cargar las visitas: $e'),
@@ -102,91 +110,8 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     }
   }
 
-  // Future<String> _getNextUserCode() async {
-  //   Random random = Random();
-  //   String code = '';
-  //   bool isUnique = false;
-
-  //   while (!isUnique) {
-  //     // Generar un número aleatorio de 6 dígitos
-  //     int randomNumber = random.nextInt(900000) + 100000; // Asegura 6 dígitos
-  //     code = 'USR$randomNumber';
-
-  //     // Verificar si el código ya existe en Firebase
-  //     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-  //         .collection('Users')
-  //         .where('Codigo', isEqualTo: code)
-  //         .limit(1)
-  //         .get();
-
-  //     if (querySnapshot.docs.isEmpty) {
-  //       isUnique = true; // El código es único
-  //     }
-  //   }
-
-  //   return code;
-  // }
-
-  // Future<void> _saveOrUpdateVisit(Visitas? existingVisit) async {
-  //   try {
-  //     // Obtener el usuario actualmente logueado
-  //     final user = FirebaseAuth.instance.currentUser;
-  //     if (user == null) {
-  //       throw Exception('No hay ningún usuario logueado.');
-  //     }
-
-  //     // Obtener el código del vendedor y el UserId
-  //     final userId = user.uid;
-  //     final codVendedor = _codVendedorController.text;
-
-  //     // Datos de la visita a guardar o actualizar
-  //     final visitData = {
-  //       'Acciones': _accionesController.text,
-  //       'CodVendedor': codVendedor, // Código del vendedor logueado
-  //       'Hora': _horaController.text,
-  //       'Notas': _notasController.text,
-  //       'ProductoServicio': _prodServicioController.text,
-  //       'PropositoVisita': selectedPurpose,
-  //       'UserId': userId, // UserId del usuario logueado
-  //       'Fecha': Timestamp.fromDate(
-  //           DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
-  //     };
-
-  //     if (existingVisit == null) {
-  //       // Crear una nueva visita
-  //       await FirebaseFirestore.instance.collection('Visits').add(visitData);
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(content: Text('Visita agendada exitosamente')),
-  //       );
-  //     } else {
-  //       // Actualizar visita existente
-  //       await FirebaseFirestore.instance
-  //           .collection('Visits')
-  //           .doc(existingVisit
-  //               .id) // Suponiendo que tienes un campo 'id' en Visitas
-  //           .update(visitData);
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(content: Text('Visita actualizada exitosamente')),
-  //       );
-  //     }
-
-  //     // Recargar la lista de visitas filtradas por CodVendedor
-  //     await _loadVisits(codVendedor);
-
-  //     // Limpiar los campos del formulario
-  //     _clearFormFields();
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text('Error: ${e.toString()}'),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //   }
-  // }
-
   Future<void> _saveOrUpdateVisit(
-    BuildContext context, Visitas? existingVisit) async {
+      BuildContext context, Visitas? existingVisit) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     try {
@@ -223,7 +148,8 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
         'PropositoVisita': selectedPurpose,
         'NombreCliente': _nombreClienteController.text,
         'UserId': user.uid,
-        'Fecha': Timestamp.fromDate(DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
+        'Fecha': Timestamp.fromDate(
+            DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
         'Location': geoPoint,
         'updatedAt': Timestamp.now(),
       };
@@ -306,11 +232,6 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
         return null;
       }
 
-      // // Obtener la posición
-      // Position position = await Geolocator.getCurrentPosition(
-      //   desiredAccuracy: LocationAccuracy.high
-      // );
-
       // Obtener la posición usando LocationSettings
       Position position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
@@ -347,173 +268,6 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     _fechaController.clear();
     _nombreClienteController.clear();
   }
-
-  // void _showClientVisitFormDialog(BuildContext context, Visitas? visita) {
-  //   final formKey = GlobalKey<FormState>();
-  //   final ValueNotifier<bool> isEditable = ValueNotifier<bool>(visita == null);
-
-  //   if (visita != null) {
-  //     _accionesController.text = visita.acciones;
-  //     _prodServicioController.text = visita.productoServicio;
-  //     _propVisitaController.text = visita.propVisita;
-  //     _notasController.text = visita.notas;
-  //     _nombreClienteController.text = visita.nombreCliente;
-  //     _horaController.text = visita.hora;
-  //     _fechaController.text = DateFormat('dd/MM/yyyy').format(visita.fecha);
-  //   } else {
-  //     _accionesController.clear();
-  //     _prodServicioController.clear();
-  //     selectedPurpose = 'Venta';
-  //     _notasController.clear();
-  //     _nombreClienteController.clear();
-  //     _horaController.text = DateFormat('HH:mm')
-  //         .format(DateTime.now()); // Asignar la hora actual del servidor
-  //     _fechaController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
-  //   }
-
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return Dialog(
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(20),
-  //         ),
-  //         elevation: 0,
-  //         backgroundColor: Colors.transparent,
-  //         child: LayoutBuilder(
-  //           builder: (context, constraints) {
-  //             double modalWidth = constraints.maxWidth > 600
-  //                 ? constraints.maxWidth * 0.4
-  //                 : constraints.maxWidth * 0.9;
-
-  //             return Container(
-  //               width: modalWidth,
-  //               padding: const EdgeInsets.all(20),
-  //               decoration: BoxDecoration(
-  //                 color: Colors.white,
-  //                 borderRadius: BorderRadius.circular(20),
-  //               ),
-  //               child: Column(
-  //                 mainAxisSize: MainAxisSize.min,
-  //                 mainAxisAlignment: MainAxisAlignment.center,
-  //                 children: <Widget>[
-  //                   Text(
-  //                     visita == null ? 'Nueva Visita' : 'Editar Visita',
-  //                     style: const TextStyle(
-  //                         fontSize: 22, fontWeight: FontWeight.w600),
-  //                   ),
-  //                   const SizedBox(height: 20),
-  //                   Form(
-  //                     key: formKey,
-  //                     child: ValueListenableBuilder<bool>(
-  //                       valueListenable: isEditable,
-  //                       builder: (context, editable, _) {
-  //                         bool isLargeScreen = constraints.maxWidth > 600;
-  //                         return Column(
-  //                           children: [
-  //                             _buildResponsiveRow(isLargeScreen, [
-  //                               // _buildInputField(
-  //                               //     _codVendedorController, 'Cod. Vendedor',
-  //                               //     enabled: false),
-  //                               _buildInputField(
-  //                                   _nombreClienteController, 'Nombre Cliente',
-  //                                   enabled: editable),
-  //                               _buildInputField(
-  //                                   _accionesController, 'Acciones',
-  //                                   enabled: editable),
-  //                             ]),
-  //                             _buildResponsiveRow(isLargeScreen, [
-  //                               _buildInputField(_prodServicioController,
-  //                                   'Producto/Servicio',
-  //                                   enabled: editable),
-  //                               _buildDropdown(selectedPurpose,
-  //                                   (String? newValue) {
-  //                                 setState(() {
-  //                                   selectedPurpose = newValue!;
-  //                                 });
-  //                               }, enabled: editable),
-  //                             ]),
-  //                             _buildResponsiveRow(isLargeScreen, [
-  //                               _buildDatePicker(context, _fechaController,
-  //                                   'Fecha de Ingreso',
-  //                                   enabled: false),
-  //                               _buildTimePicker(
-  //                                   context, _horaController, 'Hora',
-  //                                   enabled: false),
-  //                             ]),
-  //                             _buildResponsiveRow(isLargeScreen, [
-  //                               _buildNotesField(_notasController, 'Notas',
-  //                                   enabled: editable),
-  //                             ]),
-  //                           ],
-  //                         );
-  //                       },
-  //                     ),
-  //                   ),
-  //                   const SizedBox(height: 20),
-  //                   Row(
-  //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                     children: [
-  //                       // Botón de Editar solo se muestra cuando se está editando un cliente existente
-  //                       if (visita != null)
-  //                         ElevatedButton(
-  //                           onPressed: () {
-  //                             isEditable.value = !isEditable.value;
-  //                           },
-  //                           child: ValueListenableBuilder<bool>(
-  //                             valueListenable: isEditable,
-  //                             builder: (context, editable, _) {
-  //                               return Text(
-  //                                 editable ? 'Cancelar Edición' : 'Editar',
-  //                               );
-  //                             },
-  //                           ),
-  //                         ),
-  //                       const Spacer(),
-  //                       // Botones de Cancelar y Guardar
-  //                       TextButton(
-  //                         onPressed: () => Navigator.of(context).pop(),
-  //                         child: Text(
-  //                           'Cancelar',
-  //                           style: TextStyle(color: Colors.grey[600]),
-  //                         ),
-  //                       ),
-  //                       const SizedBox(width: 16),
-  //                       ElevatedButton(
-  //                         style: ElevatedButton.styleFrom(
-  //                           backgroundColor: Colors.indigo,
-  //                           shape: RoundedRectangleBorder(
-  //                             borderRadius: BorderRadius.circular(8),
-  //                           ),
-  //                           padding: const EdgeInsets.symmetric(
-  //                               horizontal: 24, vertical: 12),
-  //                         ),
-  //                         onPressed: () {
-  //                           if (formKey.currentState!.validate()) {
-  //                             _saveOrUpdateVisit(context, visita);
-  //                             Navigator.of(context).pop();
-  //                           }
-  //                         },
-  //                         child: const Text(
-  //                           'Guardar',
-  //                           style: TextStyle(
-  //                             fontSize: 16,
-  //                             fontWeight: FontWeight.bold,
-  //                             color: Colors.white,
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     ],
-  //                   ),
-  //                 ],
-  //               ),
-  //             );
-  //           },
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 
   void _showClientVisitFormDialog(BuildContext context, Visitas? visita) {
     final formKey = GlobalKey<FormState>();
@@ -670,12 +424,17 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                               Navigator.of(context).pop();
                             }
                           },
-                          icon: const Icon(Icons.save, color: Colors.white,),
+                          icon: const Icon(
+                            Icons.save,
+                            color: Colors.white,
+                          ),
                           label: MediaQuery.of(context).size.width < 400
                               ? const Text(
                                   '') // Texto vacío si el ancho es menor a 400px
-                              : const Text(
-                                  'Guardar', style: TextStyle(color: Colors.white)), // Mostrar texto en pantallas más grandes
+                              : const Text('Guardar',
+                                  style: TextStyle(
+                                      color: Colors
+                                          .white)), // Mostrar texto en pantallas más grandes
                         ),
                       ],
                     ),
@@ -964,6 +723,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                 deleteVisit: (visita) => _deleteVisit(visita),
                 showClientVisitFormDialog: (context, visita) =>
                     _showClientVisitFormDialog(context, visita),
+                isLoading: isLoading,
               ),
             ),
           ],
@@ -971,391 +731,6 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       ),
     );
   }
-  // Widget _buildUserTable() {
-  //   return Card(
-  //     elevation: 4,
-  //     color: Colors.white70,
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(16),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Row(
-  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //             children: [
-  //               const Text(
-  //                 'Mis visitas',
-  //                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-  //               ),
-  //               ElevatedButton(
-  //                 onPressed: () => showClientVisitFormDialog(context, null),
-  //                 child: const Text('Agendar Visita'),
-  //               ),
-  //             ],
-  //           ),
-  //           const SizedBox(height: 16),
-  //           visitas.isEmpty
-  //               ? SizedBox(
-  //                   height: 400,
-  //                   child: FutureBuilder(
-  //                     future: Future.delayed(const Duration(seconds: 1)),
-  //                     builder: (context, snapshot) {
-  //                       if (snapshot.connectionState ==
-  //                           ConnectionState.waiting) {
-  //                         return const Center(
-  //                           child: CircularProgressIndicator(strokeWidth: 2),
-  //                         );
-  //                       } else {
-  //                         return const Center(
-  //                           child: Text(
-  //                             "No hay visitas para mostrar",
-  //                             style: TextStyle(fontSize: 18),
-  //                           ),
-  //                         );
-  //                       }
-  //                     },
-  //                   ),
-  //                 )
-  //               : SizedBox(
-  //                   height: 400,
-  //                   child: DataTable2(
-  //                     columnSpacing: 12,
-  //                     horizontalMargin: 12,
-  //                     minWidth: 600,
-  //                     decoration: BoxDecoration(
-  //                       color: Colors.grey[100],
-  //                       borderRadius: BorderRadius.circular(8),
-  //                     ),
-  //                     headingRowColor:
-  //                         WidgetStateProperty.all(Colors.grey[200]),
-  //                     columns: const [
-  //                       // DataColumn2(
-  //                       //   label: Center(
-  //                       //     child: Text('Cod. Vendedor',
-  //                       //         style: TextStyle(
-  //                       //           fontSize: 16,
-  //                       //           fontWeight: FontWeight.bold,
-  //                       //           color: Colors.blue,
-  //                       //         )),
-  //                       //   ),
-  //                       //   size: ColumnSize.L,
-  //                       // ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Acciones',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       // DataColumn2(
-  //                       //   label: Center(
-  //                       //     child: Text('Hora',
-  //                       //         style: TextStyle(
-  //                       //           fontSize: 16,
-  //                       //           fontWeight: FontWeight.bold,
-  //                       //           color: Colors.blue,
-  //                       //         )),
-  //                       //   ),
-  //                       //   size: ColumnSize.L,
-  //                       // ),
-  //                       // DataColumn2(
-  //                       //   label: Center(
-  //                       //     child: Text('Notas',
-  //                       //         style: TextStyle(
-  //                       //           fontSize: 16,
-  //                       //           fontWeight: FontWeight.bold,
-  //                       //           color: Colors.blue,
-  //                       //         )),
-  //                       //   ),
-  //                       //   size: ColumnSize.L,
-  //                       // ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Producto/Servicio',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Proposito Visita',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Fecha',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.S,
-  //                       ),
-  //                     ],
-  //                     rows: visitas
-  //                         .map((visita) => DataRow2(
-  //                               cells: [
-  //                                 // DataCell(
-  //                                 //     Center(child: Text(visita.codVendedor))),
-  //                                 DataCell(
-  //                                     Center(child: Text(visita.acciones))),
-  //                                 // DataCell(Center(child: Text(visita.hora))),
-  //                                 // DataCell(Center(child: Text(visita.notas))),
-  //                                 DataCell(Center(
-  //                                     child: Text(visita.productoServicio))),
-  //                                 DataCell(
-  //                                     Center(child: Text(visita.propVisita))),
-  //                                 // DataCell(
-  //                                 //   Row(
-  //                                 //     mainAxisAlignment:
-  //                                 //         MainAxisAlignment.spaceBetween,
-  //                                 //     children: [
-  //                                 //       Text(DateFormat('dd/MM/yyyy')
-  //                                 //           .format(visita.fecha)),
-  //                                 //       PopupMenuButton<String>(
-  //                                 //         onSelected: (value) {
-  //                                 //           if (value == 'Eliminar') {
-  //                                 //             _deleteVisit(visita);
-  //                                 //           } else if (value ==
-  //                                 //               'Deshabilitar') {
-  //                                 //             //_disableEmployee(employee);
-  //                                 //             print(
-  //                                 //                 'Aqui se va a deshabilitar');
-  //                                 //           }
-  //                                 //         },
-  //                                 //         itemBuilder: (BuildContext context) =>
-  //                                 //             [
-  //                                 //           const PopupMenuItem<String>(
-  //                                 //             value: 'Eliminar',
-  //                                 //             child: Text('Eliminar'),
-  //                                 //           ),
-  //                                 //           const PopupMenuItem<String>(
-  //                                 //             value: 'Deshabilitar',
-  //                                 //             child: Text('Deshabilitar'),
-  //                                 //           ),
-  //                                 //         ],
-  //                                 //         icon: const Icon(Icons.more_vert),
-  //                                 //       ),
-  //                                 //     ],
-  //                                 //   ),
-  //                                 // ),
-  //                                 DataCell(Center(
-  //                                     child: Text((DateFormat('dd/MM/yyyy')
-  //                                         .format(visita.fecha))))),
-  //                                 DataCell(
-  //                                   Row(
-  //                                     mainAxisAlignment: MainAxisAlignment
-  //                                         .end, // Alinear al final
-  //                                     children: [
-  //                                       PopupMenuButton<String>(
-  //                                         onSelected: (value) {
-  //                                           if (value == 'Eliminar') {
-  //                                             deleteVisit(visita);
-  //                                           } else if (value ==
-  //                                               'Deshabilitar') {
-  //                                             //_disableEmployee(employee);
-  //                                             print(
-  //                                                 'Aqui se va a deshabilitar');
-  //                                           }
-  //                                         },
-  //                                         itemBuilder: (BuildContext context) =>
-  //                                             [
-  //                                           const PopupMenuItem<String>(
-  //                                             value: 'Eliminar',
-  //                                             child: Text('Eliminar'),
-  //                                           ),
-  //                                           const PopupMenuItem<String>(
-  //                                             value: 'Deshabilitar',
-  //                                             child: Text('Deshabilitar'),
-  //                                           ),
-  //                                         ],
-  //                                         icon: const Icon(Icons.more_vert),
-  //                                       ),
-  //                                     ],
-  //                                   ),
-  //                                 ),
-  //                               ],
-  //                               color: WidgetStateProperty.resolveWith<Color?>(
-  //                                 (Set<WidgetState> states) {
-  //                                   if (states.contains(WidgetState.hovered)) {
-  //                                     return Colors.grey[300];
-  //                                   }
-  //                                   return null;
-  //                                 },
-  //                               ),
-  //                               onDoubleTap: () =>
-  //                                   showClientVisitFormDialog(context, visita),
-  //                             ))
-  //                         .toList(),
-  //                   ),
-  //                 ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-//   Widget _buildUserTable() {
-//   final visitasDataSource = VisitasDataTableSource(visitas, _deleteVisit);
-
-//   return Card(
-//     elevation: 0,
-//     color: Colors.white,
-//     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-//     child: Padding(
-//       padding: const EdgeInsets.all(16),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               const Text(
-//                 'Mis visitas',
-//                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//               ),
-//               ElevatedButton(
-//                 onPressed: () => showClientVisitFormDialog(context, null),
-//                 style: ElevatedButton.styleFrom(
-//                   foregroundColor: Colors.blue,
-//                   backgroundColor: Colors.white,
-//                   shape: RoundedRectangleBorder(
-//                     borderRadius: BorderRadius.circular(8),
-//                   ),
-//                 ),
-
-//                 child: const Text('Nueva Visita'),
-//               ),
-//             ],
-//           ),
-//           const SizedBox(height: 16),
-//           if (visitas.isEmpty)
-//             SizedBox(
-//               height: 400,
-//               child: FutureBuilder(
-//                 future: Future.delayed(const Duration(seconds: 1)),
-//                 builder: (context, snapshot) {
-//                   if (snapshot.connectionState == ConnectionState.waiting) {
-//                     return const Center(
-//                       child: CircularProgressIndicator(strokeWidth: 2),
-//                     );
-//                   } else {
-//                     return const Center(
-//                       child: Text(
-//                         "No hay visitas para mostrar",
-//                         style: TextStyle(fontSize: 18),
-//                       ),
-//                     );
-//                   }
-//                 },
-//               ),
-//             )
-//           else
-//             Theme(
-//               data: Theme.of(context).copyWith(
-//                 dividerColor: Colors.grey[300],
-//                 dataTableTheme: DataTableThemeData(
-//                   headingTextStyle: TextStyle(
-//                     color: Colors.blue,
-//                     fontWeight: FontWeight.bold,
-//                   ),
-//                   dataTextStyle: TextStyle(color: Colors.black87),
-//                 ),
-//               ),
-//               child: PaginatedDataTable(
-//                 header: null,
-//                 columns: const [
-//                   DataColumn(label: Text('Acciones')),
-//                   DataColumn(label: Text('Productos/Servicios')),
-//                   DataColumn(label: Text('Proposito Visita')),
-//                   DataColumn(label: Text('Fecha')),
-//                   DataColumn(label: Text('')),
-//                 ],
-//                 source: visitasDataSource,
-//                 rowsPerPage: 10,
-//                 columnSpacing: 24,
-//                 horizontalMargin: 0,
-//                 showCheckboxColumn: false,
-//               ),
-//             ),
-//         ],
-//       ),
-//     ),
-//   );
-// }
-
-  // Future<void> _deleteVisit(Visitas visita) async {
-  //   // Mostrar un diálogo de confirmación
-  //   bool? confirmDelete = await showDialog<bool>(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: const Text('Confirmar eliminación'),
-  //         content: const Text('¿Está seguro de que desea eliminar la visita?'),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: const Text('Cancelar'),
-  //             onPressed: () => Navigator.of(context).pop(false),
-  //           ),
-  //           TextButton(
-  //             child: const Text('Eliminar'),
-  //             onPressed: () => Navigator.of(context).pop(true),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-
-  //   if (confirmDelete == true) {
-  //     try {
-  //       // Eliminar el documento directamente usando su ID
-  //       await FirebaseFirestore.instance
-  //           .collection('Visits')
-  //           .doc(visita.id)
-  //           .delete();
-
-  //       // Actualizar la lista de visitas localmente
-  //       setState(() {
-  //         visitas.removeWhere((v) => v.id == visita.id);
-  //       });
-
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(content: Text('Visita eliminada con éxito')),
-  //       );
-  //     } catch (e) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Error al eliminar la visita: $e')),
-  //       );
-  //     }
-  //   }
-  // }
 
   void _deleteVisit(Visitas visita) async {
     // Mostrar un diálogo de confirmación

@@ -1,14 +1,9 @@
-// ignore_for_file: duplicate_import
-
 import 'dart:math';
-
 import 'package:admindashboard/models/clients.dart';
 import 'package:admindashboard/pages/clients/widgets/clients_paginated_table.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ClientsPage extends StatefulWidget {
@@ -22,6 +17,7 @@ class _ClientsPageState extends State<ClientsPage> {
   //final _formKey = GlobalKey<FormState>();
   //String selectedRole = 'Cliente';
   //List<String> roles = ['Vendedor', 'Supervisor'];
+  bool isLoading = false;
   String currentVendorCode = '';
   List<Clients> clients = [];
 
@@ -40,64 +36,6 @@ class _ClientsPageState extends State<ClientsPage> {
     super.initState();
     _loadUserCodeAndUsers();
   }
-
-  // Future<void> _loadUserCodeAndUsers() async {
-  //   try {
-  //     // Get the current user
-  //     User? currentUser = FirebaseAuth.instance.currentUser;
-  //     if (currentUser != null) {
-  //       if (kDebugMode) {
-  //         print('Current user UID: ${currentUser.uid}');
-  //       }
-
-  //       // Fetch the user document from Firestore
-  //       DocumentSnapshot userDoc = await FirebaseFirestore.instance
-  //           .collection('Users')
-  //           .doc(currentUser.uid)
-  //           .get();
-
-  //       if (userDoc.exists) {
-  //         if (kDebugMode) {
-  //           print('User document data: ${userDoc.data()}');
-  //         }
-
-  //         // Set the _codVendedorController with the user's code
-  //         String userCode = userDoc.get('Codigo') ?? '';
-  //         setState(() {
-  //           _codVendedorController.text = userCode;
-  //           currentVendorCode = _codVendedorController.text;
-  //         });
-
-  //         if (kDebugMode) {
-  //           print('Código de vendedor cargado: $userCode');
-  //           print('Código de vendedor cargado: $userCode');
-  //         }
-  //       } else {
-  //         if (kDebugMode) {
-  //           print('User document does not exist for UID: ${currentUser.uid}');
-  //         }
-  //       }
-  //     } else {
-  //       if (kDebugMode) {
-  //         print('No user is currently logged in');
-  //       }
-  //     }
-
-  //     // Load clients
-  //     await _loadUsers();
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       print('Error loading user code and clients: $e');
-  //     }
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content:
-  //             Text('Error al cargar información del usuario y clientes: $e'),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //   }
-  // }
 
   Future<void> _loadUserCodeAndUsers() async {
     try {
@@ -133,6 +71,10 @@ class _ClientsPageState extends State<ClientsPage> {
   }
 
   Future<void> _loadUsers() async {
+    setState(() {
+      isLoading = true; // Activar loading al inicio de la carga
+    });
+
     try {
       // Obtener el usuario actualmente autenticado
       final user = FirebaseAuth.instance.currentUser;
@@ -150,8 +92,13 @@ class _ClientsPageState extends State<ClientsPage> {
         clients = querySnapshot.docs
             .map((doc) => Clients.fromFirestore(doc))
             .toList();
+        isLoading = false;
       });
     } catch (e) {
+      setState(() {
+        isLoading = false; // Desactivar loading incluso si hay error
+      });
+
       // Mostrar un mensaje de error al usuario
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -186,98 +133,6 @@ class _ClientsPageState extends State<ClientsPage> {
 
     return code;
   }
-
-  // Future<void> _saveOrUpdateClient(Clients? existingClient) async {
-  //   try {
-  //     // Obtener el código del vendedor actual
-  //     // currentVendorCode = _codVendedorController.text;
-
-  //     if (kDebugMode) {
-  //       print('Código del vendedor actual: $currentVendorCode');
-  //     }
-
-  //     // Obtener el UserId del usuario actualmente logeado
-  //     final user = FirebaseAuth.instance.currentUser;
-  //     if (user == null) {
-  //       throw Exception('No hay ningún usuario logeado.');
-  //     }
-
-  //     final userId = user.uid;
-
-  //     final clientData = {
-  //       'Nombre': _nombresController.text,
-  //       'Apellidos': _apellidosController.text,
-  //       'email': _emailController.text,
-  //       'Telefono': _telefonoController.text,
-  //       'Direccion': _direccionController.text,
-  //       'Empresa': _empresaController.text,
-  //       'Codigo': _codigoController.text,
-  //       'CodVendedor': currentVendorCode, // Usar el código del vendedor actual
-  //       'UserId': userId, // Guardar el UserId del usuario logeado
-  //       'updatedAt': Timestamp.now(),
-  //     };
-
-  //     if (kDebugMode) {
-  //       print('Datos del cliente a guardar: $clientData');
-  //     }
-
-  //     if (existingClient == null) {
-  //       // Crear un nuevo cliente
-  //       final nextCode = await _getNextClientCode();
-  //       clientData['Codigo'] = nextCode;
-  //       clientData['createdAt'] = Timestamp.now();
-
-  //       DocumentReference docRef = await FirebaseFirestore.instance
-  //           .collection('Clients')
-  //           .add(clientData);
-
-  //       if (kDebugMode) {
-  //         print('Nuevo cliente creado con ID: ${docRef.id}');
-  //       }
-  //     } else {
-  //       // Actualizar cliente existente
-  //       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-  //           .collection('Clients')
-  //           .where('Codigo', isEqualTo: existingClient.codigo)
-  //           .limit(1)
-  //           .get();
-
-  //       if (querySnapshot.docs.isNotEmpty) {
-  //         await querySnapshot.docs.first.reference.update(clientData);
-
-  //         if (kDebugMode) {
-  //           print('Cliente actualizado con código: ${existingClient.codigo}');
-  //         }
-  //       } else {
-  //         throw Exception('No se encontró el cliente a actualizar');
-  //       }
-  //     }
-
-  //     // Recargar la lista de clientes
-  //     await _loadUsers();
-
-  //     // Mostrar mensaje de éxito
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text(existingClient == null
-  //             ? 'Cliente creado exitosamente'
-  //             : 'Cliente actualizado exitosamente'),
-  //         backgroundColor: Colors.green,
-  //       ),
-  //     );
-  //   } catch (e) {
-  //     // Mostrar mensaje de error
-  //     if (kDebugMode) {
-  //       print('Error al guardar/actualizar cliente: $e');
-  //     }
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text('Error: ${e.toString()}'),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //   }
-  // }
 
   Future<void> _saveOrUpdateClient(Clients? existingClient) async {
     try {
@@ -677,6 +532,7 @@ class _ClientsPageState extends State<ClientsPage> {
                 deleteClient: (visita) => _deleteClient(visita),
                 showClientVisitFormDialog: (context, visita) =>
                     _showFormDialog(context, visita),
+                isLoading: isLoading,
               ),
             ),
           ],
@@ -684,411 +540,6 @@ class _ClientsPageState extends State<ClientsPage> {
       ),
     );
   }
-
-  // Widget _buildUserTable() {
-  //   return Card(
-  //     elevation: 4,
-  //     color: Colors.white70,
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(16),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Row(
-  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //             children: [
-  //               const Text(
-  //                 'Lista de Clientes',
-  //                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-  //               ),
-  //               ElevatedButton(
-  //                 onPressed: () => _showFormDialog(context, null),
-  //                 child: const Text('Nuevo Cliente'),
-  //               ),
-  //             ],
-  //           ),
-  //           const SizedBox(height: 16),
-  //           clients.isEmpty
-  //               ? const SizedBox(
-  //                   height: 400,
-  //                   child: Center(
-  //                     child: CircularProgressIndicator(
-  //                       strokeWidth: 2,
-  //                     ), // Use a circular indicator
-  //                   ),
-  //                 )
-  //               : SizedBox(
-  //                   height: 400,
-  //                   child: DataTable2(
-  //                     columnSpacing: 12,
-  //                     horizontalMargin: 12,
-  //                     minWidth: 600,
-  //                     decoration: BoxDecoration(
-  //                       color: Colors.grey[100],
-  //                       borderRadius: BorderRadius.circular(8),
-  //                     ),
-  //                     headingRowColor:
-  //                         WidgetStateProperty.all(Colors.grey[200]),
-  //                     columns: const [
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Nombres',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Apellidos',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Email',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Teléfono',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Empresa',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       // DataColumn2(
-  //                       //   label: Center(
-  //                       //     child: Text('Direccion',
-  //                       //         style: TextStyle(
-  //                       //           fontSize: 16,
-  //                       //           fontWeight: FontWeight.bold,
-  //                       //           color: Colors.blue,
-  //                       //         )),
-  //                       //   ),
-  //                       //   size: ColumnSize.L,
-  //                       // ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Fecha Ingreso',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                     ],
-  //                     rows: clients
-  //                         .map((client) => DataRow2(
-  //                               cells: [
-  //                                 DataCell(Center(child: Text(client.nombres))),
-  //                                 DataCell(
-  //                                     Center(child: Text(client.apellidos))),
-  //                                 DataCell(Center(child: Text(client.email))),
-  //                                 DataCell(
-  //                                     Center(child: Text(client.telefono))),
-  //                                 DataCell(Center(child: Text(client.empresa))),
-  //                                 // DataCell(
-  //                                 //     Center(child: Text(client.direccion))),
-  //                                 // ... (otras celdas) ...
-  //                                 DataCell(
-  //                                   Row(
-  //                                     mainAxisAlignment:
-  //                                         MainAxisAlignment.spaceBetween,
-  //                                     children: [
-  //                                       Text(DateFormat('dd/MM/yyyy')
-  //                                           .format(client.fechaIngreso)),
-  //                                       PopupMenuButton<String>(
-  //                                         onSelected: (value) {
-  //                                           if (value == 'Eliminar') {
-  //                                             _deleteClient(client);
-  //                                           } else if (value ==
-  //                                               'Deshabilitar') {
-  //                                             //_disableEmployee(employee);
-  //                                             print(
-  //                                                 'Aqui se va a deshabilitar');
-  //                                           }
-  //                                         },
-  //                                         itemBuilder: (BuildContext context) =>
-  //                                             [
-  //                                           const PopupMenuItem<String>(
-  //                                             value: 'Eliminar',
-  //                                             child: Text('Eliminar'),
-  //                                           ),
-  //                                           const PopupMenuItem<String>(
-  //                                             value: 'Deshabilitar',
-  //                                             child: Text('Deshabilitar'),
-  //                                           ),
-  //                                         ],
-  //                                         icon: const Icon(Icons.more_vert),
-  //                                       ),
-  //                                     ],
-  //                                   ),
-  //                                 ),
-  //                               ],
-  //                               color: WidgetStateProperty.resolveWith<Color?>(
-  //                                 (Set<WidgetState> states) {
-  //                                   if (states.contains(WidgetState.hovered)) {
-  //                                     return Colors.grey[300];
-  //                                   }
-  //                                   return null;
-  //                                 },
-  //                               ),
-  //                               onDoubleTap: () =>
-  //                                   _showFormDialog(context, client),
-  //                             ))
-  //                         .toList(),
-  //                   ),
-  //                 ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildUserTable(BuildContext context) {
-  //   return LayoutBuilder(
-  //     builder: (context, constraints) {
-  //       final isSmallScreen = constraints.maxWidth < 600;
-
-  //       return Card(
-  //         elevation: 4,
-  //         color: Colors.white70,
-  //         shape:
-  //             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  //         child: Padding(
-  //           padding: const EdgeInsets.all(16),
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Row(
-  //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                 children: [
-  //                   const Text(
-  //                     'Lista de Clientes',
-  //                     style:
-  //                         TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-  //                   ),
-  //                   ElevatedButton(
-  //                     onPressed: () => _showFormDialog(context, null),
-  //                     child: const Text('Nuevo Cliente'),
-  //                   ),
-  //                 ],
-  //               ),
-  //               const SizedBox(height: 16),
-  //               clients.isEmpty
-  //                   ? SizedBox(
-  //                       height: 400,
-  //                       child: FutureBuilder(
-  //                         future: Future.delayed(const Duration(seconds: 1)),
-  //                         builder: (context, snapshot) {
-  //                           if (snapshot.connectionState ==
-  //                               ConnectionState.waiting) {
-  //                             return const Center(
-  //                               child:
-  //                                   CircularProgressIndicator(strokeWidth: 2),
-  //                             );
-  //                           } else {
-  //                             return const Center(
-  //                               child: Text(
-  //                                 "No hay clientes para mostrar",
-  //                                 style: TextStyle(fontSize: 18),
-  //                               ),
-  //                             );
-  //                           }
-  //                         },
-  //                       ),
-  //                     )
-  //                   : SizedBox(
-  //                       height: 400,
-  //                       child: DataTable2(
-  //                         columnSpacing: 12,
-  //                         horizontalMargin: 12,
-  //                         minWidth: isSmallScreen ? 400 : 600,
-  //                         decoration: BoxDecoration(
-  //                           color: Colors.grey[100],
-  //                           borderRadius: BorderRadius.circular(8),
-  //                         ),
-  //                         headingRowColor:
-  //                             WidgetStateProperty.all(Colors.grey[200]),
-  //                         columns: _buildColumns(isSmallScreen),
-  //                         rows: _buildRows(isSmallScreen),
-  //                       ),
-  //                     ),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
-  // List<DataColumn2> _buildColumns(bool isSmallScreen) {
-  //   final List<DataColumn2> baseColumns = [
-  //     const DataColumn2(
-  //       label: Center(
-  //         child: Text('Nombres',
-  //             style: TextStyle(
-  //               fontSize: 16,
-  //               fontWeight: FontWeight.bold,
-  //               color: Colors.blue,
-  //             )),
-  //       ),
-  //       size: ColumnSize.L,
-  //     ),
-  //     const DataColumn2(
-  //       label: Center(
-  //         child: Text('Apellidos',
-  //             style: TextStyle(
-  //               fontSize: 16,
-  //               fontWeight: FontWeight.bold,
-  //               color: Colors.blue,
-  //             )),
-  //       ),
-  //       size: ColumnSize.L,
-  //     ),
-  //     const DataColumn2(
-  //       label: Center(
-  //         child: Text('Empresa',
-  //             style: TextStyle(
-  //               fontSize: 16,
-  //               fontWeight: FontWeight.bold,
-  //               color: Colors.blue,
-  //             )),
-  //       ),
-  //       size: ColumnSize.L,
-  //     ),
-  //     const DataColumn2(
-  //       label: Center(
-  //         child: Text('Fecha Ingreso',
-  //             style: TextStyle(
-  //               fontSize: 16,
-  //               fontWeight: FontWeight.bold,
-  //               color: Colors.blue,
-  //             )),
-  //       ),
-  //       size: ColumnSize.L,
-  //     ),
-  //   ];
-
-  //   if (!isSmallScreen) {
-  //     baseColumns.insert(
-  //         2,
-  //         const DataColumn2(
-  //           label: Center(
-  //             child: Text('Email',
-  //                 style: TextStyle(
-  //                   fontSize: 16,
-  //                   fontWeight: FontWeight.bold,
-  //                   color: Colors.blue,
-  //                 )),
-  //           ),
-  //           size: ColumnSize.L,
-  //         ));
-  //     baseColumns.insert(
-  //         3,
-  //         const DataColumn2(
-  //           label: Center(
-  //             child: Text('Teléfono',
-  //                 style: TextStyle(
-  //                   fontSize: 16,
-  //                   fontWeight: FontWeight.bold,
-  //                   color: Colors.blue,
-  //                 )),
-  //           ),
-  //           size: ColumnSize.L,
-  //         ));
-  //   }
-
-  //   return baseColumns;
-  // }
-
-  // List<DataRow2> _buildRows(bool isSmallScreen) {
-  //   return clients.map((client) {
-  //     final List<DataCell> baseCells = [
-  //       DataCell(Center(child: Text(client.nombres))),
-  //       DataCell(Center(child: Text(client.apellidos))),
-  //       DataCell(Center(child: Text(client.empresa))),
-  //       DataCell(
-  //         Row(
-  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //           children: [
-  //             Text(DateFormat('dd/MM/yyyy').format(client.fechaIngreso)),
-  //             PopupMenuButton<String>(
-  //               onSelected: (value) {
-  //                 if (value == 'Eliminar') {
-  //                   _deleteClient(client);
-  //                 } else if (value == 'Deshabilitar') {
-  //                   print('Aqui se va a deshabilitar');
-  //                 }
-  //               },
-  //               itemBuilder: (BuildContext context) => [
-  //                 const PopupMenuItem<String>(
-  //                   value: 'Eliminar',
-  //                   child: Text('Eliminar'),
-  //                 ),
-  //                 const PopupMenuItem<String>(
-  //                   value: 'Deshabilitar',
-  //                   child: Text('Deshabilitar'),
-  //                 ),
-  //               ],
-  //               icon: const Icon(Icons.more_vert),
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ];
-
-  //     if (!isSmallScreen) {
-  //       baseCells.insert(2, DataCell(Center(child: Text(client.email))));
-  //       baseCells.insert(3, DataCell(Center(child: Text(client.telefono))));
-  //     }
-
-  //     return DataRow2(
-  //       cells: baseCells,
-  //       color: WidgetStateProperty.resolveWith<Color?>(
-  //         (Set<WidgetState> states) {
-  //           if (states.contains(WidgetState.hovered)) {
-  //             return Colors.grey[300];
-  //           }
-  //           return null;
-  //         },
-  //       ),
-  //       onDoubleTap: () => _showFormDialog(context, client),
-  //     );
-  //   }).toList();
-  // }
 
   void _deleteClient(Clients client) async {
     // Mostrar un diálogo de confirmación
