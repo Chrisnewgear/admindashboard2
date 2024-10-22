@@ -387,7 +387,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Lista de Empleados',
+                  'Lista de Usuarios',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 // ElevatedButton(

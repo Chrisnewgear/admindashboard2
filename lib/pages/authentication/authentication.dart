@@ -16,7 +16,9 @@ class AuthenticationPage extends StatefulWidget {
   @override
   State<AuthenticationPage> createState() => _AuthenticationPageState();
 }
-class _AuthenticationPageState extends State<AuthenticationPage> with SingleTickerProviderStateMixin {
+
+class _AuthenticationPageState extends State<AuthenticationPage>
+    with SingleTickerProviderStateMixin {
   late final TextEditingController _email;
   late final TextEditingController _password;
   bool notVisiblePassword = false;
@@ -25,7 +27,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
   late AnimationController _animationController;
   late Animation<Offset> _offsetAnimation;
 
-@override
+  @override
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
@@ -52,7 +54,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
     super.dispose();
   }
 
-    // Load the remember me state and email
+  // Load the remember me state and email
   void _loadRememberMe() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -73,6 +75,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
       await prefs.remove('email');
     }
   }
+
   void _shakePassword() {
     _animationController.forward().then((_) {
       _animationController.reverse();
@@ -181,7 +184,9 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          notVisiblePassword == false ? Icons.visibility_off : Icons.visibility,
+                          notVisiblePassword == false
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           color: isPasswordIncorrect ? Colors.red : Colors.grey,
                         ),
                         onPressed: () {
@@ -190,7 +195,8 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
                           });
                         },
                       ),
-                      errorText: isPasswordIncorrect ? 'Password incorrecto' : null,
+                      errorText:
+                          isPasswordIncorrect ? 'Password incorrecto' : null,
                       errorStyle: const TextStyle(color: Colors.red),
                     ),
                     onChanged: (value) {
@@ -241,27 +247,34 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
                     final email = _email.text;
                     final password = _password.text;
                     try {
-                      final UserCredential userCredential =
-                          await FirebaseAuth.instance.signInWithEmailAndPassword(
+                      final UserCredential userCredential = await FirebaseAuth
+                          .instance
+                          .signInWithEmailAndPassword(
                               email: email, password: password);
                       _saveRememberMe(); // Save remember me state
                       Get.offAllNamed(rootRoute);
                     } on FirebaseAuthException catch (e) {
                       if (e.code == "user-not-found") {
-                        showCustomAlert(context, "User not found. Please register.");
-                      } else if (e.message == "The supplied auth credential is incorrect, malformed or has expired.") {
+                        showCustomAlert(
+                            context, "User not found. Please register.");
+                      } else if (e.message ==
+                          "The supplied auth credential is incorrect, malformed or has expired.") {
                         setState(() {
                           isPasswordIncorrect = true;
                         });
                         _shakePassword();
-                      } else if (e.message == "Access to this account has been temporarily disabled due to many failed login attempts.") {
-                        showCustomAlert(context, "Access to this account has been temporarily disabled.");
+                      } else if (e.message ==
+                          "Access to this account has been temporarily disabled due to many failed login attempts.") {
+                        showCustomAlert(context,
+                            "Access to this account has been temporarily disabled.");
                       } else if (e.message == "invalid-email") {
                         showCustomAlert(context, "Invalid email format.");
                       } else if (e.code == "user-disabled") {
-                        showCustomAlert(context, "This account has been disabled.");
+                        showCustomAlert(
+                            context, "This account has been disabled.");
                       } else {
-                        showCustomAlert(context, "Login failed. Please try again.");
+                        showCustomAlert(
+                            context, "Login failed. Please try again.");
                       }
                     }
                   },
@@ -284,7 +297,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const RegisterPage(), 
+                        builder: (context) => const RegisterPage(),
                       ),
                     );
                   },

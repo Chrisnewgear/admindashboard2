@@ -35,7 +35,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Mis visitas',
+                        '',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
@@ -337,7 +337,7 @@ class VisitasDataTableSource extends DataTableSource {
   @override
   DataRow? getRow(int index) {
     final visita = visitas[index];
-    return DataRow(
+    return DataRow2(
       color: WidgetStateProperty.resolveWith<Color?>(
         (Set<WidgetState> states) {
           if (index % 2 == 0) return Colors.grey.withOpacity(0.1);
@@ -345,18 +345,19 @@ class VisitasDataTableSource extends DataTableSource {
         },
       ),
       cells: [
-        DataCell(Center(
-          child: GestureDetector(
-            onTap: () => showClientVisitFormDialog(context, visita),
-            child: Text(visita.nombreCliente),
-          ),
-        )),
+        // DataCell(Center(
+        //   child: GestureDetector(
+        //     onTap: () => showClientVisitFormDialog(context, visita),
+        //     child: Text(visita.nombreCliente),
+        //   ),
+        // )),
+        DataCell(Center(child: Text(visita.nombreCliente))),
         DataCell(Center(child: Text(visita.acciones))),
         DataCell(Center(child: Text(visita.productoServicio))),
         DataCell(Center(child: Text(visita.propVisita))),
         DataCell(
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(DateFormat('dd/MM/yyyy').format(visita.fecha)),
               PopupMenuButton<String>(
@@ -376,6 +377,7 @@ class VisitasDataTableSource extends DataTableSource {
           ),
         ),
       ],
+      onTap: () => showClientVisitFormDialog(context, visita),
     );
   }
 

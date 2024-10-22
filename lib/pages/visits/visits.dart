@@ -1,4 +1,4 @@
-import 'package:admindashboard/pages/visits/visitas_datatable_source.dart';
+import 'package:admindashboard/pages/visits/visitas_paginated_table.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';

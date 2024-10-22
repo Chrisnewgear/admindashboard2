@@ -35,7 +35,7 @@ class ResponsiveClientsTable extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Mis clientes',
+                        '',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
@@ -337,7 +337,7 @@ class ClientesDataTableSource extends DataTableSource {
   @override
   DataRow? getRow(int index) {
     final cliente = clientes[index];
-    return DataRow(
+    return DataRow2(
       color: WidgetStateProperty.resolveWith<Color?>(
         (Set<WidgetState> states) {
           if (index % 2 == 0) return Colors.grey.withOpacity(0.1);
@@ -345,18 +345,19 @@ class ClientesDataTableSource extends DataTableSource {
         },
       ),
       cells: [
-        DataCell(Center(
-          child: GestureDetector(
-            onTap: () => showClientVisitFormDialog(context, cliente),
-            child: Text(cliente.nombres),
-          ),
-        )),
+        // DataCell(Center(
+        //   child: GestureDetector(
+        //     onTap: () => showClientVisitFormDialog(context, cliente),
+        //     child: Text(cliente.nombres),
+        //   ),
+        // )),
+        DataCell(Center(child: Text(cliente.nombres))),
         DataCell(Center(child: Text(cliente.apellidos))),
         DataCell(Center(child: Text(cliente.empresa))),
         DataCell(Center(child: Text(cliente.telefono))),
         DataCell(
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(DateFormat('dd/MM/yyyy').format(cliente.fechaIngreso)),
               PopupMenuButton<String>(
@@ -376,6 +377,7 @@ class ClientesDataTableSource extends DataTableSource {
           ),
         ),
       ],
+      onTap: () => showClientVisitFormDialog(context, cliente),
     );
   }
 

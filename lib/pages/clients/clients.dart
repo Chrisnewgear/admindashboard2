@@ -657,7 +657,7 @@ class _ClientsPageState extends State<ClientsPage> {
       // appBar: AppBar(
       //   title: const Text('Administrar Clientes'),
       // ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

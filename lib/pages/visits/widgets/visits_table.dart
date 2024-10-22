@@ -6,10 +6,10 @@ class ResponsiveUserTable extends StatelessWidget {
   final Function(dynamic, dynamic) showClientVisitFormDialog;
 
   const ResponsiveUserTable({
-    Key? key,
+    super.key,
     required this.visitas,
     required this.deleteVisit, required this.showClientVisitFormDialog,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,6 @@ class ResponsiveUserTable extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () => showClientVisitFormDialog(context, null),
-                      child: const Text('Agendar Visita'),
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.blue,
                         backgroundColor: Colors.white,
@@ -41,6 +40,7 @@ class ResponsiveUserTable extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
+                      child: const Text('Agendar Visita'),
                     ),
                   ],
                 ),
@@ -89,7 +89,7 @@ class ResponsiveUserTable extends StatelessWidget {
             title: Text('${visita.nombres} ${visita.apellidos}'),
             subtitle: Text(visita.email),
             trailing: IconButton(
-              icon: Icon(Icons.more_vert),
+              icon: const Icon(Icons.more_vert),
               onPressed: () {
                 // Implementar menú de acciones
               },
@@ -106,7 +106,7 @@ class ResponsiveUserTable extends StatelessWidget {
     return Theme(
       data: Theme.of(context).copyWith(
         dividerColor: Colors.grey[300],
-        dataTableTheme: DataTableThemeData(
+        dataTableTheme: const DataTableThemeData(
           headingTextStyle: TextStyle(
             color: Colors.blue,
             fontWeight: FontWeight.bold,
@@ -153,16 +153,16 @@ class VisitasDataTableSource extends DataTableSource {
         DataCell(Text(visita.empresa)),
         DataCell(Text(visita.fechaIngreso)),
         DataCell(PopupMenuButton(
-          icon: Icon(Icons.more_vert),
+          icon: const Icon(Icons.more_vert),
           itemBuilder: (context) => [
             PopupMenuItem(
-              child: Text('Editar'),
+              child: const Text('Editar'),
               onTap: () {
                 // Implementar edición
               },
             ),
             PopupMenuItem(
-              child: Text('Eliminar'),
+              child: const Text('Eliminar'),
               onTap: () => deleteVisit(visita),
             ),
           ],
