@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:admindashboard/models/employee.dart';
+import 'package:admindashboard/pages/roles/Widgets/role_paginated_table.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,6 +16,7 @@ class RoleManagementWidget extends StatefulWidget {
 
 class _RoleManagementWidgetState extends State<RoleManagementWidget> {
   //final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
   String selectedRole = 'Vendedor';
   List<String> roles = ['Vendedor', 'Supervisor', 'Admin', 'None'];
   List<Employee> employees = [];
@@ -33,6 +35,10 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
   }
 
   Future<void> _loadUsers() async {
+    setState(() {
+      isLoading = true; // Activar loading al inicio de la carga
+    });
+
     try {
       final querySnapshot =
           await FirebaseFirestore.instance.collection('Users').get();
@@ -40,8 +46,13 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
         employees = querySnapshot.docs
             .map((doc) => Employee.fromFirestore(doc))
             .toList();
+        isLoading = false;
       });
     } catch (e) {
+      setState(() {
+        isLoading = false; // Desactivar loading incluso si hay error
+      });
+
       if (kDebugMode) {
         print('Error loading users: $e');
       }
@@ -349,7 +360,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
       // appBar: AppBar(
       //   title: const Text('Administrar Roles'),
       // ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,7 +370,17 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
-            _buildUserTable(),
+            // _buildUserTable(),
+
+            Expanded(
+              child: ResponsiveRolesTable(
+                usuario: employees,
+                deleteUsuario: (employee) => _deleteEmployee(employee),
+                showUsuarioFormDialog: (context, employee) =>
+                    _showFormDialog(context, employee),
+                isLoading: isLoading,
+              ),
+            ),
           ],
         ),
       ),

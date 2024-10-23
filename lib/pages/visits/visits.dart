@@ -1,4 +1,4 @@
-import 'package:admindashboard/pages/visits/visitas_paginated_table.dart';
+import 'package:admindashboard/pages/visits/widgets/visitas_paginated_table.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
@@ -338,15 +338,15 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                             children: [
                               _buildResponsiveRow(isLargeScreen, [
                                 _buildInputField(
-                                    _nombreClienteController, 'Nombre Cliente',
+                                    _nombreClienteController, 'Nombre Cliente*',
                                     enabled: editable),
                                 _buildInputField(
-                                    _accionesController, 'Acciones',
+                                    _accionesController, 'Acciones*',
                                     enabled: editable),
                               ]),
                               _buildResponsiveRow(isLargeScreen, [
                                 _buildInputField(_prodServicioController,
-                                    'Producto/Servicio',
+                                    'Producto/Servicio*',
                                     enabled: editable),
                                 _buildDropdown(selectedPurpose,
                                     (String? newValue) {
@@ -364,7 +364,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                                     enabled: false),
                               ]),
                               _buildResponsiveRow(isLargeScreen, [
-                                _buildNotesField(_notasController, 'Notas',
+                                _buildNotesField(_notasController, 'Observaciones',
                                     enabled: editable),
                               ]),
                             ],
@@ -393,8 +393,10 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                                 label: MediaQuery.of(context).size.width < 400
                                     ? const Text(
                                         '') // Texto vacío si el ancho es menor a 400px
-                                    : const Text(
-                                        'Editar'), // Mostrar texto en pantallas más grandes
+                                    : Text(
+                                        editable
+                                          ? 'Cancelar Edición'
+                                          : 'Editar'), // Mostrar texto en pantallas más grandes
                               );
                             },
                           ),
@@ -580,7 +582,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
         value: currentValue,
-        items: ['Venta', 'Seguimiento', 'Renovación', 'Resolución']
+        items: ['Venta', 'Seguimiento', 'Renovación', 'Resolución', 'Cotización']
             .map((String value) {
           return DropdownMenuItem<String>(
             value: value,

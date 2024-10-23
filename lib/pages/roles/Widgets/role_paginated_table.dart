@@ -9,13 +9,12 @@ class ResponsiveRolesTable extends StatelessWidget {
   final Function(BuildContext, dynamic) showUsuarioFormDialog;
   final bool isLoading;
 
-  const ResponsiveRolesTable({
-    super.key,
-    required this.usuario,
-    required this.deleteUsuario,
-    required this.showUsuarioFormDialog,
-    required this.isLoading
-  });
+  const ResponsiveRolesTable(
+      {super.key,
+      required this.usuario,
+      required this.deleteUsuario,
+      required this.showUsuarioFormDialog,
+      required this.isLoading});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +25,8 @@ class ResponsiveRolesTable extends StatelessWidget {
           child: Card(
             elevation: 4,
             color: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -37,7 +37,8 @@ class ResponsiveRolesTable extends StatelessWidget {
                     children: [
                       Text(
                         '',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       // ElevatedButton(
                       //   onPressed: isLoading ? null : () => showClientVisitFormDialog(context, null),
@@ -62,8 +63,6 @@ class ResponsiveRolesTable extends StatelessWidget {
       },
     );
   }
-
-
 
   Widget _buildTableContent(BuildContext context, BoxConstraints constraints) {
     if (isLoading) {
@@ -107,21 +106,23 @@ class ResponsiveRolesTable extends StatelessWidget {
             showUsuarioFormDialog(context, item);
           },
           child: Card(
-            color: Colors.white,
+            //color: Colors.white,
+            color: _getRoleColor(item.role),
             elevation: 2,
             margin: const EdgeInsets.symmetric(vertical: 4),
             child: ListTile(
               title: Text(
                 '${item.nombres} ${item.apellidos}',
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(color: Colors.white),
               ),
               subtitle: Text(
-                '${item.role} - ${DateFormat('dd/MM/yyyy').format(item.fechaIngreso)}',
-                textAlign: TextAlign.center,
+                //'${item.role} - ${DateFormat('dd/MM/yyyy').format(item.fechaIngreso)}',
+                item.role,
+                textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
               ),
               trailing: PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
+                icon: const Icon(Icons.more_vert, color: Colors.white,),
                 onSelected: (String result) {
                   if (result == 'Editar') {
                     showUsuarioFormDialog(
@@ -221,7 +222,16 @@ class ResponsiveRolesTable extends StatelessWidget {
           DataColumn2(
             label: Center(
               child: Text(
-                'Fecha',
+                'Role',
+                style: TextStyle(color: Colors.white), // Texto blanco
+              ),
+            ),
+            size: ColumnSize.L,
+          ),
+          DataColumn2(
+            label: Center(
+              child: Text(
+                'Fecha Ingreso',
                 style: TextStyle(color: Colors.white), // Texto blanco
               ),
             ),
@@ -240,7 +250,7 @@ class ResponsiveRolesTable extends StatelessWidget {
         headingRowHeight: 40,
         dataRowHeight: 60,
         headingRowColor: WidgetStateColor.resolveWith(
-            (states) => Colors.blue[900]!), // Fondo azul para el encabezado
+            (states) => Theme.of(context).primaryColor), // Fondo azul para el encabezado
       ),
     );
   }
@@ -270,17 +280,26 @@ class UsuariosDataTableSource extends DataTableSource {
         },
       ),
       cells: [
-        // DataCell(Center(
-        //   child: GestureDetector(
-        //     onTap: () => showClientVisitFormDialog(context, visita),
-        //     child: Text(visita.nombreCliente),
-        //   ),
-        // )),
         DataCell(Center(child: Text(usuario.codigo))),
         DataCell(Center(child: Text(usuario.nombres))),
         DataCell(Center(child: Text(usuario.apellidos))),
         DataCell(Center(child: Text(usuario.email))),
         DataCell(Center(child: Text(usuario.telefono))),
+        DataCell(
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: _getRoleColor(usuario.role),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                usuario.role,
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ),
         DataCell(
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -307,6 +326,9 @@ class UsuariosDataTableSource extends DataTableSource {
     );
   }
 
+
+
+
   @override
   bool get isRowCountApproximate => false;
 
@@ -316,3 +338,15 @@ class UsuariosDataTableSource extends DataTableSource {
   @override
   int get selectedRowCount => 0;
 }
+  Color _getRoleColor(String role) {
+    switch (role.toLowerCase()) {
+      case 'admin':
+        return Colors.black87;
+      case 'supervisor':
+        return Colors.green[400]!;
+      case 'vendedor':
+        return Colors.blue[300]!;
+      default:
+        return Colors.grey[400]!;
+    }
+  }

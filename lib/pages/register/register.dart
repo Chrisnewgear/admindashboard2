@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/pages/authentication/authentication.dart';
 import 'package:admindashboard/pages/verification/verification_page.dart';
@@ -7,6 +6,7 @@ import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:admindashboard/widgets/message_box.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -40,7 +40,7 @@ class _RegisterPageState extends State<RegisterPage> {
     super.initState();
   }
 
-  // Función para generar el siguiente código de usuario
+  // Función para generar el siguiente código de usuario secuancial
   // Future<String> getNextUserCode() async {
   //   final usersCollection = FirebaseFirestore.instance.collection('Users');
   //   final querySnapshot = await usersCollection
@@ -82,9 +82,8 @@ class _RegisterPageState extends State<RegisterPage> {
     return code;
   }
 
-
   // Función para guardar el usuario en Firestore
-Future<void> saveUserToFirestore(User user) async {
+  Future<void> saveUserToFirestore(User user) async {
     final userCode = await getNextUserCode();
     await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
       'email': user.email,
@@ -116,31 +115,48 @@ Future<void> saveUserToFirestore(User user) async {
   }) {
     return TextFormField(
       controller: controller,
-      obscureText: isPassword ? (labelText == 'Password' ? notVisiblePassword : notVisibleRepeatPassword) : false,
+      obscureText: isPassword
+          ? (labelText == 'Password'
+              ? notVisiblePassword
+              : notVisibleRepeatPassword)
+          : false,
       enableSuggestions: !isPassword,
       autocorrect: !isPassword,
       keyboardType: keyboardType,
+      // Añadir inputFormatters para el campo de teléfono
+      inputFormatters: labelText == 'Teléfono'
+          ? [FilteringTextInputFormatter.digitsOnly]
+          : null,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
+        hintStyle: TextStyle(
+          color: Colors.grey.withOpacity(0.5),
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(
-            color: (isRepeatedPassword && !_passwordsMatch) ? Colors.red : Colors.grey,
+            color: (isRepeatedPassword && !_passwordsMatch)
+                ? Colors.red
+                : Colors.grey,
             width: 2.0,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(
-            color: (isRepeatedPassword && !_passwordsMatch) ? Colors.red : Colors.grey,
+            color: (isRepeatedPassword && !_passwordsMatch)
+                ? Colors.red
+                : Colors.grey,
             width: 2.0,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(
-            color: (isRepeatedPassword && !_passwordsMatch) ? Colors.red : Colors.blue,
+            color: (isRepeatedPassword && !_passwordsMatch)
+                ? Colors.red
+                : Colors.blue,
             width: 2.0,
           ),
         ),
@@ -161,7 +177,9 @@ Future<void> saveUserToFirestore(User user) async {
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(
-                  (labelText == 'Password' ? notVisiblePassword : notVisibleRepeatPassword)
+                  (labelText == 'Password'
+                          ? notVisiblePassword
+                          : notVisibleRepeatPassword)
                       ? Icons.visibility_off
                       : Icons.visibility,
                 ),
@@ -184,12 +202,34 @@ Future<void> saveUserToFirestore(User user) async {
             return validationResult;
           }
         }
+
+        if (labelText == 'Email') {
+          final emailRegExp = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+          if (value == null || value.isEmpty) {
+            return 'Ingrese su email';
+          } else if (!emailRegExp.hasMatch(value)) {
+            return 'Formato de email inválido';
+          }
+
+          // Removemos la llamada a showCustomAlert aquí ya que queremos mostrar el error
+          // en el campo de texto directamente
+        }
+
+        if (labelText == 'Teléfono') {
+          if (value != null && value.isNotEmpty) {
+            if (value.length > 10) {
+              return 'Ingrese máximo 10 dígitos';
+            }
+          }
+        }
+
         if (isRepeatedPassword && value != _password.text) {
           setState(() {
             _passwordsMatch = false;
           });
           return 'Las contraseñas no coinciden';
         }
+
         return null;
       },
       onChanged: (value) {
@@ -205,6 +245,9 @@ Future<void> saveUserToFirestore(User user) async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Registrar Nuevo Usuario'),
+      ),
       body: Center(
         child: Card(
           elevation: 4,
@@ -220,7 +263,8 @@ Future<void> saveUserToFirestore(User user) async {
                 child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
                     return Column(
-                      mainAxisSize: MainAxisSize.min, // Ajusta la altura del Card al contenido
+                      mainAxisSize: MainAxisSize
+                          .min, // Ajusta la altura del Card al contenido
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Row(
@@ -239,14 +283,14 @@ Future<void> saveUserToFirestore(User user) async {
                         ),
                         const SizedBox(height: 30),
                         Text(
-                          'Sign Up',
+                          'Registrate',
                           style: GoogleFonts.roboto(
                             fontSize: 30,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         CustomText(
-                          text: "Sign up with your email!",
+                          text: "Registrate con tu email!",
                           color: lightGrey,
                         ),
                         const SizedBox(height: 15),
@@ -254,15 +298,15 @@ Future<void> saveUserToFirestore(User user) async {
                             ? Column(
                                 children: [
                                   _buildRowFields(
-                                    _name, _surname, 'Nombre', 'Apellido'),
+                                      _name, _surname, 'Nombre*', 'Apellido*'),
                                   const SizedBox(height: 15),
                                   _buildRowFields(
-                                    _email, _phone, 'Email', 'Teléfono',
-                                    isPhoneOptional: true),
+                                      _email, _phone, 'Email*', 'Teléfono',
+                                      isPhoneOptional: true),
                                   const SizedBox(height: 15),
-                                  _buildRowFields(
-                                    _password, _repeated_password, 'Password', 'Repita su Password',
-                                    isSecondFieldPassword: true),
+                                  _buildRowFields(_password, _repeated_password,
+                                      'Password*', 'Repita su Password*',
+                                      isSecondFieldPassword: true),
                                 ],
                               )
                             : Column(
@@ -271,14 +315,18 @@ Future<void> saveUserToFirestore(User user) async {
                                     controller: _name,
                                     labelText: 'Nombre',
                                     hintText: 'Ingrese su nombre',
-                                    validator: (value) => value!.isEmpty ? 'El campo nombre es obligatorio' : null,
+                                    validator: (value) => value!.isEmpty
+                                        ? 'El campo nombre es obligatorio'
+                                        : null,
                                   ),
                                   const SizedBox(height: 15),
                                   _buildTextField(
                                     controller: _surname,
                                     labelText: 'Apellidos',
                                     hintText: 'Ingrese sus apellidos',
-                                    validator: (value) => value!.isEmpty ? 'El campo apellidos es obligatorio' : null,
+                                    validator: (value) => value!.isEmpty
+                                        ? 'El campo apellidos es obligatorio'
+                                        : null,
                                   ),
                                   const SizedBox(height: 15),
                                   _buildTextField(
@@ -286,13 +334,16 @@ Future<void> saveUserToFirestore(User user) async {
                                     labelText: 'Email',
                                     hintText: 'abc@domain.com',
                                     keyboardType: TextInputType.emailAddress,
-                                    validator: (value) => value!.isEmpty ? 'Ingrese su email' : null,
+                                    validator: (value) => value!.isEmpty
+                                        ? 'Ingrese su email'
+                                        : null,
                                   ),
                                   const SizedBox(height: 15),
                                   _buildTextField(
                                     controller: _phone,
                                     labelText: 'Teléfono',
-                                    hintText: 'Ingrese su número de teléfono (opcional)',
+                                    hintText:
+                                        'Ingrese su número de teléfono (opcional)',
                                     keyboardType: TextInputType.phone,
                                   ),
                                   const SizedBox(height: 15),
@@ -335,14 +386,16 @@ Future<void> saveUserToFirestore(User user) async {
                                 setState(() {
                                   _passwordsMatch = false;
                                 });
-                                showCustomAlert(context, 'Las contraseñas no coinciden');
+                                showCustomAlert(
+                                    context, 'Las contraseñas no coinciden');
                                 return;
                               }
 
                               final email = _email.text;
                               final password = _password.text;
 
-                              bool emailExists = await isEmailAlreadyInUse(email);
+                              bool emailExists =
+                                  await isEmailAlreadyInUse(email);
                               if (emailExists) {
                                 showCustomAlert(context, 'Email ya existe');
                                 return;
@@ -350,18 +403,21 @@ Future<void> saveUserToFirestore(User user) async {
 
                               try {
                                 final UserCredential userCredential =
-                                    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                                    await FirebaseAuth.instance
+                                        .createUserWithEmailAndPassword(
                                   email: email,
                                   password: password,
                                 );
 
                                 await saveUserToFirestore(userCredential.user!);
 
-                                await userCredential.user?.sendEmailVerification();
+                                await userCredential.user
+                                    ?.sendEmailVerification();
 
                                 Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
-                                    builder: (context) => const VerifyEmailView(),
+                                    builder: (context) =>
+                                        const VerifyEmailView(),
                                   ),
                                 );
                               } on FirebaseAuthException catch (e) {
@@ -373,20 +429,21 @@ Future<void> saveUserToFirestore(User user) async {
                                   showCustomAlert(context, 'Email invalido');
                                 }
                               } catch (e) {
-                                showCustomAlert(context, 'Ocurrió un error. Intétalo de nuevo.');
+                                showCustomAlert(context,
+                                    'Ocurrió un error. Intétalo de nuevo.');
                               }
                             }
                           },
                           child: Container(
                             decoration: BoxDecoration(
-                              color: active,
+                              color: Theme.of(context).primaryColor,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             alignment: Alignment.center,
                             width: 200,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             child: const CustomText(
-                              text: "Sign Up",
+                              text: "Registrate",
                               color: Colors.white,
                             ),
                           ),
@@ -396,11 +453,16 @@ Future<void> saveUserToFirestore(User user) async {
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => const AuthenticationPage(),
+                                builder: (context) =>
+                                    const AuthenticationPage(),
                               ),
                             );
                           },
-                          child: const Text("Ya tienes cuenta? Ingresa aqui"),
+                          child: const Text(
+                            "Ya tienes cuenta? Ingresa aqui",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
                         )
                       ],
                     );
@@ -414,14 +476,9 @@ Future<void> saveUserToFirestore(User user) async {
     );
   }
 
-  Widget _buildRowFields(
-    TextEditingController controller1,
-    TextEditingController controller2,
-    String label1,
-    String label2, {
-    bool isSecondFieldPassword = false,
-    bool isPhoneOptional = false
-  }) {
+  Widget _buildRowFields(TextEditingController controller1,
+      TextEditingController controller2, String label1, String label2,
+      {bool isSecondFieldPassword = false, bool isPhoneOptional = false}) {
     return Row(
       children: [
         Expanded(
@@ -429,10 +486,16 @@ Future<void> saveUserToFirestore(User user) async {
             controller: controller1,
             labelText: label1,
             isPassword: isSecondFieldPassword,
-            hintText: isSecondFieldPassword ? 'Al menos 8 caracteres' : 'Ingrese su $label1',
-            validator: (value) => value!.isEmpty ? 'Por favor ingrese su $label1' : null,
-            keyboardType: label1 == 'Email' ? TextInputType.emailAddress :
-                          label1 == 'Teléfono' ? TextInputType.phone : null,
+            hintText: isSecondFieldPassword
+                ? 'Al menos 8 caracteres'
+                : 'Ingrese su $label1',
+            validator: (value) =>
+                value!.isEmpty ? 'Por favor ingrese su $label1' : null,
+            keyboardType: label1 == 'Email'
+                ? TextInputType.emailAddress
+                : label1 == 'Teléfono'
+                    ? TextInputType.phone
+                    : null,
           ),
         ),
         const SizedBox(width: 15),
@@ -440,7 +503,9 @@ Future<void> saveUserToFirestore(User user) async {
           child: _buildTextField(
             controller: controller2,
             labelText: label2,
-            hintText: isSecondFieldPassword ? 'Al menos 8 caracteres' : 'Ingrese su $label2${isPhoneOptional ? ' (opcional)' : ''}',
+            hintText: isSecondFieldPassword
+                ? 'Al menos 8 caracteres'
+                : 'Ingrese su $label2${isPhoneOptional ? ' (opcional)' : ''}',
             isPassword: isSecondFieldPassword,
             validator: (value) {
               if (isPhoneOptional && label2 == 'Teléfono') {
@@ -460,6 +525,7 @@ Future<void> saveUserToFirestore(User user) async {
       ],
     );
   }
+
   @override
   void dispose() {
     _email.dispose();

@@ -232,7 +232,7 @@ class ResponsiveClientsTable extends StatelessWidget {
         headingRowHeight: 40,
         dataRowHeight: 60,
         headingRowColor: WidgetStateColor.resolveWith(
-            (states) => Colors.blue[900]!), // Fondo azul para el encabezado
+            (states) => Theme.of(context).primaryColor), // Fondo azul para el encabezado
       ),
     );
   }
@@ -262,12 +262,6 @@ class ClientesDataTableSource extends DataTableSource {
         },
       ),
       cells: [
-        // DataCell(Center(
-        //   child: GestureDetector(
-        //     onTap: () => showClientVisitFormDialog(context, cliente),
-        //     child: Text(cliente.nombres),
-        //   ),
-        // )),
         DataCell(Center(child: Text(cliente.nombres))),
         DataCell(Center(child: Text(cliente.apellidos))),
         DataCell(Center(child: Text(cliente.empresa))),

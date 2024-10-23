@@ -142,6 +142,10 @@ class _AuthenticationPageState extends State<AuthenticationPage>
                   decoration: InputDecoration(
                       labelText: 'Email',
                       hintText: 'abc@domain.com',
+                      hintStyle: TextStyle(
+                        color: Colors.grey.withOpacity(
+                            0.5), // Aquí atenuamos el color del hintText
+                      ),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20))),
                 ),
@@ -158,6 +162,10 @@ class _AuthenticationPageState extends State<AuthenticationPage>
                     decoration: InputDecoration(
                       labelText: 'Password',
                       hintText: 'Al menos 8 caracteres',
+                      hintStyle: TextStyle(
+                        color: Colors.grey.withOpacity(
+                            0.5), // Aquí atenuamos el color del hintText
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                         borderSide: BorderSide(
@@ -280,7 +288,8 @@ class _AuthenticationPageState extends State<AuthenticationPage>
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                        color: active, borderRadius: BorderRadius.circular(20)),
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(20)),
                     alignment: Alignment.center,
                     width: double.maxFinite,
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -301,7 +310,10 @@ class _AuthenticationPageState extends State<AuthenticationPage>
                       ),
                     );
                   },
-                  child: const Text("No tienes una cuenta? Registrate aquí"),
+                  child: const Text(
+                    "No tienes una cuenta? Registrate aquí",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                 )
               ],
             ),

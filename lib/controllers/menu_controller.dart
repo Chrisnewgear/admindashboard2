@@ -1,4 +1,3 @@
-
 import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/routing/routes.dart';
 import 'package:flutter/material.dart';
@@ -6,20 +5,38 @@ import 'package:get/get.dart';
 
 class MyMenuController extends GetxController{
   static MyMenuController instance = Get.find();
-  var activeItem = overviewPageDisplayName.obs;
+  var activeItem = "".obs;
   var hoverItem = "".obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    activeItem.value = overviewPageDisplayName;
+    // Inicializamos también el hoverItem con el mismo valor
+    hoverItem.value = overviewPageDisplayName;
+  }
 
   changeActiveItemTo(String itemName) {
     activeItem.value = itemName;
+    // Actualizamos también el hoverItem cuando cambia el item activo
+    hoverItem.value = itemName;
   }
 
   onHover(String itemName) {
-    if (!isActive(itemName)) hoverItem.value = itemName;  // Corregido aquí
+    if (!isActive(itemName)) {
+      hoverItem.value = itemName;
+    }
+  }
+
+  // Modificamos este método para mantener el hover en el item activo
+  isHovering(String itemName) {
+    if(isActive(itemName)) {
+      return true; // Siempre retorna true para el item activo
+    }
+    return hoverItem.value == itemName;
   }
 
   isActive(String itemName) => activeItem.value == itemName;
-
-  isHovering(String itemName) => hoverItem.value == itemName;
 
   Widget returnIconFor(String itemName) {
     switch (itemName) {

@@ -231,7 +231,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
         headingRowHeight: 40,
         dataRowHeight: 60,
         headingRowColor: WidgetStateColor.resolveWith(
-            (states) => Colors.blue[900]!), // Fondo azul para el encabezado
+            (states) => Theme.of(context).primaryColor), // Fondo azul para el encabezado
       ),
     );
   }
@@ -261,12 +261,6 @@ class VisitasDataTableSource extends DataTableSource {
         },
       ),
       cells: [
-        // DataCell(Center(
-        //   child: GestureDetector(
-        //     onTap: () => showClientVisitFormDialog(context, visita),
-        //     child: Text(visita.nombreCliente),
-        //   ),
-        // )),
         DataCell(Center(child: Text(visita.nombreCliente))),
         DataCell(Center(child: Text(visita.acciones))),
         DataCell(Center(child: Text(visita.productoServicio))),

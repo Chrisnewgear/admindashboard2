@@ -230,10 +230,14 @@ class _ClientsPageState extends State<ClientsPage> {
           backgroundColor: Colors.transparent,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              double modalWidth = constraints.maxWidth > 600
-                  ? constraints.maxWidth * 0.5
-                  : constraints.maxWidth * 0.95;
-              bool isLargeScreen = constraints.maxWidth > 600;
+              double modalWidth;
+              if (constraints.maxWidth > 927) {
+                modalWidth = constraints.maxWidth * 0.4;
+              } else if (constraints.maxWidth > 681) {
+                modalWidth = constraints.maxWidth * 0.7;
+              } else {
+                modalWidth = constraints.maxWidth * 0.9;
+              }
 
               return Container(
                 width: modalWidth,
@@ -269,6 +273,7 @@ class _ClientsPageState extends State<ClientsPage> {
                       child: ValueListenableBuilder<bool>(
                         valueListenable: isEditable,
                         builder: (context, editable, _) {
+                          bool isLargeScreen = constraints.maxWidth > 986;
                           return Column(
                             children: [
                               _buildResponsiveRow(isLargeScreen, [
@@ -303,35 +308,101 @@ class _ClientsPageState extends State<ClientsPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //   children: [
+                    //     // Botón de Editar solo se muestra cuando se está editando un cliente existente
+                    //     if (client != null)
+                    //       ElevatedButton(
+                    //         onPressed: () {
+                    //           isEditable.value = !isEditable.value;
+                    //         },
+                    //         child: ValueListenableBuilder<bool>(
+                    //           valueListenable: isEditable,
+                    //           builder: (context, editable, _) {
+                    //             return Text(
+                    //               editable ? 'Cancelar Edición' : 'Editar',
+                    //             );
+                    //           },
+                    //         ),
+                    //       ),
+                    //     const Spacer(),
+                    //     // Botones de Cancelar y Guardar
+                    //     TextButton(
+                    //       onPressed: () => Navigator.of(context).pop(),
+                    //       child: Text(
+                    //         'Cancelar',
+                    //         style: TextStyle(color: Colors.grey[600]),
+                    //       ),
+                    //     ),
+                    //     const SizedBox(width: 16),
+                    //     ElevatedButton(
+                    //       style: ElevatedButton.styleFrom(
+                    //         backgroundColor: Colors.indigo,
+                    //         shape: RoundedRectangleBorder(
+                    //           borderRadius: BorderRadius.circular(8),
+                    //         ),
+                    //         padding: const EdgeInsets.symmetric(
+                    //             horizontal: 24, vertical: 12),
+                    //       ),
+                    //       onPressed: () {
+                    //         if (formKey.currentState!.validate()) {
+                    //           _saveOrUpdateClient(client);
+                    //           Navigator.of(context).pop();
+                    //         }
+                    //       },
+                    //       child: const Text(
+                    //         'Guardar',
+                    //         style: TextStyle(
+                    //           fontSize: 16,
+                    //           fontWeight: FontWeight.bold,
+                    //           color: Colors.white,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Botón de Editar solo se muestra cuando se está editando un cliente existente
                         if (client != null)
-                          ElevatedButton(
-                            onPressed: () {
-                              isEditable.value = !isEditable.value;
+                          ValueListenableBuilder<bool>(
+                            valueListenable: isEditable,
+                            builder: (context, editable, _) {
+                              return ElevatedButton.icon(
+                                onPressed: () {
+                                  isEditable.value = !isEditable
+                                      .value; // Cambia el estado de edición
+                                },
+                                icon: editable
+                                    ? const Icon(Icons
+                                        .edit_off) // Ícono cuando está habilitado
+                                    : const Icon(Icons
+                                        .edit), // Ícono cuando está deshabilitado
+                                label: MediaQuery.of(context).size.width < 400
+                                    ? const Text(
+                                        '') // Texto vacío si el ancho es menor a 400px
+                                    : Text(
+                                        editable
+                                            ? 'Cancelar Edición'
+                                            : 'Editar', // Aquí se cambia el texto
+                                      ), // Mostrar texto en pantallas más grandes
+                              );
                             },
-                            child: ValueListenableBuilder<bool>(
-                              valueListenable: isEditable,
-                              builder: (context, editable, _) {
-                                return Text(
-                                  editable ? 'Cancelar Edición' : 'Editar',
-                                );
-                              },
-                            ),
                           ),
                         const Spacer(),
-                        // Botones de Cancelar y Guardar
-                        TextButton(
+                        TextButton.icon(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: Text(
-                            'Cancelar',
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
+                          icon: const Icon(Icons.cancel),
+                          label: MediaQuery.of(context).size.width < 400
+                              ? const Text(
+                                  '') // Texto vacío si el ancho es menor a 400px
+                              : const Text(
+                                  'Cancelar'), // Mostrar texto en pantallas más grandes
                         ),
-                        const SizedBox(width: 16),
-                        ElevatedButton(
+                        const SizedBox(width: 8),
+                        ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.indigo,
                             shape: RoundedRectangleBorder(
@@ -346,14 +417,17 @@ class _ClientsPageState extends State<ClientsPage> {
                               Navigator.of(context).pop();
                             }
                           },
-                          child: const Text(
-                            'Guardar',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                          icon: const Icon(
+                            Icons.save,
+                            color: Colors.white,
                           ),
+                          label: MediaQuery.of(context).size.width < 400
+                              ? const Text(
+                                  '') // Texto vacío si el ancho es menor a 400px
+                              : const Text('Guardar',
+                                  style: TextStyle(
+                                      color: Colors
+                                          .white)), // Mostrar texto en pantallas más grandes
                         ),
                       ],
                     ),
