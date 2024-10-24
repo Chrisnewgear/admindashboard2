@@ -9,13 +9,12 @@ class ResponsiveVisitasTable extends StatelessWidget {
   final Function(BuildContext, dynamic) showClientVisitFormDialog;
   final bool isLoading;
 
-  const ResponsiveVisitasTable({
-    super.key,
-    required this.visitas,
-    required this.deleteVisit,
-    required this.showClientVisitFormDialog,
-    required this.isLoading
-  });
+  const ResponsiveVisitasTable(
+      {super.key,
+      required this.visitas,
+      required this.deleteVisit,
+      required this.showClientVisitFormDialog,
+      required this.isLoading});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +25,8 @@ class ResponsiveVisitasTable extends StatelessWidget {
           child: Card(
             elevation: 4,
             color: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -37,10 +37,13 @@ class ResponsiveVisitasTable extends StatelessWidget {
                     children: [
                       const Text(
                         '',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       ElevatedButton(
-                        onPressed: isLoading ? null : () => showClientVisitFormDialog(context, null),
+                        onPressed: isLoading
+                            ? null
+                            : () => showClientVisitFormDialog(context, null),
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.blue,
                           backgroundColor: Colors.white,
@@ -62,8 +65,6 @@ class ResponsiveVisitasTable extends StatelessWidget {
       },
     );
   }
-
-
 
   Widget _buildTableContent(BuildContext context, BoxConstraints constraints) {
     if (isLoading) {
@@ -231,7 +232,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
         headingRowHeight: 40,
         dataRowHeight: 60,
         headingRowColor: WidgetStateColor.resolveWith(
-            (states) => Theme.of(context).primaryColor), // Fondo azul para el encabezado
+            (states) => Theme.of(context).primaryColor),
       ),
     );
   }

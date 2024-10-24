@@ -119,10 +119,15 @@ class ResponsiveRolesTable extends StatelessWidget {
               subtitle: Text(
                 //'${item.role} - ${DateFormat('dd/MM/yyyy').format(item.fechaIngreso)}',
                 item.role,
-                textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.white),
               ),
               trailing: PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert, color: Colors.white,),
+                icon: const Icon(
+                  Icons.more_vert,
+                  color: Colors.white,
+                ),
                 onSelected: (String result) {
                   if (result == 'Editar') {
                     showUsuarioFormDialog(
@@ -172,17 +177,17 @@ class ResponsiveRolesTable extends StatelessWidget {
       child: PaginatedDataTable2(
         header: null,
         columns: const [
-          DataColumn2(
-            label: Center(
-              child: Text(
-                'Código',
-                style: TextStyle(color: Colors.white), // Texto blanco
-              ),
-            ),
-            size: ColumnSize.L,
-            numeric:
-                false, // Para evitar que las columnas numéricas se alineen a la derecha
-          ),
+          // DataColumn2(
+          //   label: Center(
+          //     child: Text(
+          //       'Código',
+          //       style: TextStyle(color: Colors.white), // Texto blanco
+          //     ),
+          //   ),
+          //   size: ColumnSize.L,
+          //   numeric:
+          //       false, // Para evitar que las columnas numéricas se alineen a la derecha
+          // ),
           DataColumn2(
             label: Center(
               child: Text(
@@ -244,13 +249,13 @@ class ResponsiveRolesTable extends StatelessWidget {
         ],
         source: usuarioDataSource,
         rowsPerPage: 10,
-        columnSpacing: 40,
+        columnSpacing: 30,
         horizontalMargin: 20,
         showCheckboxColumn: false,
         headingRowHeight: 40,
         dataRowHeight: 60,
         headingRowColor: WidgetStateColor.resolveWith(
-            (states) => Theme.of(context).primaryColor), // Fondo azul para el encabezado
+            (states) => Theme.of(context).primaryColor),
       ),
     );
   }
@@ -280,7 +285,7 @@ class UsuariosDataTableSource extends DataTableSource {
         },
       ),
       cells: [
-        DataCell(Center(child: Text(usuario.codigo))),
+        //DataCell(Center(child: Text(usuario.codigo))),
         DataCell(Center(child: Text(usuario.nombres))),
         DataCell(Center(child: Text(usuario.apellidos))),
         DataCell(Center(child: Text(usuario.email))),
@@ -326,9 +331,6 @@ class UsuariosDataTableSource extends DataTableSource {
     );
   }
 
-
-
-
   @override
   bool get isRowCountApproximate => false;
 
@@ -338,15 +340,16 @@ class UsuariosDataTableSource extends DataTableSource {
   @override
   int get selectedRowCount => 0;
 }
-  Color _getRoleColor(String role) {
-    switch (role.toLowerCase()) {
-      case 'admin':
-        return Colors.black87;
-      case 'supervisor':
-        return Colors.green[400]!;
-      case 'vendedor':
-        return Colors.blue[300]!;
-      default:
-        return Colors.grey[400]!;
-    }
+
+Color _getRoleColor(String role) {
+  switch (role.toLowerCase()) {
+    case 'admin':
+      return Colors.black87;
+    case 'supervisor':
+      return Colors.green[400]!;
+    case 'vendedor':
+      return Colors.blue[300]!;
+    default:
+      return Colors.grey[400]!;
   }
+}

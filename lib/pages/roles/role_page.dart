@@ -148,6 +148,8 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
 
   void _showFormDialog(BuildContext context, Employee? employee) {
     final formKey = GlobalKey<FormState>();
+    final ValueNotifier<bool> isEditable =
+        ValueNotifier<bool>(employee == null);
 
     if (employee != null) {
       _nombresController.text = employee.nombres;
@@ -179,10 +181,18 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
           backgroundColor: Colors.transparent,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              double modalWidth = constraints.maxWidth > 600
-                  ? constraints.maxWidth * 0.5
-                  : constraints.maxWidth * 0.95;
-              bool isLargeScreen = constraints.maxWidth > 600;
+              // Ajustamos los breakpoints para mejor soporte de tablets
+              double modalWidth;
+              if (constraints.maxWidth > 1024) {
+                // iPad Pro y pantallas grandes
+                modalWidth =
+                    constraints.maxWidth * 0.5; // 50% del ancho disponible
+              } else if (constraints.maxWidth > 768) {
+                // iPads regulares
+                modalWidth = constraints.maxWidth * 0.7;
+              } else {
+                modalWidth = constraints.maxWidth * 0.9;
+              }
 
               return Container(
                 width: modalWidth,
@@ -217,65 +227,110 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                     const SizedBox(height: 24),
                     Form(
                       key: formKey,
-                      child: Column(
-                        children: [
-                          _buildResponsiveRow(isLargeScreen, [
-                            _buildInputField(_nombresController, 'Nombres'),
-                            _buildInputField(_apellidosController, 'Apellidos'),
-                          ]),
-                          _buildResponsiveRow(isLargeScreen, [
-                            _buildInputField(_emailController, 'Email',
-                                isEmail: true),
-                            _buildInputField(_telefonoController, 'Teléfono'),
-                          ]),
-                          _buildResponsiveRow(isLargeScreen, [
-                            _buildDropdown(
-                              selectedRole,
-                              (String? newValue) {
-                                setState(() {
-                                  selectedRole = newValue!;
-                                });
-                              },
-                            ),
-                            _buildDatePicker(context, _fechaIngresoController,
-                                'Fecha de Ingreso'),
-                          ]),
-                        ],
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: isEditable,
+                        builder: (context, editable, _) {
+                          bool isLargeScreen = constraints.maxWidth > 986;
+                          return Column(
+                            children: [
+                              _buildResponsiveRow(isLargeScreen, [
+                                _buildInputField(_nombresController, 'Nombres'),
+                                _buildInputField(
+                                    _apellidosController, 'Apellidos'),
+                              ]),
+                              _buildResponsiveRow(isLargeScreen, [
+                                _buildInputField(_emailController, 'Email',
+                                    isEmail: true),
+                                _buildInputField(
+                                    _telefonoController, 'Teléfono'),
+                              ]),
+                              _buildResponsiveRow(isLargeScreen, [
+                                _buildDropdown(
+                                  selectedRole,
+                                  (String? newValue) {
+                                    setState(() {
+                                      selectedRole = newValue!;
+                                    });
+                                  },
+                                ),
+                                _buildDatePicker(
+                                    context,
+                                    _fechaIngresoController,
+                                    'Fecha de Ingreso'),
+                              ]),
+                            ],
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text(
-                            'Cancelar',
-                            style: TextStyle(color: Colors.grey[600]),
+                        if (employee != null) const SizedBox(width: 8),
+                        Flexible(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width < 768
+                                  ? double.infinity
+                                  : 200,
+                            ),
+                            child: TextButton.icon(
+                              onPressed: () => Navigator.of(context).pop(),
+                              icon: const Icon(Icons.cancel),
+                              label: MediaQuery.of(context).size.width < 768
+                                  ? const SizedBox.shrink()
+                                  : const Text('Cancelar'),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal:
+                                      MediaQuery.of(context).size.width < 768
+                                          ? 12
+                                          : 16,
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.indigo,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width < 768
+                                  ? double.infinity
+                                  : 200,
                             ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                          ),
-                          onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              _saveOrUpdateEmployee(employee);
-                              Navigator.of(context).pop();
-                            }
-                          },
-                          child: const Text(
-                            'Guardar',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.indigo,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal:
+                                      MediaQuery.of(context).size.width < 768
+                                          ? 12
+                                          : 16,
+                                  vertical: 12,
+                                ),
+                              ),
+                              onPressed: () {
+                                if (formKey.currentState!.validate()) {
+                                  _saveOrUpdateEmployee(employee);
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                              icon: const Icon(
+                                Icons.save,
+                                color: Colors.white,
+                              ),
+                              label: MediaQuery.of(context).size.width < 768
+                                  ? const SizedBox.shrink()
+                                  : const Text(
+                                      'Guardar',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                             ),
                           ),
                         ),
@@ -370,7 +425,6 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
-            // _buildUserTable(),
 
             Expanded(
               child: ResponsiveRolesTable(
@@ -387,227 +441,228 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
     );
   }
 
-  Widget _buildUserTable() {
-    return Card(
-      elevation: 4,
-      color: Colors.white70,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Lista de Usuarios',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                // ElevatedButton(
-                //   onPressed: () => _showFormDialog(context, null),
-                //   child: const Text('Nuevo Empleado'),
-                // ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            employees.isEmpty
-                ? SizedBox(
-                  height: 400,
-                  child: FutureBuilder(
-                    future: Future.delayed(const Duration(seconds: 1)),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        );
-                      } else {
-                        return const Center(
-                          child: Text(
-                            "No hay usuarios para mostrar",
-                            style: TextStyle(fontSize: 18),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                )
-                : SizedBox(
-                    height: 400,
-                    child: DataTable2(
-                      columnSpacing: 12,
-                      horizontalMargin: 12,
-                      minWidth: 600,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      headingRowColor:
-                          WidgetStateProperty.all(Colors.grey[200]),
-                      columns: const [
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Codigo',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Nombres',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Apellidos',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Email',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Teléfono',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Role',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                        DataColumn2(
-                          label: Center(
-                            child: Text('Fecha Ingreso',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                          ),
-                          size: ColumnSize.L,
-                        ),
-                      ],
-                      rows: employees
-                          .map((employee) => DataRow2(
-                                cells: [
-                                  DataCell(
-                                      Center(child: Text(employee.codigo))),
-                                  DataCell(
-                                      Center(child: Text(employee.nombres))),
-                                  DataCell(
-                                      Center(child: Text(employee.apellidos))),
-                                  DataCell(Center(child: Text(employee.email))),
-                                  DataCell(
-                                      Center(child: Text(employee.telefono))),
-                                  DataCell(
-                                    Center(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: _getRoleColor(employee.role),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                        child: Text(
-                                          employee.role,
-                                          style: const TextStyle(
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  // ... (otras celdas) ...
-                                  DataCell(
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(DateFormat('dd/MM/yyyy')
-                                            .format(employee.fechaIngreso)),
-                                        PopupMenuButton<String>(
-                                          onSelected: (value) {
-                                            if (value == 'Eliminar') {
-                                              _deleteEmployee(employee);
-                                            } else if (value ==
-                                                'Deshabilitar') {
-                                              //_disableEmployee(employee);
-                                              print(
-                                                  'Aqui se va a deshabilitar');
-                                            }
-                                          },
-                                          itemBuilder: (BuildContext context) =>
-                                              [
-                                            const PopupMenuItem<String>(
-                                              value: 'Eliminar',
-                                              child: Text('Eliminar'),
-                                            ),
-                                            const PopupMenuItem<String>(
-                                              value: 'Deshabilitar',
-                                              child: Text('Deshabilitar'),
-                                            ),
-                                          ],
-                                          icon: const Icon(Icons.more_vert),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                                color: WidgetStateProperty.resolveWith<Color?>(
-                                  (Set<WidgetState> states) {
-                                    if (states.contains(WidgetState.hovered)) {
-                                      return Colors.grey[300];
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                onDoubleTap: () =>
-                                    _showFormDialog(context, employee),
-                              ))
-                          .toList(),
-                    ),
-                  ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildUserTable() {
+  //   return Card(
+  //     elevation: 4,
+  //     color: Colors.white70,
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(16),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           const Row(
+  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //             children: [
+  //               Text(
+  //                 'Lista de Usuarios',
+  //                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+  //               ),
+  //               ElevatedButton(
+  //                 onPressed: () => _showFormDialog(context, null),
+  //                 child: const Text('Nuevo Empleado'),
+  //               ),
+  //             ],
+  //           ),
+  //           const SizedBox(height: 16),
+  //           employees.isEmpty
+  //               ? SizedBox(
+  //                   height: 400,
+  //                   child: FutureBuilder(
+  //                     future: Future.delayed(const Duration(seconds: 1)),
+  //                     builder: (context, snapshot) {
+  //                       if (snapshot.connectionState ==
+  //                           ConnectionState.waiting) {
+  //                         return const Center(
+  //                           child: CircularProgressIndicator(strokeWidth: 2),
+  //                         );
+  //                       } else {
+  //                         return const Center(
+  //                           child: Text(
+  //                             "No hay usuarios para mostrar",
+  //                             style: TextStyle(fontSize: 18),
+  //                           ),
+  //                         );
+  //                       }
+  //                     },
+  //                   ),
+  //                 )
+  //               : SizedBox(
+  //                   height: 400,
+  //                   child: DataTable2(
+  //                     columnSpacing: 12,
+  //                     horizontalMargin: 12,
+  //                     minWidth: 600,
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.grey[100],
+  //                       borderRadius: BorderRadius.circular(8),
+  //                     ),
+  //                     headingRowColor:
+  //                         WidgetStateProperty.all(Colors.grey[200]),
+  //                     columns: const [
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Codigo',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Nombres',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Apellidos',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Email',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Teléfono',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Role',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                       DataColumn2(
+  //                         label: Center(
+  //                           child: Text('Fecha Ingreso',
+  //                               style: TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 color: Colors.blue,
+  //                               )),
+  //                         ),
+  //                         size: ColumnSize.L,
+  //                       ),
+  //                     ],
+  //                     rows: employees
+  //                         .map((employee) => DataRow2(
+  //                               cells: [
+  //                                 DataCell(
+  //                                     Center(child: Text(employee.codigo))),
+  //                                 DataCell(
+  //                                     Center(child: Text(employee.nombres))),
+  //                                 DataCell(
+  //                                     Center(child: Text(employee.apellidos))),
+  //                                 DataCell(Center(child: Text(employee.email))),
+  //                                 DataCell(
+  //                                     Center(child: Text(employee.telefono))),
+  //                                 DataCell(
+  //                                   Center(
+  //                                     child: Container(
+  //                                       padding: const EdgeInsets.symmetric(
+  //                                           horizontal: 8, vertical: 4),
+  //                                       decoration: BoxDecoration(
+  //                                         color: _getRoleColor(employee.role),
+  //                                         borderRadius:
+  //                                             BorderRadius.circular(12),
+  //                                       ),
+  //                                       child: Text(
+  //                                         employee.role,
+  //                                         style: const TextStyle(
+  //                                             color: Colors.white),
+  //                                       ),
+  //                                     ),
+  //                                   ),
+  //                                 ),
+  //                                 ... (otras celdas) ...
+  //                                 DataCell(
+  //                                   Row(
+  //                                     mainAxisAlignment:
+  //                                         MainAxisAlignment.spaceBetween,
+  //                                     children: [
+  //                                       Text(DateFormat('dd/MM/yyyy')
+  //                                           .format(employee.fechaIngreso)),
+  //                                       PopupMenuButton<String>(
+  //                                         onSelected: (value) {
+  //                                           if (value == 'Eliminar') {
+  //                                             _deleteEmployee(employee);
+  //                                           } else if (value ==
+  //                                               'Deshabilitar') {
+  //                                             _disableEmployee(employee);
+  //                                             print(
+  //                                                 'Aqui se va a deshabilitar');
+  //                                           }
+  //                                         },
+  //                                         itemBuilder: (BuildContext context) =>
+  //                                             [
+  //                                           const PopupMenuItem<String>(
+  //                                             value: 'Eliminar',
+  //                                             child: Text('Eliminar'),
+  //                                           ),
+  //                                           const PopupMenuItem<String>(
+  //                                             value: 'Deshabilitar',
+  //                                             child: Text('Deshabilitar'),
+  //                                           ),
+  //                                         ],
+  //                                         icon: const Icon(Icons.more_vert),
+  //                                       ),
+  //                                     ],
+  //                                   ),
+  //                                 ),
+  //                               ],
+  //                               color: WidgetStateProperty.resolveWith<Color?>(
+  //                                 (Set<WidgetState> states) {
+  //                                   if (states.contains(WidgetState.hovered)) {
+  //                                     return Colors.grey[300];
+  //                                   }
+  //                                   return null;
+  //                                 },
+  //                               ),
+  //                               onDoubleTap: () =>
+  //                                   _showFormDialog(context, employee),
+  //                             ))
+  //                         .toList(),
+  //                   ),
+  //                 ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   void _deleteEmployee(Employee employee) async {
     // Mostrar un diálogo de confirmación
