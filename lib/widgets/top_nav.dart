@@ -16,7 +16,8 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
               Container(
                 padding: const EdgeInsets.only(left: 14),
                 //margin: const EdgeInsets.only(right: 100),
-                child: Image.asset("assets/icons/goSoftwareSolutions-01.png", width: 40),
+                child: Image.asset("assets/icons/goSoftwareSolutions-01.png",
+                    width: 40),
               )
             ],
           )
@@ -117,19 +118,22 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
                 print("Seleccionaste: $value");
                 // Aquí puedes navegar a una nueva pantalla o realizar otra acción
               },
-              offset: const Offset(0, 40), // Desplaza el menú hacia abajo del icono
+              offset:
+                  const Offset(0, 40), // Desplaza el menú hacia abajo del icono
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<String>>[
                   PopupMenuItem<String>(
                     value: 'Perfil',
                     onTap: () {
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => const ProfileWidget()),
+                        MaterialPageRoute(
+                            builder: (context) => const ProfileWidget()),
                       );
                     },
                     child: const Row(
                       children: [
-                        Icon(Icons.person, color: Colors.black), // Icono para la opción
+                        Icon(Icons.person,
+                            color: Colors.black), // Icono para la opción
                         SizedBox(width: 8), // Espacio entre el icono y el texto
                         Text('Profile'),
                       ],
@@ -139,7 +143,8 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
                     value: 'Settings',
                     child: Row(
                       children: [
-                        Icon(Icons.settings, color: Colors.black), // Icono para la opción
+                        Icon(Icons.settings,
+                            color: Colors.black), // Icono para la opción
                         SizedBox(width: 8),
                         Text('Settings'),
                       ],
@@ -148,53 +153,116 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
                   PopupMenuItem<String>(
                     value: 'Log Out',
                     onTap: () async {
-                      // Delay the execution to avoid conflicts with PopupMenuItem
                       WidgetsBinding.instance.addPostFrameCallback((_) async {
-                        // Show confirmation dialog
                         bool? confirmLogout = await showDialog<bool>(
                           context: context,
                           builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text('Confirm Logout'),
-                              content: const Text('Are you sure you want to log out?'),
-                              actions: <Widget>[
-                                TextButton(
-                                  child: const Text('Cancel'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop(false);
-                                  },
+                            return Dialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.all(20),
+                                width: 320,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          'Cerrar Sesión',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          icon: const Icon(Icons.close),
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(false),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    const Text(
+                                      'Está seguro de cerrar la sesión?',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(false),
+                                          style: TextButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 8,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Cancelar',
+                                            style: TextStyle(
+                                              color: Colors.black54,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(true),
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 8,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Cerrar sesión',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                                TextButton(
-                                  child: const Text('Log Out'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop(true);
-                                  },
-                                ),
-                              ],
+                              ),
                             );
                           },
                         );
 
-                        // If user confirms, proceed with logout
                         if (confirmLogout == true) {
-                          // Cerrar sesión de Firebase
                           await FirebaseAuth.instance.signOut();
-
-                          // Redirigir al usuario a la pantalla de autenticación
                           Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (context) => const AuthenticationPage()),
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const AuthenticationPage()),
                           );
                         }
                       });
                     },
                     child: const Row(
                       children: [
-                        Icon(Icons.logout, color: Colors.black), // Icono para la opción
+                        Icon(Icons.logout, color: Colors.black),
                         SizedBox(width: 8),
                         Text('Log Out'),
                       ],
                     ),
-                  ),
+                  )
                 ];
               },
             ),
