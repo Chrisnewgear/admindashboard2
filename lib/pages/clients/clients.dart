@@ -137,7 +137,12 @@ class _ClientsPageState extends State<ClientsPage> {
     return code;
   }
 
-  Future<void> _saveOrUpdateClient(Clients? existingClient) async {
+  Future<void> _saveOrUpdateClient(BuildContext context, Clients? existingClient) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    // Mostrar el diálogo de carga al iniciar la operación
+    showLoadingDialog(context);
+
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
@@ -177,7 +182,7 @@ class _ClientsPageState extends State<ClientsPage> {
 
       await _loadUsers();
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text(existingClient == null
               ? 'Cliente creado exitosamente'
@@ -186,12 +191,14 @@ class _ClientsPageState extends State<ClientsPage> {
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
+    }finally{
+      Navigator.of(context, rootNavigator: true).pop();
     }
   }
 
@@ -233,13 +240,25 @@ class _ClientsPageState extends State<ClientsPage> {
           backgroundColor: Colors.transparent,
           child: LayoutBuilder(
             builder: (context, constraints) {
+              // double modalWidth;
+              // if (constraints.maxWidth > 1024) {
+              //   modalWidth = constraints.maxWidth * 0.5;
+              // } else if (constraints.maxWidth > 768) {
+              //   modalWidth = constraints.maxWidth * 0.7;
+              // } else {
+              //   modalWidth = constraints.maxWidth * 0.9;
+              
               double modalWidth;
               if (constraints.maxWidth > 1024) {
-                modalWidth = constraints.maxWidth * 0.5;
+                // iPad Pro y pantallas grandes
+                modalWidth =
+                    constraints.maxWidth * 0.5; // 50% del ancho disponible
               } else if (constraints.maxWidth > 768) {
+                // iPads regulares
                 modalWidth = constraints.maxWidth * 0.7;
               } else {
                 modalWidth = constraints.maxWidth * 0.9;
+
               }
 
               return Container(
@@ -249,181 +268,183 @@ class _ClientsPageState extends State<ClientsPage> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          client == null ? 'Nuevo Cliente' : 'Editar Cliente',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            client == null ? 'Nuevo Cliente' : 'Editar Cliente',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close, color: Colors.black54),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Form(
-                      key: formKey,
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: isEditable,
-                        builder: (context, editable, _) {
-                          bool isLargeScreen = constraints.maxWidth > 986;
-                          return Column(
-                            children: [
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(_nombresController, 'Nombres*',
-                                    enabled: editable),
-                                _buildInputField(
-                                    _apellidosController, 'Apellidos*',
-                                    enabled: editable),
-                              ]),
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(_emailController, 'Email',
-                                    isEmail: true, enabled: editable),
-                                _buildInputField(
-                                    _telefonoController, 'Teléfono*',
-                                    enabled: editable),
-                              ]),
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(_empresaController, 'Empresa',
-                                    enabled: editable),
-                                _buildDatePicker(context,
-                                    _fechaIngresoController, 'Fecha de Ingreso',
-                                    enabled: editable),
-                              ]),
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(
-                                    _direccionController, 'Dirección',
-                                    enabled: editable),
-                              ])
-                            ],
-                          );
-                        },
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.black54),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        if (client != null)
+                      const SizedBox(height: 24),
+                      Form(
+                        key: formKey,
+                        child: ValueListenableBuilder<bool>(
+                          valueListenable: isEditable,
+                          builder: (context, editable, _) {
+                            bool isLargeScreen = constraints.maxWidth > 986;
+                            return Column(
+                              children: [
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(_nombresController, 'Nombres*',
+                                      enabled: editable),
+                                  _buildInputField(
+                                      _apellidosController, 'Apellidos*',
+                                      enabled: editable),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(_emailController, 'Email',
+                                      isEmail: true, enabled: editable),
+                                  _buildInputField(
+                                      _telefonoController, 'Teléfono*',
+                                      enabled: editable),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(_empresaController, 'Empresa',
+                                      enabled: editable),
+                                  _buildDatePicker(context,
+                                      _fechaIngresoController, 'Fecha de Ingreso',
+                                      enabled: editable),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(
+                                      _direccionController, 'Dirección',
+                                      enabled: editable),
+                                ])
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (client != null)
+                            Flexible(
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width < 768
+                                          ? double.infinity
+                                          : 200,
+                                ),
+                                child: ValueListenableBuilder<bool>(
+                                  valueListenable: isEditable,
+                                  builder: (context, editable, _) {
+                                    return ElevatedButton.icon(
+                                      style: ElevatedButton.styleFrom(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal:
+                                              MediaQuery.of(context).size.width <
+                                                      768
+                                                  ? 12
+                                                  : 16,
+                                          vertical: 12,
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        isEditable.value = !isEditable.value;
+                                      },
+                                      icon: editable
+                                          ? const Icon(Icons.edit_off)
+                                          : const Icon(Icons.edit),
+                                      label:
+                                          MediaQuery.of(context).size.width < 768
+                                              ? const SizedBox.shrink()
+                                              : Text(editable
+                                                  ? 'Cancelar Edición'
+                                                  : 'Editar'),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          if (client != null) const SizedBox(width: 8),
                           Flexible(
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
-                                maxWidth:
-                                    MediaQuery.of(context).size.width < 768
-                                        ? double.infinity
-                                        : 200,
+                                maxWidth: MediaQuery.of(context).size.width < 768
+                                    ? double.infinity
+                                    : 200,
                               ),
-                              child: ValueListenableBuilder<bool>(
-                                valueListenable: isEditable,
-                                builder: (context, editable, _) {
-                                  return ElevatedButton.icon(
-                                    style: ElevatedButton.styleFrom(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal:
-                                            MediaQuery.of(context).size.width <
-                                                    768
-                                                ? 12
-                                                : 16,
-                                        vertical: 12,
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      isEditable.value = !isEditable.value;
-                                    },
-                                    icon: editable
-                                        ? const Icon(Icons.edit_off)
-                                        : const Icon(Icons.edit),
-                                    label:
+                              child: TextButton.icon(
+                                onPressed: () => Navigator.of(context).pop(),
+                                icon: const Icon(Icons.cancel),
+                                label: MediaQuery.of(context).size.width < 768
+                                    ? const SizedBox.shrink()
+                                    : const Text('Cancelar'),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal:
                                         MediaQuery.of(context).size.width < 768
-                                            ? const SizedBox.shrink()
-                                            : Text(editable
-                                                ? 'Cancelar Edición'
-                                                : 'Editar'),
-                                  );
+                                            ? 12
+                                            : 16,
+                                    vertical: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width < 768
+                                    ? double.infinity
+                                    : 200,
+                              ),
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.indigo,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal:
+                                        MediaQuery.of(context).size.width < 768
+                                            ? 12
+                                            : 16,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  if (formKey.currentState!.validate()) {
+                                    _saveOrUpdateClient(context, client);
+                                    Navigator.of(context).pop();
+                                  }
                                 },
+                                icon: const Icon(
+                                  Icons.save,
+                                  color: Colors.white,
+                                ),
+                                label: MediaQuery.of(context).size.width < 768
+                                    ? const SizedBox.shrink()
+                                    : const Text(
+                                        'Guardar',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
                               ),
                             ),
                           ),
-                        if (client != null) const SizedBox(width: 8),
-                        Flexible(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width < 768
-                                  ? double.infinity
-                                  : 200,
-                            ),
-                            child: TextButton.icon(
-                              onPressed: () => Navigator.of(context).pop(),
-                              icon: const Icon(Icons.cancel),
-                              label: MediaQuery.of(context).size.width < 768
-                                  ? const SizedBox.shrink()
-                                  : const Text('Cancelar'),
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal:
-                                      MediaQuery.of(context).size.width < 768
-                                          ? 12
-                                          : 16,
-                                  vertical: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width < 768
-                                  ? double.infinity
-                                  : 200,
-                            ),
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.indigo,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal:
-                                      MediaQuery.of(context).size.width < 768
-                                          ? 12
-                                          : 16,
-                                  vertical: 12,
-                                ),
-                              ),
-                              onPressed: () {
-                                if (formKey.currentState!.validate()) {
-                                  _saveOrUpdateClient(client);
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              icon: const Icon(
-                                Icons.save,
-                                color: Colors.white,
-                              ),
-                              label: MediaQuery.of(context).size.width < 768
-                                  ? const SizedBox.shrink()
-                                  : const Text(
-                                      'Guardar',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -712,9 +733,9 @@ class _ClientsPageState extends State<ClientsPage> {
             Expanded(
               child: ResponsiveClientsTable(
                 clientes: clients,
-                deleteClient: (visita) => _deleteClient(visita),
-                showClientVisitFormDialog: (context, visita) =>
-                    _showFormDialog(context, visita),
+                deleteClient: (cliente) => _deleteClient(cliente),
+                showClientVisitFormDialog: (context, cliente) =>
+                    _showFormDialog(context, cliente),
                 isLoading: isLoading,
               ),
             ),
@@ -836,4 +857,26 @@ class _ClientsPageState extends State<ClientsPage> {
       }
     }
   }
+}
+
+void showLoadingDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return const Dialog(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Guardando cliente..."),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }

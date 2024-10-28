@@ -1,9 +1,12 @@
+import 'dart:ui';
+
 import 'package:admindashboard/models/clients.dart';
+import 'package:admindashboard/pages/visits/widgets/search_bar.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ResponsiveClientsTable extends StatelessWidget {
+class ResponsiveClientsTable extends StatefulWidget {
   final List<Clients> clientes;
   final Function(Clients) deleteClient;
   final Function(BuildContext, dynamic) showClientVisitFormDialog;
@@ -16,6 +19,58 @@ class ResponsiveClientsTable extends StatelessWidget {
     required this.showClientVisitFormDialog,
     required this.isLoading,
   });
+
+  @override
+  State<ResponsiveClientsTable> createState() => _ResponsiveClientsTableState();
+}
+
+class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
+  List<Clients> filteredClientes = [];
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    filteredClientes = widget.clientes;
+    _searchController.addListener(_filterClientes);
+  }
+
+  @override
+  void didUpdateWidget(ResponsiveClientsTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.clientes != widget.clientes) {
+      _filterClientes();
+    }
+  }
+
+  void _filterClientes() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      filteredClientes = widget.clientes.where((cliente) {
+        return cliente.nombres.toLowerCase().contains(query) ||
+            cliente.apellidos.toLowerCase().contains(query) ||
+            cliente.telefono.toLowerCase().contains(query) ||
+            cliente.email.toLowerCase().contains(query) ||
+            cliente.empresa.toLowerCase().contains(query) ||
+            DateFormat('dd/MM/yyyy')
+                .format(cliente.fechaIngreso)
+                .toLowerCase()
+                .contains(query);
+      }).toList();
+    });
+  }
+
+  void _clearSearch() {
+    setState(() {
+      filteredClientes = widget.clientes;
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,15 +89,26 @@ class ResponsiveClientsTable extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // children: [
+                    //   const Text(
+                    //     '',
+                    //     style: TextStyle(
+                    //         fontSize: 20, fontWeight: FontWeight.bold),
+                    //   ),
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        '',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
+                      EnhancedSearchBar(
+                        controller: _searchController,
+                        onClear: _clearSearch,
+                        hintText: 'Buscar Cliente...',
+                        accentColor: Theme.of(context).primaryColor,
                       ),
                       ElevatedButton(
-                        onPressed: isLoading ? null : () => showClientVisitFormDialog(context, null),
+                        onPressed: widget.isLoading
+                            ? null
+                            : () =>
+                                widget.showClientVisitFormDialog(context, null),
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.blue,
                           backgroundColor: Colors.white,
@@ -66,7 +132,7 @@ class ResponsiveClientsTable extends StatelessWidget {
   }
 
   Widget _buildTableContent(BuildContext context, BoxConstraints constraints) {
-    if (isLoading) {
+    if (widget.isLoading) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -79,7 +145,7 @@ class ResponsiveClientsTable extends StatelessWidget {
       );
     }
 
-    if (clientes.isEmpty) {
+    if (widget.clientes.isEmpty) {
       return _buildEmptyState();
     }
 
@@ -89,23 +155,25 @@ class ResponsiveClientsTable extends StatelessWidget {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Text(
-        "No hay clientes para mostrar",
-        style: TextStyle(fontSize: 18),
+        _searchController.text.isEmpty
+            ? "No hay clientes para mostrar"
+            : "No se encontraron resultados para '${_searchController.text}'",
+        style: const TextStyle(fontSize: 18),
       ),
     );
   }
 
   Widget _buildListView() {
     return ListView.builder(
-      itemCount: clientes.length,
+      itemCount: widget.clientes.length,
       itemBuilder: (context, index) {
-        final item = clientes[index];
+        final item = widget.clientes[index];
         return GestureDetector(
           onTap: () {
             // Al hacer tap en la tarjeta, mostrar el cuadro de diálogo para editar
-            showClientVisitFormDialog(context, item);
+            widget.showClientVisitFormDialog(context, item);
           },
           child: Card(
             color: Colors.white,
@@ -125,10 +193,10 @@ class ResponsiveClientsTable extends StatelessWidget {
                 icon: const Icon(Icons.more_vert),
                 onSelected: (String result) {
                   if (result == 'Editar') {
-                    showClientVisitFormDialog(
+                    widget.showClientVisitFormDialog(
                         context, item); // Cuadro de diálogo para editar
                   } else if (result == 'Eliminar') {
-                    deleteClient(item); // Lógica para eliminar
+                    widget.deleteClient(item); // Lógica para eliminar
                   }
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -151,7 +219,11 @@ class ResponsiveClientsTable extends StatelessWidget {
 
   Widget _buildDataTable(BuildContext context) {
     final clientesDataSource = ClientesDataTableSource(
-        clientes, deleteClient, showClientVisitFormDialog, context);
+        filteredClientes,
+        widget.clientes,
+        widget.deleteClient,
+        widget.showClientVisitFormDialog,
+        context);
 
     return Theme(
       data: Theme.of(context).copyWith(
@@ -231,8 +303,8 @@ class ResponsiveClientsTable extends StatelessWidget {
         showCheckboxColumn: false,
         headingRowHeight: 40,
         dataRowHeight: 60,
-        headingRowColor: WidgetStateColor.resolveWith(
-            (states) => Theme.of(context).primaryColor), // Fondo azul para el encabezado
+        headingRowColor: WidgetStateColor.resolveWith((states) =>
+            Theme.of(context).primaryColor), // Fondo azul para el encabezado
       ),
     );
   }

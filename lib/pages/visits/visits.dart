@@ -114,6 +114,8 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       BuildContext context, Visitas? existingVisit) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
+    showLoadingDialog(context);
+
     try {
       // Mostrar el loading
       showDialog(
@@ -187,6 +189,8 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      Navigator.of(context).pop();
     }
   }
   // void _showErrorMessage(BuildContext context, String errorMessage) {
@@ -205,7 +209,6 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       try {
         serviceEnabled = await Geolocator.isLocationServiceEnabled();
       } catch (e) {
-        print("Error al verificar el servicio de ubicación: $e");
         _showSnackBar(context,
             'Error al verificar el servicio de ubicación. Por favor, reinicia la aplicación.');
         return null;
@@ -242,7 +245,6 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
 
       return GeoPoint(position.latitude, position.longitude);
     } catch (e) {
-      print("Error detallado al obtener la ubicación: $e");
       _showSnackBar(context,
           'Error al obtener la ubicación. Por favor, verifica los permisos e intenta de nuevo.');
       return null;
@@ -302,14 +304,10 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
           backgroundColor: Colors.transparent,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              // Ajustamos los breakpoints para mejor soporte de tablets
               double modalWidth;
               if (constraints.maxWidth > 1024) {
-                // iPad Pro y pantallas grandes
-                modalWidth =
-                    constraints.maxWidth * 0.5; // 50% del ancho disponible
+                modalWidth = constraints.maxWidth * 0.5;
               } else if (constraints.maxWidth > 768) {
-                // iPads regulares
                 modalWidth = constraints.maxWidth * 0.7;
               } else {
                 modalWidth = constraints.maxWidth * 0.9;
@@ -322,66 +320,118 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      visita == null ? 'Nueva Visita' : 'Editar Visita',
-                      style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 20),
-                    Form(
-                      key: formKey,
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: isEditable,
-                        builder: (context, editable, _) {
-                          bool isLargeScreen = constraints.maxWidth > 986;
-                          return Column(
-                            children: [
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(
-                                    _nombreClienteController, 'Nombre Cliente*',
-                                    enabled: editable),
-                                _buildInputField(
-                                    _accionesController, 'Acciones*',
-                                    enabled: editable),
-                              ]),
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(_prodServicioController,
-                                    'Producto/Servicio*',
-                                    enabled: editable),
-                                _buildDropdown(selectedPurpose,
-                                    (String? newValue) {
-                                  setState(() {
-                                    selectedPurpose = newValue!;
-                                  });
-                                }, enabled: editable),
-                              ]),
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildDatePicker(context, _fechaController,
-                                    'Fecha de Ingreso',
-                                    enabled: false),
-                                _buildTimePicker(
-                                    context, _horaController, 'Hora',
-                                    enabled: false),
-                              ]),
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildNotesField(
-                                    _notasController, 'Observaciones',
-                                    enabled: editable),
-                              ]),
-                            ],
-                          );
-                        },
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            visita == null ? 'Nueva Visita' : 'Editar Visita',
+                            style: const TextStyle(
+                                fontSize: 22, fontWeight: FontWeight.w600),
+                          ),
+                          IconButton(
+                            icon:
+                                const Icon(Icons.close, color: Colors.black54),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        if (visita != null)
+                      const SizedBox(height: 20),
+                      Form(
+                        key: formKey,
+                        child: ValueListenableBuilder<bool>(
+                          valueListenable: isEditable,
+                          builder: (context, editable, _) {
+                            bool isLargeScreen = constraints.maxWidth > 986;
+                            return Column(
+                              children: [
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(_nombreClienteController,
+                                      'Nombre Cliente*',
+                                      enabled: editable),
+                                  _buildInputField(
+                                      _accionesController, 'Acciones*',
+                                      enabled: editable),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(_prodServicioController,
+                                      'Producto/Servicio*',
+                                      enabled: editable),
+                                  _buildDropdown(selectedPurpose,
+                                      (String? newValue) {
+                                    setState(() {
+                                      selectedPurpose = newValue!;
+                                    });
+                                  }, enabled: editable),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildDatePicker(context, _fechaController,
+                                      'Fecha de Ingreso',
+                                      enabled: false),
+                                  _buildTimePicker(
+                                      context, _horaController, 'Hora',
+                                      enabled: false),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildNotesField(
+                                      _notasController, 'Observaciones',
+                                      enabled: editable),
+                                ]),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (visita != null)
+                            Flexible(
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width < 768
+                                          ? double.infinity
+                                          : 200,
+                                ),
+                                child: ValueListenableBuilder<bool>(
+                                  valueListenable: isEditable,
+                                  builder: (context, editable, _) {
+                                    return ElevatedButton.icon(
+                                      style: ElevatedButton.styleFrom(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: MediaQuery.of(context)
+                                                      .size
+                                                      .width <
+                                                  768
+                                              ? 12
+                                              : 16,
+                                          vertical: 12,
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        isEditable.value = !isEditable.value;
+                                      },
+                                      icon: editable
+                                          ? const Icon(Icons.edit_off)
+                                          : const Icon(Icons.edit),
+                                      label: MediaQuery.of(context).size.width <
+                                              768
+                                          ? const SizedBox.shrink()
+                                          : Text(editable
+                                              ? 'Cancelar Edición'
+                                              : 'Editar'),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          if (visita != null) const SizedBox(width: 8),
                           Flexible(
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
@@ -390,107 +440,70 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                                         ? double.infinity
                                         : 200,
                               ),
-                              child: ValueListenableBuilder<bool>(
-                                valueListenable: isEditable,
-                                builder: (context, editable, _) {
-                                  return ElevatedButton.icon(
-                                    style: ElevatedButton.styleFrom(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal:
-                                            MediaQuery.of(context).size.width <
-                                                    768
-                                                ? 12
-                                                : 16,
-                                        vertical: 12,
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      isEditable.value = !isEditable.value;
-                                    },
-                                    icon: editable
-                                        ? const Icon(Icons.edit_off)
-                                        : const Icon(Icons.edit),
-                                    label:
+                              child: TextButton.icon(
+                                onPressed: () => Navigator.of(context).pop(),
+                                icon: const Icon(Icons.cancel),
+                                label: MediaQuery.of(context).size.width < 768
+                                    ? const SizedBox.shrink()
+                                    : const Text('Cancelar'),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal:
                                         MediaQuery.of(context).size.width < 768
-                                            ? const SizedBox.shrink()
-                                            : Text(editable
-                                                ? 'Cancelar Edición'
-                                                : 'Editar'),
-                                  );
+                                            ? 12
+                                            : 16,
+                                    vertical: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width < 768
+                                        ? double.infinity
+                                        : 200,
+                              ),
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.indigo,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal:
+                                        MediaQuery.of(context).size.width < 768
+                                            ? 12
+                                            : 16,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  if (formKey.currentState!.validate()) {
+                                    _saveOrUpdateVisit(context, visita);
+                                    Navigator.of(context).pop();
+                                  }
                                 },
+                                icon: const Icon(
+                                  Icons.save,
+                                  color: Colors.white,
+                                ),
+                                label: MediaQuery.of(context).size.width < 768
+                                    ? const SizedBox.shrink()
+                                    : const Text(
+                                        'Guardar',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
                               ),
                             ),
                           ),
-                        if (visita != null) const SizedBox(width: 8),
-                        Flexible(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width < 768
-                                  ? double.infinity
-                                  : 200,
-                            ),
-                            child: TextButton.icon(
-                              onPressed: () => Navigator.of(context).pop(),
-                              icon: const Icon(Icons.cancel),
-                              label: MediaQuery.of(context).size.width < 768
-                                  ? const SizedBox.shrink()
-                                  : const Text('Cancelar'),
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal:
-                                      MediaQuery.of(context).size.width < 768
-                                          ? 12
-                                          : 16,
-                                  vertical: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width < 768
-                                  ? double.infinity
-                                  : 200,
-                            ),
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.indigo,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal:
-                                      MediaQuery.of(context).size.width < 768
-                                          ? 12
-                                          : 16,
-                                  vertical: 12,
-                                ),
-                              ),
-                              onPressed: () {
-                                if (formKey.currentState!.validate()) {
-                                  _saveOrUpdateVisit(context, visita);
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              icon: const Icon(
-                                Icons.save,
-                                color: Colors.white,
-                              ),
-                              label: MediaQuery.of(context).size.width < 768
-                                  ? const SizedBox.shrink()
-                                  : const Text(
-                                      'Guardar',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -705,35 +718,96 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       ),
     );
   }
+  // //ESTE ES EL ORIGINAL
+  // Widget _buildNotesField(TextEditingController controller, String label,
+  //     {required bool enabled}) {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(bottom: 16),
+  //     child: Container(
+
+  //       child: TextFormField(
+  //         enabled: enabled,
+  //         controller: controller,
+  //         maxLines: null, // Permite múltiples líneas
+  //         keyboardType: TextInputType
+  //             .multiline, // Configura el teclado para entrada de texto largo
+  //         decoration: InputDecoration(
+  //           labelText: label,
+  //           border: OutlineInputBorder(
+  //             borderRadius: BorderRadius.circular(8),
+  //             borderSide: BorderSide(color: Colors.grey[300]!),
+  //           ),
+  //           enabledBorder: OutlineInputBorder(
+  //             borderRadius: BorderRadius.circular(8),
+  //             borderSide: BorderSide(color: Colors.grey[300]!),
+  //           ),
+  //           focusedBorder: OutlineInputBorder(
+  //             borderRadius: BorderRadius.circular(8),
+  //             borderSide: const BorderSide(color: Colors.indigo),
+  //           ),
+  //           filled: true,
+  //           fillColor: Colors.grey[50],
+  //         ),
+  //         // Sin validación porque no es un campo obligatorio
+  //       ),
+  //     ),
+  //   );
+  // }//<-- HASTA AQUI
 
   Widget _buildNotesField(TextEditingController controller, String label,
       {required bool enabled}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        enabled: enabled,
-        controller: controller,
-        maxLines: null, // Permite múltiples líneas
-        keyboardType: TextInputType
-            .multiline, // Configura el teclado para entrada de texto largo
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Colors.indigo),
-          ),
-          filled: true,
-          fillColor: Colors.grey[50],
-        ),
-        // Sin validación porque no es un campo obligatorio
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          // Obtener el tamaño de la pantalla
+          final screenHeight = MediaQuery.of(context).size.height;
+
+          // Calcular altura dinámica
+          // Para iPhone 6/7/8/SE (altura ~667)
+          double maxHeight = 65;
+
+          // Para pantallas más grandes, aumentar proporcionalmente
+          if (screenHeight > 667) {
+            // Calcular un valor entre 65 y 120 basado en el tamaño de la pantalla
+            maxHeight = 65 + ((screenHeight - 667) / 667) * 55;
+
+            // Limitar a un máximo de 120px para pantallas muy grandes
+            maxHeight = maxHeight.clamp(65.0, 120.0);
+          }
+
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: maxHeight,
+            ),
+            child: SingleChildScrollView(
+              child: TextFormField(
+                enabled: enabled,
+                controller: controller,
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                decoration: InputDecoration(
+                  labelText: label,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.indigo),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                  contentPadding: const EdgeInsets.all(12),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -891,4 +965,26 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       }
     }
   }
+}
+
+void showLoadingDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return const Dialog(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Guardando visita..."),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }

@@ -322,7 +322,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   children: [
                                     _buildTextField(
                                       controller: _name,
-                                      labelText: 'Nombre',
+                                      labelText: 'Nombre*',
                                       hintText: 'Ingrese su nombre',
                                       validator: (value) => value!.isEmpty
                                           ? 'El campo nombre es obligatorio'
@@ -331,7 +331,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     const SizedBox(height: 15),
                                     _buildTextField(
                                       controller: _surname,
-                                      labelText: 'Apellidos',
+                                      labelText: 'Apellidos*',
                                       hintText: 'Ingrese sus apellidos',
                                       validator: (value) => value!.isEmpty
                                           ? 'El campo apellidos es obligatorio'
@@ -340,7 +340,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     const SizedBox(height: 15),
                                     _buildTextField(
                                       controller: _email,
-                                      labelText: 'Email',
+                                      labelText: 'Email*',
                                       hintText: 'abc@domain.com',
                                       keyboardType: TextInputType.emailAddress,
                                       validator: (value) => value!.isEmpty
@@ -358,7 +358,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     const SizedBox(height: 15),
                                     _buildTextField(
                                       controller: _password,
-                                      labelText: 'Password',
+                                      labelText: 'Password*',
                                       hintText: 'Al menos 8 caracteres',
                                       isPassword: true,
                                       validator: (value) {
@@ -374,7 +374,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     const SizedBox(height: 15),
                                     _buildTextField(
                                       controller: _repeated_password,
-                                      labelText: 'Repita su Password',
+                                      labelText: 'Repita su Password*',
                                       hintText: 'Repita su password',
                                       isPassword: true,
                                       isRepeatedPassword: true,
@@ -565,3 +565,4 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 }
+

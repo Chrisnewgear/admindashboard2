@@ -1,9 +1,101 @@
 import 'package:admindashboard/models/visits.dart';
+import 'package:admindashboard/pages/visits/widgets/search_bar.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ResponsiveVisitasTable extends StatelessWidget {
+// class AnimatedSearchBar extends StatefulWidget {
+//   final TextEditingController controller;
+//   final Function() onClear;
+
+//   const AnimatedSearchBar({
+//     super.key,
+//     required this.controller,
+//     required this.onClear,
+//   });
+
+//   @override
+//   State<AnimatedSearchBar> createState() => _AnimatedSearchBarState();
+// }
+
+// class _AnimatedSearchBarState extends State<AnimatedSearchBar>
+//     with SingleTickerProviderStateMixin {
+//   late AnimationController _animationController;
+//   bool _isSearching = false;
+//   final FocusNode _focusNode = FocusNode();
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _animationController = AnimationController(
+//       duration: const Duration(milliseconds: 300),
+//       vsync: this,
+//     );
+//   }
+
+//   @override
+//   void dispose() {
+//     _animationController.dispose();
+//     _focusNode.dispose();
+//     super.dispose();
+//   }
+
+//   void _toggleSearch() {
+//     setState(() {
+//       _isSearching = !_isSearching;
+//       if (_isSearching) {
+//         _animationController.forward();
+//         _focusNode.requestFocus();
+//       } else {
+//         _animationController.reverse();
+//         widget.controller.clear();
+//         widget.onClear();
+//       }
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       children: [
+//         AnimatedContainer(
+//           duration: const Duration(milliseconds: 300),
+//           width: _isSearching ? 300 : 48,
+//           decoration: BoxDecoration(
+//             borderRadius: BorderRadius.circular(8),
+//             color: Colors.grey[100],
+//           ),
+//           child: Row(
+//             children: [
+//               Material(
+//                 color: Colors.transparent,
+//                 child: IconButton(
+//                   icon: Icon(_isSearching ? Icons.close : Icons.search),
+//                   onPressed: _toggleSearch,
+//                   color: Colors.grey[700],
+//                 ),
+//               ),
+//               if (_isSearching)
+//                 Expanded(
+//                   child: TextField(
+//                     controller: widget.controller,
+//                     focusNode: _focusNode,
+//                     decoration: const InputDecoration(
+//                       hintText: 'Buscar visitas...',
+//                       border: InputBorder.none,
+//                       contentPadding: EdgeInsets.symmetric(horizontal: 8),
+//                     ),
+//                   ),
+//                 ),
+//             ],
+//           ),
+//         ),
+//       ],
+//     );
+//   }
+// }
+
+class ResponsiveVisitasTable extends StatefulWidget {
   final List<Visitas> visitas;
   final Function(Visitas) deleteVisit;
   final Function(BuildContext, dynamic) showClientVisitFormDialog;
@@ -15,6 +107,57 @@ class ResponsiveVisitasTable extends StatelessWidget {
       required this.deleteVisit,
       required this.showClientVisitFormDialog,
       required this.isLoading});
+
+  @override
+  State<ResponsiveVisitasTable> createState() => _ResponsiveVisitasTableState();
+}
+
+class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
+  List<Visitas> filteredVisitas = [];
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    filteredVisitas = widget.visitas;
+    _searchController.addListener(_filterVisitas);
+  }
+
+  @override
+  void didUpdateWidget(ResponsiveVisitasTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.visitas != widget.visitas) {
+      _filterVisitas();
+    }
+  }
+
+  void _filterVisitas() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      filteredVisitas = widget.visitas.where((visita) {
+        return visita.nombreCliente.toLowerCase().contains(query) ||
+            visita.productoServicio.toLowerCase().contains(query) ||
+            visita.propVisita.toLowerCase().contains(query) ||
+            visita.acciones.toLowerCase().contains(query) ||
+            DateFormat('dd/MM/yyyy')
+                .format(visita.fecha)
+                .toLowerCase()
+                .contains(query);
+      }).toList();
+    });
+  }
+
+  void _clearSearch() {
+    setState(() {
+      filteredVisitas = widget.visitas;
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,15 +178,17 @@ class ResponsiveVisitasTable extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        '',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
+                      EnhancedSearchBar(
+                        controller: _searchController,
+                        onClear: _clearSearch,
+                        hintText: 'Buscar visitas...',
+                        accentColor: Theme.of(context).primaryColor,
                       ),
                       ElevatedButton(
-                        onPressed: isLoading
+                        onPressed: widget.isLoading
                             ? null
-                            : () => showClientVisitFormDialog(context, null),
+                            : () =>
+                                widget.showClientVisitFormDialog(context, null),
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.blue,
                           backgroundColor: Colors.white,
@@ -56,7 +201,9 @@ class ResponsiveVisitasTable extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Expanded(child: _buildTableContent(context, constraints)),
+                  Expanded(
+                    child: _buildTableContent(context, constraints),
+                  ),
                 ],
               ),
             ),
@@ -67,7 +214,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
   }
 
   Widget _buildTableContent(BuildContext context, BoxConstraints constraints) {
-    if (isLoading) {
+    if (widget.isLoading) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -80,7 +227,7 @@ class ResponsiveVisitasTable extends StatelessWidget {
       );
     }
 
-    if (visitas.isEmpty) {
+    if (filteredVisitas.isEmpty) {
       return _buildEmptyState();
     }
 
@@ -89,28 +236,31 @@ class ResponsiveVisitasTable extends StatelessWidget {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Text(
-        "No hay visitas para mostrar",
-        style: TextStyle(fontSize: 18),
+        _searchController.text.isEmpty
+            ? "No hay visitas para mostrar"
+            : "No se encontraron resultados para '${_searchController.text}'",
+        style: const TextStyle(fontSize: 18),
       ),
     );
   }
 
   Widget _buildListView() {
     return ListView.builder(
-      itemCount: visitas.length,
+      itemCount: filteredVisitas.length,
       itemBuilder: (context, index) {
-        final item = visitas[index];
+        final item = filteredVisitas[index];
         return GestureDetector(
           onTap: () {
             // Al hacer tap en la tarjeta, mostrar el cuadro de diálogo para editar
-            showClientVisitFormDialog(context, item);
+            widget.showClientVisitFormDialog(context, item);
           },
           child: Card(
-            color: Colors.white,
-            elevation: 2,
-            margin: const EdgeInsets.symmetric(vertical: 4),
+            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: ListTile(
               title: Text(
                 item.nombreCliente,
@@ -125,10 +275,9 @@ class ResponsiveVisitasTable extends StatelessWidget {
                 icon: const Icon(Icons.more_vert),
                 onSelected: (String result) {
                   if (result == 'Editar') {
-                    showClientVisitFormDialog(
-                        context, item); // Cuadro de diálogo para editar
+                    widget.showClientVisitFormDialog(context, item);
                   } else if (result == 'Eliminar') {
-                    deleteVisit(item); // Lógica para eliminar
+                    widget.deleteVisit(item);
                   }
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -151,21 +300,25 @@ class ResponsiveVisitasTable extends StatelessWidget {
 
   Widget _buildDataTable(BuildContext context) {
     final visitasDataSource = VisitasDataTableSource(
-        visitas, deleteVisit, showClientVisitFormDialog, context);
+      filteredVisitas,
+      widget.deleteVisit,
+      widget.showClientVisitFormDialog,
+      context,
+    );
 
     return Theme(
       data: Theme.of(context).copyWith(
         cardColor: Colors.white,
-        dividerColor: Colors.grey[300],
+        dividerColor: Colors.transparent,
         dataTableTheme: DataTableThemeData(
           headingTextStyle: TextStyle(
-            color: Colors.blue[700], // Color del texto del encabezado
-            fontWeight: FontWeight.bold, // Texto en negrita
-            fontSize: 16, // Tamaño de letra más grande
+            color: Colors.blue[700],
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
           ),
           dataTextStyle: const TextStyle(
-            color: Colors.black87, // Color del texto de las celdas
-            fontSize: 14, // Tamaño de texto de las celdas
+            color: Colors.black87,
+            fontSize: 14,
           ),
         ),
       ),
@@ -174,55 +327,37 @@ class ResponsiveVisitasTable extends StatelessWidget {
         columns: const [
           DataColumn2(
             label: Center(
-              child: Text(
-                'NombreCliente',
-                style: TextStyle(color: Colors.white), // Texto blanco
-              ),
-            ),
-            size: ColumnSize.L,
-            numeric:
-                false, // Para evitar que las columnas numéricas se alineen a la derecha
-          ),
-          DataColumn2(
-            label: Center(
-              child: Text(
-                'Acciones',
-                style: TextStyle(color: Colors.white), // Texto blanco
-              ),
+              child:
+                  Text('NombreCliente', style: TextStyle(color: Colors.white)),
             ),
             size: ColumnSize.L,
           ),
           DataColumn2(
             label: Center(
-              child: Text(
-                'Producto/Servicio',
-                style: TextStyle(color: Colors.white), // Texto blanco
-              ),
+              child: Text('Acciones', style: TextStyle(color: Colors.white)),
             ),
             size: ColumnSize.L,
           ),
           DataColumn2(
             label: Center(
-              child: Text(
-                'Propósito Visita',
-                style: TextStyle(color: Colors.white), // Texto blanco
-              ),
+              child: Text('Producto/Servicio',
+                  style: TextStyle(color: Colors.white)),
             ),
             size: ColumnSize.L,
           ),
           DataColumn2(
             label: Center(
-              child: Text(
-                'Fecha',
-                style: TextStyle(color: Colors.white), // Texto blanco
-              ),
+              child: Text('Propósito Visita',
+                  style: TextStyle(color: Colors.white)),
             ),
             size: ColumnSize.L,
           ),
-          // DataColumn2(
-          //   label: Text(''),
-          //   size: ColumnSize.S,
-          // ),
+          DataColumn2(
+            label: Center(
+              child: Text('Fecha', style: TextStyle(color: Colors.white)),
+            ),
+            size: ColumnSize.L,
+          ),
         ],
         source: visitasDataSource,
         rowsPerPage: 10,
