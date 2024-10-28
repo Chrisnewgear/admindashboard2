@@ -1,103 +1,12 @@
 import 'package:admindashboard/models/visits.dart';
-import 'package:admindashboard/pages/visits/widgets/search_bar.dart';
+import 'package:admindashboard/widgets/search_bar.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-// class AnimatedSearchBar extends StatefulWidget {
-//   final TextEditingController controller;
-//   final Function() onClear;
-
-//   const AnimatedSearchBar({
-//     super.key,
-//     required this.controller,
-//     required this.onClear,
-//   });
-
-//   @override
-//   State<AnimatedSearchBar> createState() => _AnimatedSearchBarState();
-// }
-
-// class _AnimatedSearchBarState extends State<AnimatedSearchBar>
-//     with SingleTickerProviderStateMixin {
-//   late AnimationController _animationController;
-//   bool _isSearching = false;
-//   final FocusNode _focusNode = FocusNode();
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _animationController = AnimationController(
-//       duration: const Duration(milliseconds: 300),
-//       vsync: this,
-//     );
-//   }
-
-//   @override
-//   void dispose() {
-//     _animationController.dispose();
-//     _focusNode.dispose();
-//     super.dispose();
-//   }
-
-//   void _toggleSearch() {
-//     setState(() {
-//       _isSearching = !_isSearching;
-//       if (_isSearching) {
-//         _animationController.forward();
-//         _focusNode.requestFocus();
-//       } else {
-//         _animationController.reverse();
-//         widget.controller.clear();
-//         widget.onClear();
-//       }
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       children: [
-//         AnimatedContainer(
-//           duration: const Duration(milliseconds: 300),
-//           width: _isSearching ? 300 : 48,
-//           decoration: BoxDecoration(
-//             borderRadius: BorderRadius.circular(8),
-//             color: Colors.grey[100],
-//           ),
-//           child: Row(
-//             children: [
-//               Material(
-//                 color: Colors.transparent,
-//                 child: IconButton(
-//                   icon: Icon(_isSearching ? Icons.close : Icons.search),
-//                   onPressed: _toggleSearch,
-//                   color: Colors.grey[700],
-//                 ),
-//               ),
-//               if (_isSearching)
-//                 Expanded(
-//                   child: TextField(
-//                     controller: widget.controller,
-//                     focusNode: _focusNode,
-//                     decoration: const InputDecoration(
-//                       hintText: 'Buscar visitas...',
-//                       border: InputBorder.none,
-//                       contentPadding: EdgeInsets.symmetric(horizontal: 8),
-//                     ),
-//                   ),
-//                 ),
-//             ],
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
 class ResponsiveVisitasTable extends StatefulWidget {
-  final List<Visitas> visitas;
-  final Function(Visitas) deleteVisit;
+  final List<Visita> visitas;
+  final Function(Visita) deleteVisit;
   final Function(BuildContext, dynamic) showClientVisitFormDialog;
   final bool isLoading;
 
@@ -113,8 +22,9 @@ class ResponsiveVisitasTable extends StatefulWidget {
 }
 
 class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
-  List<Visitas> filteredVisitas = [];
+  List<Visita> filteredVisitas = [];
   final TextEditingController _searchController = TextEditingController();
+  bool isSearchFocused = false;
 
   @override
   void initState() {
@@ -184,19 +94,57 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
                         hintText: 'Buscar visitas...',
                         accentColor: Theme.of(context).primaryColor,
                       ),
-                      ElevatedButton(
-                        onPressed: widget.isLoading
-                            ? null
-                            : () =>
-                                widget.showClientVisitFormDialog(context, null),
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.blue,
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text('Nueva Visita'),
+                      // ElevatedButton(
+                      //   onPressed: widget.isLoading
+                      //       ? null
+                      //       : () =>
+                      //           widget.showClientVisitFormDialog(context, null),
+                      //   style: ElevatedButton.styleFrom(
+                      //     foregroundColor: Colors.blue,
+                      //     backgroundColor: Colors.white,
+                      //     shape: RoundedRectangleBorder(
+                      //       borderRadius: BorderRadius.circular(8),
+                      //     ),
+                      //   ),
+                      //   child: const Text('Nueva Visita'),
+                      // ),
+
+                      LayoutBuilder(
+                        builder: (context, buttonConstraints) {
+                          final bool showIconOnly =
+                              constraints.maxWidth < 800 &&
+                                  isSearchFocused &&
+                                  buttonConstraints.maxWidth < 100;
+
+                          return ElevatedButton(
+                            onPressed: widget.isLoading
+                                ? null
+                                : () => widget.showClientVisitFormDialog(
+                                    context, null),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.blue,
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              // Ajusta el padding según si solo muestra el icono
+                              padding: showIconOnly
+                                  ? const EdgeInsets.all(8)
+                                  : const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.add_circle_outline, size: 20),
+                                if (!showIconOnly) ...[
+                                  const SizedBox(width: 8),
+                                  const Text('Nueva Visita'),
+                                ],
+                              ],
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -374,8 +322,8 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
 }
 
 class VisitasDataTableSource extends DataTableSource {
-  final List<Visitas> visitas;
-  final Function(Visitas) deleteVisit;
+  final List<Visita> visitas;
+  final Function(Visita) deleteVisit;
   final Function(BuildContext, dynamic) showClientVisitFormDialog;
   final BuildContext context;
 

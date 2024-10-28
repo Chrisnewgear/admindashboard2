@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Visitas {
+class Visita {
   final String id;
   final String acciones;
   final String codVendedor;
@@ -11,7 +11,7 @@ class Visitas {
   final String propVisita;
   final String nombreCliente;
 
-  Visitas({
+  Visita({
     required this.id,
     required this.acciones,
     required this.codVendedor,
@@ -23,9 +23,9 @@ class Visitas {
     required this.nombreCliente,
   });
 
-  factory Visitas.fromFirestore(DocumentSnapshot doc) {
+  factory Visita.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
-    return Visitas(
+    return Visita(
       id: doc.id,
       acciones: data['Acciones'] ?? '',
       codVendedor: data['CodVendedor'] ?? '',

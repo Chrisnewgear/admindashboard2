@@ -4,7 +4,7 @@ import 'package:intl/intl.dart'; // Para la fecha
 // Importa el modelo y cualquier otro paquete necesario
 
 class ClientFormDialog extends StatefulWidget {
-  final Clients? client;
+  final Cliente? client;
 
   const ClientFormDialog({super.key, this.client});
 
@@ -29,8 +29,8 @@ class _ClientFormDialogState extends State<ClientFormDialog> {
   void initState() {
     super.initState();
     if (widget.client != null) {
-      _nombresController.text = widget.client!.nombres;
-      _apellidosController.text = widget.client!.apellidos;
+      _nombresController.text = widget.client!.nombre;
+      _apellidosController.text = widget.client!.apellido;
       _emailController.text = widget.client!.email;
       _telefonoController.text = widget.client!.telefono;
       _codigoController.text = widget.client!.codigo;
@@ -210,7 +210,7 @@ class _ClientFormDialogState extends State<ClientFormDialog> {
     );
   }
 
-  void _saveOrUpdateClient(Clients? client) {
+  void _saveOrUpdateClient(Cliente? client) {
     // Lógica para guardar o actualizar cliente
   }
 }

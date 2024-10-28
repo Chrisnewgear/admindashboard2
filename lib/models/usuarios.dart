@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Employee {
+class Usuario {
   final String nombres;
   final String apellidos;
   final String email;
@@ -9,7 +9,7 @@ class Employee {
   final String codigo;
   final DateTime fechaIngreso;
 
-  Employee({
+  Usuario({
     required this.nombres,
     required this.apellidos,
     required this.email,
@@ -19,9 +19,9 @@ class Employee {
     required this.fechaIngreso,
   });
 
-  factory Employee.fromFirestore(DocumentSnapshot doc) {
+  factory Usuario.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    return Employee(
+    return Usuario(
       nombres: data['Nombre'] ?? '',
       apellidos: data['Apellidos'] ?? '',
       email: data['email'] ?? '',

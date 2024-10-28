@@ -18,7 +18,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   bool isLoading = false;
   String selectedPurpose = 'Venta';
   List<String> purpose = ['Venta', 'Seguimiento', 'Renovación', 'Resolución'];
-  List<Visitas> visitas = [];
+  List<Visita> visitas = [];
   String currentVendorCode = '';
 
   final TextEditingController _accionesController = TextEditingController();
@@ -92,7 +92,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
 
       setState(() {
         visitas = querySnapshot.docs
-            .map((doc) => Visitas.fromFirestore(doc))
+            .map((doc) => Visita.fromFirestore(doc))
             .toList();
         isLoading = false; // Desactivar loading cuando los datos están listos
       });
@@ -111,7 +111,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   }
 
   Future<void> _saveOrUpdateVisit(
-      BuildContext context, Visitas? existingVisit) async {
+      BuildContext context, Visita? existingVisit) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     showLoadingDialog(context);
@@ -271,7 +271,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     _nombreClienteController.clear();
   }
 
-  void _showClientVisitFormDialog(BuildContext context, Visitas? visita) {
+  void _showClientVisitFormDialog(BuildContext context, Visita? visita) {
     final formKey = GlobalKey<FormState>();
     final ValueNotifier<bool> isEditable = ValueNotifier<bool>(visita == null);
 
@@ -863,7 +863,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     );
   }
 
-  void _deleteVisit(Visitas visita) async {
+  void _deleteVisit(Visita visita) async {
     // Mostrar un diálogo de confirmación
     bool confirmDelete = await showDialog(
       context: context,

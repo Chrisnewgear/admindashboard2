@@ -19,7 +19,7 @@ class _ClientsPageState extends State<ClientsPage> {
   //List<String> roles = ['Vendedor', 'Supervisor'];
   bool isLoading = false;
   String currentVendorCode = '';
-  List<Clients> clients = [];
+  List<Cliente> clients = [];
   
 
 
@@ -93,7 +93,7 @@ class _ClientsPageState extends State<ClientsPage> {
 
       setState(() {
         clients = querySnapshot.docs
-            .map((doc) => Clients.fromFirestore(doc))
+            .map((doc) => Cliente.fromFirestore(doc))
             .toList();
         isLoading = false;
       });
@@ -137,7 +137,7 @@ class _ClientsPageState extends State<ClientsPage> {
     return code;
   }
 
-  Future<void> _saveOrUpdateClient(BuildContext context, Clients? existingClient) async {
+  Future<void> _saveOrUpdateClient(BuildContext context, Cliente? existingClient) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     // Mostrar el diálogo de carga al iniciar la operación
@@ -202,13 +202,13 @@ class _ClientsPageState extends State<ClientsPage> {
     }
   }
 
-  void _showFormDialog(BuildContext context, Clients? client) {
+  void _showFormDialog(BuildContext context, Cliente? client) {
     final formKey = GlobalKey<FormState>();
     final ValueNotifier<bool> isEditable = ValueNotifier<bool>(client == null);
 
     if (client != null) {
-      _nombresController.text = client.nombres;
-      _apellidosController.text = client.apellidos;
+      _nombresController.text = client.nombre;
+      _apellidosController.text = client.apellido;
       _emailController.text = client.email;
       _telefonoController.text = client.telefono;
       _codigoController.text = client.codigo;
@@ -469,44 +469,6 @@ class _ClientsPageState extends State<ClientsPage> {
         : Column(children: children);
   }
 
-  // Widget _buildInputField(TextEditingController controller, String label,
-  //     {bool isEmail = false, required bool enabled}) {
-  //   return Padding(
-  //     padding: const EdgeInsets.only(bottom: 16),
-  //     child: TextFormField(
-  //       enabled: enabled,
-  //       controller: controller,
-  //       decoration: InputDecoration(
-  //         labelText: label,
-  //         border: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: BorderSide(color: Colors.grey[300]!),
-  //         ),
-  //         enabledBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: BorderSide(color: Colors.grey[300]!),
-  //         ),
-  //         focusedBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: const BorderSide(color: Colors.indigo),
-  //         ),
-  //         filled: true,
-  //         fillColor: Colors.grey[50],
-  //       ),
-  //       validator: (value) {
-  //         if (value == null || value.isEmpty) {
-  //           return 'Por favor ingrese $label';
-  //         }
-  //         if (isEmail &&
-  //             !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-  //           return 'Por favor ingrese un email válido';
-  //         }
-  //         return null;
-  //       },
-  //     ),
-  //   );
-  // }
-
   Widget _buildInputField(TextEditingController controller, String label,
       {bool isEmail = false, required bool enabled}) {
     // Check if the field requires validation
@@ -553,78 +515,6 @@ class _ClientsPageState extends State<ClientsPage> {
       ),
     );
   }
-
-  // Widget _buildDatePicker(
-  //     BuildContext context, TextEditingController controller, String label,
-  //     {required bool enabled}) {
-  //   return Padding(
-  //     padding: const EdgeInsets.only(bottom: 16),
-  //     child: TextFormField(
-  //       enabled: enabled,
-  //       controller: controller,
-  //       decoration: InputDecoration(
-  //         labelText: label,
-  //         labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
-  //         border: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: BorderSide(color: Colors.grey[300]!),
-  //         ),
-  //         enabledBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: BorderSide(color: Colors.grey[300]!),
-  //         ),
-  //         focusedBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: const BorderSide(color: Colors.indigo),
-  //         ),
-  //         filled: true,
-  //         fillColor: Colors.grey[50], // Fondo claro como en los otros campos
-  //         suffixIcon: const Icon(
-  //           Icons.calendar_today_outlined, // Ícono más moderno
-  //           color: Colors.indigo, // Cambiar color acorde a la paleta
-  //         ),
-  //       ),
-  //       readOnly: true,
-  //       onTap: () async {
-  //         DateTime? pickedDate = await showDatePicker(
-  //           context: context,
-  //           initialDate: DateTime.now(),
-  //           firstDate: DateTime(2000),
-  //           lastDate: DateTime(2101),
-  //           builder: (BuildContext context, Widget? child) {
-  //             return Theme(
-  //               data: ThemeData.light().copyWith(
-  //                 colorScheme: const ColorScheme.light(
-  //                   primary: Colors.indigo, // Color del encabezado
-  //                   onPrimary: Colors.white, // Color del texto del encabezado
-  //                   onSurface: Colors.indigo, // Color del texto de los días
-  //                 ),
-  //                 textButtonTheme: TextButtonThemeData(
-  //                   style: TextButton.styleFrom(
-  //                     foregroundColor: Colors.indigo,
-  //                     backgroundColor:
-  //                         Colors.transparent, // Color de los botones
-  //                   ),
-  //                 ),
-  //               ),
-  //               child: child!,
-  //             );
-  //           },
-  //         );
-  //         if (pickedDate != null) {
-  //           String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
-  //           controller.text = formattedDate;
-  //         }
-  //       },
-  //       validator: (value) {
-  //         if (value == null || value.isEmpty) {
-  //           return 'Por favor seleccione una fecha';
-  //         }
-  //         return null;
-  //       },
-  //     ),
-  //   );
-  // }
 
   Widget _buildDatePicker(
       BuildContext context, TextEditingController controller, String label,
@@ -745,7 +635,7 @@ class _ClientsPageState extends State<ClientsPage> {
     );
   }
 
-  void _deleteClient(Clients client) async {
+  void _deleteClient(Cliente client) async {
     // Mostrar un diálogo de confirmación
     bool confirmDelete = await showDialog(
       context: context,
@@ -781,7 +671,7 @@ class _ClientsPageState extends State<ClientsPage> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  '¿Está seguro de que desea eliminar a ${client.nombres} ${client.apellidos}?',
+                  '¿Está seguro de que desea eliminar a ${client.nombre} ${client.apellido}?',
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 20),

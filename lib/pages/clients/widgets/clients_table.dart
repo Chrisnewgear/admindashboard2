@@ -4,8 +4,8 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:intl/intl.dart';
 
 class UserTable extends StatefulWidget {
-  final List<Clients> clients;
-  final Function(Clients) onDelete;
+  final List<Cliente> clients;
+  final Function(Cliente) onDelete;
   //final Function(Clients) onEdit;
   final Future<void> Function() onLoadUsers;
 
@@ -22,7 +22,7 @@ class UserTable extends StatefulWidget {
 }
 
 class _UserTableState extends State<UserTable> {
-  List<Clients> _sortedClients = [];
+  List<Cliente> _sortedClients = [];
   bool _sortAscending = true;
   int _sortColumnIndex = 0;
 
@@ -32,7 +32,7 @@ class _UserTableState extends State<UserTable> {
     _sortedClients = List.from(widget.clients);
   }
 
-  void _sort<T>(Comparable<T> Function(Clients c) getField, int columnIndex, bool ascending) {
+  void _sort<T>(Comparable<T> Function(Cliente c) getField, int columnIndex, bool ascending) {
     _sortedClients.sort((a, b) {
       final aValue = getField(a);
       final bValue = getField(b);
@@ -97,12 +97,12 @@ class _UserTableState extends State<UserTable> {
                         DataColumn2(
                           label: const Text('Nombres', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
                           size: ColumnSize.L,
-                          onSort: (columnIndex, ascending) => _sort((c) => c.nombres, columnIndex, ascending),
+                          onSort: (columnIndex, ascending) => _sort((c) => c.nombre, columnIndex, ascending),
                         ),
                         DataColumn2(
                           label: const Text('Apellidos', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
                           size: ColumnSize.L,
-                          onSort: (columnIndex, ascending) => _sort((c) => c.apellidos, columnIndex, ascending),
+                          onSort: (columnIndex, ascending) => _sort((c) => c.apellido, columnIndex, ascending),
                         ),
                         DataColumn2(
                           label: const Text('Email', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
@@ -138,8 +138,8 @@ class _UserTableState extends State<UserTable> {
                           .map((client) => DataRow2(
                                 cells: [
                                   DataCell(Text(client.codigo)),
-                                  DataCell(Text(client.nombres)),
-                                  DataCell(Text(client.apellidos)),
+                                  DataCell(Text(client.nombre)),
+                                  DataCell(Text(client.apellido)),
                                   DataCell(Text(client.email)),
                                   DataCell(Text(client.telefono)),
                                   DataCell(Text(client.empresa)),

@@ -1,20 +1,74 @@
-import 'package:admindashboard/models/employee.dart';
+import 'package:admindashboard/models/usuarios.dart';
+import 'package:admindashboard/widgets/search_bar.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ResponsiveRolesTable extends StatelessWidget {
-  final List<Employee> usuario;
-  final Function(Employee) deleteUsuario;
+class ResponsiveRolesTable extends StatefulWidget {
+  final List<Usuario> usuarios;
+  final Function(Usuario) deleteUsuario;
   final Function(BuildContext, dynamic) showUsuarioFormDialog;
   final bool isLoading;
 
   const ResponsiveRolesTable(
       {super.key,
-      required this.usuario,
+      required this.usuarios,
       required this.deleteUsuario,
       required this.showUsuarioFormDialog,
       required this.isLoading});
+
+  @override
+  State<ResponsiveRolesTable> createState() => _ResponsiveRolesTableState();
+}
+
+class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
+  List<Usuario> filteredUsuarios = [];
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    filteredUsuarios = widget.usuarios;
+    _searchController.addListener(_filterUsuarios);
+  }
+
+  @override
+  void didUpdateWidget(ResponsiveRolesTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.usuarios != widget.usuarios) {
+      _filterUsuarios();
+    }
+  }
+
+  void _filterUsuarios() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      filteredUsuarios = widget.usuarios.where((usuario) {
+        return usuario.nombres.toLowerCase().contains(query) ||
+            usuario.apellidos.toLowerCase().contains(query) ||
+            usuario.email.toLowerCase().contains(query) ||
+            usuario.telefono.toLowerCase().contains(query) ||
+            usuario.role.toLowerCase().contains(query) ||
+            usuario.codigo.toLowerCase().contains(query) ||
+            DateFormat('dd/MM/yyyy')
+                .format(usuario.fechaIngreso)
+                .toLowerCase()
+                .contains(query);
+      }).toList();
+    });
+  }
+
+  void _clearSearch() {
+    setState(() {
+      filteredUsuarios = widget.usuarios;
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,14 +86,22 @@ class ResponsiveRolesTable extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        '',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
+                      //   Text(
+                      //     '',
+                      //     style: TextStyle(
+                      //         fontSize: 20, fontWeight: FontWeight.bold),
+                      //   ),
+
+                      EnhancedSearchBar(
+                        controller: _searchController,
+                        onClear: _clearSearch,
+                        hintText: 'Buscar Usuario...',
+                        accentColor: Theme.of(context).primaryColor,
                       ),
+
                       // ElevatedButton(
                       //   onPressed: isLoading ? null : () => showClientVisitFormDialog(context, null),
                       //   style: ElevatedButton.styleFrom(
@@ -65,7 +127,7 @@ class ResponsiveRolesTable extends StatelessWidget {
   }
 
   Widget _buildTableContent(BuildContext context, BoxConstraints constraints) {
-    if (isLoading) {
+    if (widget.isLoading) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -78,7 +140,7 @@ class ResponsiveRolesTable extends StatelessWidget {
       );
     }
 
-    if (usuario.isEmpty) {
+    if (widget.usuarios.isEmpty) {
       return _buildEmptyState();
     }
 
@@ -87,23 +149,25 @@ class ResponsiveRolesTable extends StatelessWidget {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Text(
-        "No hay usuarios para mostrar",
-        style: TextStyle(fontSize: 18),
+        _searchController.text.isEmpty
+            ? "No hay usuarios para mostrar"
+            : "No se encontraron resultados para '${_searchController.text}'",
+        style: const TextStyle(fontSize: 18),
       ),
     );
   }
 
   Widget _buildListView() {
     return ListView.builder(
-      itemCount: usuario.length,
+      itemCount: widget.usuarios.length,
       itemBuilder: (context, index) {
-        final item = usuario[index];
+        final item = widget.usuarios[index];
         return GestureDetector(
           onTap: () {
             // Al hacer tap en la tarjeta, mostrar el cuadro de diálogo para editar
-            showUsuarioFormDialog(context, item);
+            widget.showUsuarioFormDialog(context, item);
           },
           child: Card(
             //color: Colors.white,
@@ -130,10 +194,10 @@ class ResponsiveRolesTable extends StatelessWidget {
                 ),
                 onSelected: (String result) {
                   if (result == 'Editar') {
-                    showUsuarioFormDialog(
+                    widget.showUsuarioFormDialog(
                         context, item); // Cuadro de diálogo para editar
                   } else if (result == 'Eliminar') {
-                    deleteUsuario(item); // Lógica para eliminar
+                    widget.deleteUsuario(item); // Lógica para eliminar
                   }
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -156,7 +220,10 @@ class ResponsiveRolesTable extends StatelessWidget {
 
   Widget _buildDataTable(BuildContext context) {
     final usuarioDataSource = UsuariosDataTableSource(
-        usuario, deleteUsuario, showUsuarioFormDialog, context);
+      filteredUsuarios,
+      widget.deleteUsuario,
+      widget.showUsuarioFormDialog, 
+      context);
 
     return Theme(
       data: Theme.of(context).copyWith(
@@ -262,8 +329,8 @@ class ResponsiveRolesTable extends StatelessWidget {
 }
 
 class UsuariosDataTableSource extends DataTableSource {
-  final List<Employee> usuarios;
-  final Function(Employee) deleteUsuario;
+  final List<Usuario> usuarios;
+  final Function(Usuario) deleteUsuario;
   final Function(BuildContext, dynamic) showUsuarioFormDialog;
   final BuildContext context;
 

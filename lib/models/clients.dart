@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Clients {
-  final String nombres;
-  final String apellidos;
+class Cliente {
+  final String nombre;
+  final String apellido;
   final String email;
   final String telefono;
   final String direccion;
@@ -11,9 +11,9 @@ class Clients {
   final String empresa;
   final String codVendedor;
 
-  Clients({
-    required this.nombres,
-    required this.apellidos,
+  Cliente({
+    required this.nombre,
+    required this.apellido,
     required this.email,
     required this.telefono,
     required this.direccion,
@@ -23,11 +23,11 @@ class Clients {
     required this.codVendedor,
   });
 
-  factory Clients.fromFirestore(DocumentSnapshot doc) {
+  factory Cliente.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    return Clients(
-      nombres: data['Nombre'] ?? '',
-      apellidos: data['Apellidos'] ?? '',
+    return Cliente(
+      nombre: data['Nombre'] ?? '',
+      apellido: data['Apellidos'] ?? '',
       email: data['email'] ?? '',
       telefono: data['Telefono'] ?? '',
       direccion: data['Direccion'] ?? '',

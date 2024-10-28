@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:admindashboard/models/employee.dart';
+import 'package:admindashboard/models/usuarios.dart';
 import 'package:admindashboard/pages/roles/Widgets/role_paginated_table.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +18,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
   bool isLoading = false;
   String selectedRole = 'Vendedor';
   List<String> roles = ['Vendedor', 'Supervisor', 'Admin', 'None'];
-  List<Employee> employees = [];
+  List<Usuario> employees = [];
 
   final TextEditingController _nombresController = TextEditingController();
   final TextEditingController _apellidosController = TextEditingController();
@@ -43,7 +43,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
           await FirebaseFirestore.instance.collection('Users').get();
       setState(() {
         employees = querySnapshot.docs
-            .map((doc) => Employee.fromFirestore(doc))
+            .map((doc) => Usuario.fromFirestore(doc))
             .toList();
         isLoading = false;
       });
@@ -90,7 +90,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
     return code;
   }
 
-  Future<void> _saveOrUpdateEmployee(Employee? existingEmployee) async {
+  Future<void> _saveOrUpdateEmployee(Usuario? existingEmployee) async {
     try {
       final employeeData = {
         'Nombre': _nombresController.text,
@@ -145,7 +145,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
     }
   }
 
-  void _showFormDialog(BuildContext context, Employee? employee) {
+  void _showFormDialog(BuildContext context, Usuario? employee) {
     final formKey = GlobalKey<FormState>();
     final ValueNotifier<bool> isEditable =
         ValueNotifier<bool>(employee == null);
@@ -200,142 +200,144 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          employee == null
-                              ? 'Nuevo Empleado'
-                              : 'Editar Empleado',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            employee == null
+                                ? 'Nuevo Empleado'
+                                : 'Editar Empleado',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close, color: Colors.black54),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Form(
-                      key: formKey,
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: isEditable,
-                        builder: (context, editable, _) {
-                          bool isLargeScreen = constraints.maxWidth > 986;
-                          return Column(
-                            children: [
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(_nombresController, 'Nombres'),
-                                _buildInputField(
-                                    _apellidosController, 'Apellidos'),
-                              ]),
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(_emailController, 'Email',
-                                    isEmail: true),
-                                _buildInputField(
-                                    _telefonoController, 'Teléfono'),
-                              ]),
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildDropdown(
-                                  selectedRole,
-                                  (String? newValue) {
-                                    setState(() {
-                                      selectedRole = newValue!;
-                                    });
-                                  },
-                                ),
-                                _buildDatePicker(
-                                    context,
-                                    _fechaIngresoController,
-                                    'Fecha de Ingreso'),
-                              ]),
-                            ],
-                          );
-                        },
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.black54),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        if (employee != null) const SizedBox(width: 8),
-                        Flexible(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width < 768
-                                  ? double.infinity
-                                  : 200,
-                            ),
-                            child: TextButton.icon(
-                              onPressed: () => Navigator.of(context).pop(),
-                              icon: const Icon(Icons.cancel),
-                              label: MediaQuery.of(context).size.width < 768
-                                  ? const SizedBox.shrink()
-                                  : const Text('Cancelar'),
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal:
-                                      MediaQuery.of(context).size.width < 768
-                                          ? 12
-                                          : 16,
-                                  vertical: 12,
+                      const SizedBox(height: 24),
+                      Form(
+                        key: formKey,
+                        child: ValueListenableBuilder<bool>(
+                          valueListenable: isEditable,
+                          builder: (context, editable, _) {
+                            bool isLargeScreen = constraints.maxWidth > 986;
+                            return Column(
+                              children: [
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(_nombresController, 'Nombres'),
+                                  _buildInputField(
+                                      _apellidosController, 'Apellidos'),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(_emailController, 'Email',
+                                      isEmail: true),
+                                  _buildInputField(
+                                      _telefonoController, 'Teléfono'),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildDropdown(
+                                    selectedRole,
+                                    (String? newValue) {
+                                      setState(() {
+                                        selectedRole = newValue!;
+                                      });
+                                    },
+                                  ),
+                                  _buildDatePicker(
+                                      context,
+                                      _fechaIngresoController,
+                                      'Fecha de Ingreso'),
+                                ]),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (employee != null) const SizedBox(width: 8),
+                          Flexible(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width < 768
+                                    ? double.infinity
+                                    : 200,
+                              ),
+                              child: TextButton.icon(
+                                onPressed: () => Navigator.of(context).pop(),
+                                icon: const Icon(Icons.cancel),
+                                label: MediaQuery.of(context).size.width < 768
+                                    ? const SizedBox.shrink()
+                                    : const Text('Cancelar'),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal:
+                                        MediaQuery.of(context).size.width < 768
+                                            ? 12
+                                            : 16,
+                                    vertical: 12,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width < 768
-                                  ? double.infinity
-                                  : 200,
-                            ),
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.indigo,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal:
-                                      MediaQuery.of(context).size.width < 768
-                                          ? 12
-                                          : 16,
-                                  vertical: 12,
-                                ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width < 768
+                                    ? double.infinity
+                                    : 200,
                               ),
-                              onPressed: () {
-                                if (formKey.currentState!.validate()) {
-                                  _saveOrUpdateEmployee(employee);
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              icon: const Icon(
-                                Icons.save,
-                                color: Colors.white,
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.indigo,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal:
+                                        MediaQuery.of(context).size.width < 768
+                                            ? 12
+                                            : 16,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  if (formKey.currentState!.validate()) {
+                                    _saveOrUpdateEmployee(employee);
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                                icon: const Icon(
+                                  Icons.save,
+                                  color: Colors.white,
+                                ),
+                                label: MediaQuery.of(context).size.width < 768
+                                    ? const SizedBox.shrink()
+                                    : const Text(
+                                        'Guardar',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
                               ),
-                              label: MediaQuery.of(context).size.width < 768
-                                  ? const SizedBox.shrink()
-                                  : const Text(
-                                      'Guardar',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -427,7 +429,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
 
             Expanded(
               child: ResponsiveRolesTable(
-                usuario: employees,
+                usuarios: employees,
                 deleteUsuario: (employee) => _deleteEmployee(employee),
                 showUsuarioFormDialog: (context, employee) =>
                     _showFormDialog(context, employee),
@@ -663,7 +665,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
   //   );
   // }
 
-  void _deleteEmployee(Employee employee) async {
+  void _deleteEmployee(Usuario employee) async {
     // Mostrar un diálogo de confirmación
     bool confirmDelete = await showDialog(
       context: context,

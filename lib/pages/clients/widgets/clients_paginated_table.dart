@@ -1,14 +1,12 @@
-import 'dart:ui';
-
 import 'package:admindashboard/models/clients.dart';
-import 'package:admindashboard/pages/visits/widgets/search_bar.dart';
+import 'package:admindashboard/widgets/search_bar.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ResponsiveClientsTable extends StatefulWidget {
-  final List<Clients> clientes;
-  final Function(Clients) deleteClient;
+  final List<Cliente> clientes;
+  final Function(Cliente) deleteClient;
   final Function(BuildContext, dynamic) showClientVisitFormDialog;
   final bool isLoading;
 
@@ -25,7 +23,7 @@ class ResponsiveClientsTable extends StatefulWidget {
 }
 
 class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
-  List<Clients> filteredClientes = [];
+  List<Cliente> filteredClientes = [];
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -47,8 +45,8 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       filteredClientes = widget.clientes.where((cliente) {
-        return cliente.nombres.toLowerCase().contains(query) ||
-            cliente.apellidos.toLowerCase().contains(query) ||
+        return cliente.nombre.toLowerCase().contains(query) ||
+            cliente.apellido.toLowerCase().contains(query) ||
             cliente.telefono.toLowerCase().contains(query) ||
             cliente.email.toLowerCase().contains(query) ||
             cliente.empresa.toLowerCase().contains(query) ||
@@ -181,7 +179,7 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
             margin: const EdgeInsets.symmetric(vertical: 4),
             child: ListTile(
               title: Text(
-                '${item.nombres} ${item.apellidos}',
+                '${item.nombre} ${item.apellido}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
@@ -220,7 +218,6 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
   Widget _buildDataTable(BuildContext context) {
     final clientesDataSource = ClientesDataTableSource(
         filteredClientes,
-        widget.clientes,
         widget.deleteClient,
         widget.showClientVisitFormDialog,
         context);
@@ -311,8 +308,8 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
 }
 
 class ClientesDataTableSource extends DataTableSource {
-  final List<Clients> clientes;
-  final Function(Clients) deleteClient;
+  final List<Cliente> clientes;
+  final Function(Cliente) deleteClient;
   final Function(BuildContext, dynamic) showClientVisitFormDialog;
   final BuildContext context;
 
@@ -334,8 +331,8 @@ class ClientesDataTableSource extends DataTableSource {
         },
       ),
       cells: [
-        DataCell(Center(child: Text(cliente.nombres))),
-        DataCell(Center(child: Text(cliente.apellidos))),
+        DataCell(Center(child: Text(cliente.nombre))),
+        DataCell(Center(child: Text(cliente.apellido))),
         DataCell(Center(child: Text(cliente.empresa))),
         DataCell(Center(child: Text(cliente.telefono))),
         DataCell(
