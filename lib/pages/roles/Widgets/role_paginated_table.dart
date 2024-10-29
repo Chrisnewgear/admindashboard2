@@ -24,6 +24,7 @@ class ResponsiveRolesTable extends StatefulWidget {
 class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
   List<Usuario> filteredUsuarios = [];
   final TextEditingController _searchController = TextEditingController();
+  bool isSearchExpanded = false;
 
   @override
   void initState() {
@@ -58,9 +59,17 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
     });
   }
 
+  // void _clearSearch() {
+  //   setState(() {
+  //     filteredUsuarios = widget.usuarios;
+  //   });
+  // }
+
+
   void _clearSearch() {
+    _searchController.clear();
     setState(() {
-      filteredUsuarios = widget.usuarios;
+      isSearchExpanded = false;
     });
   }
 
@@ -74,13 +83,14 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        //final bool isSmallScreen = constraints.maxWidth <= 430; 
+
         return SizedBox(
           height: 200,
           child: Card(
             elevation: 4,
             color: Colors.white,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -95,13 +105,19 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
                       //         fontSize: 20, fontWeight: FontWeight.bold),
                       //   ),
 
-                      EnhancedSearchBar(
-                        controller: _searchController,
-                        onClear: _clearSearch,
-                        hintText: 'Buscar Usuario...',
-                        accentColor: Theme.of(context).primaryColor,
+                      Expanded(
+                        child: EnhancedSearchBar(
+                          controller: _searchController,
+                          onClear: _clearSearch,
+                          hintText: 'Buscar Usuario...',
+                          accentColor: Theme.of(context).primaryColor,
+                          onSearchStateChanged: (isExpanded) {
+                            setState(() {
+                              isSearchExpanded = isExpanded;
+                            });
+                          },
+                        ),
                       ),
-
                       // ElevatedButton(
                       //   onPressed: isLoading ? null : () => showClientVisitFormDialog(context, null),
                       //   style: ElevatedButton.styleFrom(
@@ -161,9 +177,9 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
 
   Widget _buildListView() {
     return ListView.builder(
-      itemCount: widget.usuarios.length,
+      itemCount: filteredUsuarios.length,
       itemBuilder: (context, index) {
-        final item = widget.usuarios[index];
+        final item = filteredUsuarios[index];
         return GestureDetector(
           onTap: () {
             // Al hacer tap en la tarjeta, mostrar el cuadro de diálogo para editar

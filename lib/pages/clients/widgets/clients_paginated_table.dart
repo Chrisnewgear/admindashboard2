@@ -25,6 +25,7 @@ class ResponsiveClientsTable extends StatefulWidget {
 class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
   List<Cliente> filteredClientes = [];
   final TextEditingController _searchController = TextEditingController();
+  bool isSearchExpanded = false;
 
   @override
   void initState() {
@@ -74,6 +75,8 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+      final bool isSmallScreen = constraints.maxWidth <= 430;
+
         return SizedBox(
           height: 200,
           child: Card(
@@ -96,25 +99,57 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
                     //   ),
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      EnhancedSearchBar(
-                        controller: _searchController,
-                        onClear: _clearSearch,
-                        hintText: 'Buscar Cliente...',
-                        accentColor: Theme.of(context).primaryColor,
+                      Expanded(
+                        child: EnhancedSearchBar(
+                          controller: _searchController,
+                          onClear: _clearSearch,
+                          hintText: 'Buscar Cliente...',
+                          accentColor: Theme.of(context).primaryColor,
+                          onSearchStateChanged: (isExpanded) {
+                              setState(() {
+                                isSearchExpanded = isExpanded;
+                              });
+                            },
+                        ),
                       ),
-                      ElevatedButton(
-                        onPressed: widget.isLoading
-                            ? null
-                            : () =>
-                                widget.showClientVisitFormDialog(context, null),
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.blue,
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      const SizedBox(width: 8),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: ElevatedButton(
+                          onPressed: widget.isLoading
+                              ? null
+                              : () =>
+                                  widget.showClientVisitFormDialog(context, null),
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.blue,
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: (isSmallScreen && isSearchExpanded)
+                                ? const EdgeInsets.all(8)
+                                : const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.add_circle_outline, size: 20),
+                              AnimatedSize(
+                                duration: const Duration(milliseconds: 300),
+                                child: (isSmallScreen && isSearchExpanded)
+                                    ? const SizedBox.shrink()
+                                    : const Row(
+                                        children: [
+                                          SizedBox(width: 8),
+                                          Text('Nuevo Cliente'),
+                                        ],
+                                      ),
+                              ),
+                            ],
                           ),
                         ),
-                        child: const Text('Agregar Cliente'),
                       ),
                     ],
                   ),
@@ -165,9 +200,9 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
 
   Widget _buildListView() {
     return ListView.builder(
-      itemCount: widget.clientes.length,
+      itemCount: filteredClientes.length,
       itemBuilder: (context, index) {
-        final item = widget.clientes[index];
+        final item = filteredClientes[index];
         return GestureDetector(
           onTap: () {
             // Al hacer tap en la tarjeta, mostrar el cuadro de diálogo para editar

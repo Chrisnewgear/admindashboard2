@@ -67,6 +67,7 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
   }
 
   @override
+
   void dispose() {
     _searchController.dispose();
     super.dispose();
