@@ -1,4 +1,5 @@
 import 'package:admindashboard/models/visits.dart';
+//import 'package:admindashboard/widgets/enhanced_search_bar.dart';
 import 'package:admindashboard/widgets/search_bar.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
@@ -10,12 +11,13 @@ class ResponsiveVisitasTable extends StatefulWidget {
   final Function(BuildContext, dynamic) showClientVisitFormDialog;
   final bool isLoading;
 
-  const ResponsiveVisitasTable(
-      {super.key,
-      required this.visitas,
-      required this.deleteVisit,
-      required this.showClientVisitFormDialog,
-      required this.isLoading});
+  const ResponsiveVisitasTable({
+    super.key,
+    required this.visitas,
+    required this.deleteVisit,
+    required this.showClientVisitFormDialog,
+    required this.isLoading,
+  });
 
   @override
   State<ResponsiveVisitasTable> createState() => _ResponsiveVisitasTableState();
@@ -24,7 +26,7 @@ class ResponsiveVisitasTable extends StatefulWidget {
 class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
   List<Visita> filteredVisitas = [];
   final TextEditingController _searchController = TextEditingController();
-  bool isSearchFocused = false;
+  bool isSearchExpanded = false;
 
   @override
   void initState() {
@@ -58,8 +60,9 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
   }
 
   void _clearSearch() {
+    _searchController.clear();
     setState(() {
-      filteredVisitas = widget.visitas;
+      isSearchExpanded = false;
     });
   }
 
@@ -73,78 +76,71 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final bool isSmallScreen = constraints.maxWidth <= 430; // iPhone 14 Pro Max width
+
         return SizedBox(
           height: 200,
           child: Card(
             elevation: 4,
             color: Colors.white,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      EnhancedSearchBar(
-                        controller: _searchController,
-                        onClear: _clearSearch,
-                        hintText: 'Buscar visitas...',
-                        accentColor: Theme.of(context).primaryColor,
+                      Expanded(
+                        child: EnhancedSearchBar(
+                          controller: _searchController,
+                          onClear: _clearSearch,
+                          hintText: 'Buscar visitas...',
+                          accentColor: Theme.of(context).primaryColor,
+                          onSearchStateChanged: (isExpanded) {
+                            setState(() {
+                              isSearchExpanded = isExpanded;
+                            });
+                          },
+                        ),
                       ),
-                      // ElevatedButton(
-                      //   onPressed: widget.isLoading
-                      //       ? null
-                      //       : () =>
-                      //           widget.showClientVisitFormDialog(context, null),
-                      //   style: ElevatedButton.styleFrom(
-                      //     foregroundColor: Colors.blue,
-                      //     backgroundColor: Colors.white,
-                      //     shape: RoundedRectangleBorder(
-                      //       borderRadius: BorderRadius.circular(8),
-                      //     ),
-                      //   ),
-                      //   child: const Text('Nueva Visita'),
-                      // ),
-
-                      LayoutBuilder(
-                        builder: (context, buttonConstraints) {
-                          final bool showIconOnly =
-                              constraints.maxWidth < 800 &&
-                                  isSearchFocused &&
-                                  buttonConstraints.maxWidth < 100;
-
-                          return ElevatedButton(
-                            onPressed: widget.isLoading
-                                ? null
-                                : () => widget.showClientVisitFormDialog(
-                                    context, null),
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.blue,
-                              backgroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                      const SizedBox(width: 8),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: ElevatedButton(
+                          onPressed: widget.isLoading
+                              ? null
+                              : () => widget.showClientVisitFormDialog(context, null),
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.blue,
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: (isSmallScreen && isSearchExpanded)
+                                ? const EdgeInsets.all(8)
+                                : const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.add_circle_outline, size: 20),
+                              AnimatedSize(
+                                duration: const Duration(milliseconds: 300),
+                                child: (isSmallScreen && isSearchExpanded)
+                                    ? const SizedBox.shrink()
+                                    : const Row(
+                                        children: [
+                                          SizedBox(width: 8),
+                                          Text('Nueva Visita'),
+                                        ],
+                                      ),
                               ),
-                              // Ajusta el padding según si solo muestra el icono
-                              padding: showIconOnly
-                                  ? const EdgeInsets.all(8)
-                                  : const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.add_circle_outline, size: 20),
-                                if (!showIconOnly) ...[
-                                  const SizedBox(width: 8),
-                                  const Text('Nueva Visita'),
-                                ],
-                              ],
-                            ),
-                          );
-                        },
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -169,7 +165,7 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('Cargando visitas...')
+            Text('Cargando visitas...'),
           ],
         ),
       );
@@ -201,7 +197,6 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
         final item = filteredVisitas[index];
         return GestureDetector(
           onTap: () {
-            // Al hacer tap en la tarjeta, mostrar el cuadro de diálogo para editar
             widget.showClientVisitFormDialog(context, item);
           },
           child: Card(
@@ -228,7 +223,7 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
                     widget.deleteVisit(item);
                   }
                 },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                   const PopupMenuItem<String>(
                     value: 'Editar',
                     child: Text('Editar'),
@@ -275,8 +270,7 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
         columns: const [
           DataColumn2(
             label: Center(
-              child:
-                  Text('NombreCliente', style: TextStyle(color: Colors.white)),
+              child: Text('NombreCliente', style: TextStyle(color: Colors.white)),
             ),
             size: ColumnSize.L,
           ),
@@ -288,15 +282,13 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
           ),
           DataColumn2(
             label: Center(
-              child: Text('Producto/Servicio',
-                  style: TextStyle(color: Colors.white)),
+              child: Text('Producto/Servicio', style: TextStyle(color: Colors.white)),
             ),
             size: ColumnSize.L,
           ),
           DataColumn2(
             label: Center(
-              child: Text('Propósito Visita',
-                  style: TextStyle(color: Colors.white)),
+              child: Text('Propósito Visita', style: TextStyle(color: Colors.white)),
             ),
             size: ColumnSize.L,
           ),
