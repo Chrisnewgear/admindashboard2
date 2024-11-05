@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 class ResponsiveClientsTable extends StatefulWidget {
   final List<Cliente> clientes;
   final Function(Cliente) deleteClient;
-  final Function(BuildContext, dynamic) showClientVisitFormDialog;
+  final Function(BuildContext, dynamic, bool) showClientVisitFormDialog;
   final bool isLoading;
 
   const ResponsiveClientsTable({
@@ -120,7 +120,7 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
                           onPressed: widget.isLoading
                               ? null
                               : () =>
-                                  widget.showClientVisitFormDialog(context, null),
+                                  widget.showClientVisitFormDialog(context, null, true),
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.blue,
                             backgroundColor: Colors.white,
@@ -206,7 +206,7 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
         return GestureDetector(
           onTap: () {
             // Al hacer tap en la tarjeta, mostrar el cuadro de diálogo para editar
-            widget.showClientVisitFormDialog(context, item);
+            widget.showClientVisitFormDialog(context, item, false);
           },
           child: Card(
             color: Colors.white,
@@ -226,8 +226,7 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
                 icon: const Icon(Icons.more_vert),
                 onSelected: (String result) {
                   if (result == 'Editar') {
-                    widget.showClientVisitFormDialog(
-                        context, item); // Cuadro de diálogo para editar
+                    widget.showClientVisitFormDialog(context, item, true); // Cuadro de diálogo para editar
                   } else if (result == 'Eliminar') {
                     widget.deleteClient(item); // Lógica para eliminar
                   }
@@ -345,7 +344,7 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
 class ClientesDataTableSource extends DataTableSource {
   final List<Cliente> clientes;
   final Function(Cliente) deleteClient;
-  final Function(BuildContext, dynamic) showClientVisitFormDialog;
+  final Function(BuildContext, dynamic, bool) showClientVisitFormDialog;
   final BuildContext context;
 
   ClientesDataTableSource(
@@ -380,7 +379,7 @@ class ClientesDataTableSource extends DataTableSource {
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     child: const Text('Editar'),
-                    onTap: () => showClientVisitFormDialog(context, cliente),
+                    onTap: () => showClientVisitFormDialog(context, cliente, true),
                   ),
                   PopupMenuItem(
                     child: const Text('Eliminar'),
@@ -392,7 +391,7 @@ class ClientesDataTableSource extends DataTableSource {
           ),
         ),
       ],
-      onTap: () => showClientVisitFormDialog(context, cliente),
+      onTap: () => showClientVisitFormDialog(context, cliente, false),
     );
   }
 

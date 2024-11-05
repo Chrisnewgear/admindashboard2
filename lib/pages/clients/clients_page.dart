@@ -202,9 +202,9 @@ class _ClientsPageState extends State<ClientsPage> {
     }
   }
 
-  void _showFormDialog(BuildContext context, Cliente? client) {
+  void _showFormDialog(BuildContext context, Cliente? client, bool editModeOn) {
     final formKey = GlobalKey<FormState>();
-    final ValueNotifier<bool> isEditable = ValueNotifier<bool>(client == null);
+    final ValueNotifier<bool> isEditable = editModeOn ? ValueNotifier<bool>(true) : ValueNotifier<bool>(client == null);
 
     if (client != null) {
       _nombresController.text = client.nombre;
@@ -624,8 +624,8 @@ class _ClientsPageState extends State<ClientsPage> {
               child: ResponsiveClientsTable(
                 clientes: clients,
                 deleteClient: (cliente) => _deleteClient(cliente),
-                showClientVisitFormDialog: (context, cliente) =>
-                    _showFormDialog(context, cliente),
+                showClientVisitFormDialog: (context, cliente, editModeOn) =>
+                    _showFormDialog(context, cliente, editModeOn),
                 isLoading: isLoading,
               ),
             ),
@@ -731,6 +731,8 @@ class _ClientsPageState extends State<ClientsPage> {
           setState(() {
             clients.removeWhere((e) => e.codigo == client.codigo);
           });
+
+          await _loadUsers();
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Cliente eliminado con éxito')),

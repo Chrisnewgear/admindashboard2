@@ -250,102 +250,104 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 400),
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey, // Add form key here
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [
-                      const Spacer(),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: Image.asset(
-                          'assets/icons/goSoftwareSolutions-01.png',
-                          height: 200,
-                          width: 200,
-                        ),
-                      ),
-                      const Spacer(),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          'Ingrese tu mail para cambiar tu contraseña',
-                          style: TextStyle(
-                            fontSize: 18,
+          child: SingleChildScrollView(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 400),
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: _formKey, // Add form key here
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        const Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: Image.asset(
+                            'assets/icons/goSoftwareSolutions-01.png',
+                            height: 200,
+                            width: 200,
                           ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          softWrap: true,
-                          overflow: TextOverflow.visible,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      hintText: 'Ingrese su email',
-                      hintStyle: TextStyle(
-                        color: Colors.grey.withOpacity(0.5),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                        const Spacer(),
+                      ],
                     ),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Debe ingresar un email válido';
-                      }
-                      // Validación de formato de email
-                      final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-                      if (!emailRegex.hasMatch(value)) {
-                        return 'Debe ingresar un email válido';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: InkWell(
-                      onTap: _isLoading ? null : _resetPassword,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: _isLoading
-                              ? Theme.of(context).primaryColor.withOpacity(0.6)
-                              : Theme.of(context).primaryColor,
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Ingrese tu mail para cambiar tu contraseña',
+                            style: TextStyle(
+                              fontSize: 18,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            softWrap: true,
+                            overflow: TextOverflow.visible,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        hintText: 'Ingrese su email',
+                        hintStyle: TextStyle(
+                          color: Colors.grey.withOpacity(0.5),
+                        ),
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        alignment: Alignment.center,
-                        width: double.maxFinite,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: _isLoading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white)
-                            : const CustomText(
-                                text: 'Cambiar Contraseña',
-                                color: Colors.white,
-                              ),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Debe ingresar un email válido';
+                        }
+                        // Validación de formato de email
+                        final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+                        if (!emailRegex.hasMatch(value)) {
+                          return 'Debe ingresar un email válido';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: InkWell(
+                        onTap: _isLoading ? null : _resetPassword,
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: _isLoading
+                                ? Theme.of(context).primaryColor.withOpacity(0.6)
+                                : Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          alignment: Alignment.center,
+                          width: double.maxFinite,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: _isLoading
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white)
+                              : const CustomText(
+                                  text: 'Cambiar Contraseña',
+                                  color: Colors.white,
+                                ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

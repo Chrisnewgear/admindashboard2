@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 class ResponsiveVisitasTable extends StatefulWidget {
   final List<Visita> visitas;
   final Function(Visita) deleteVisit;
-  final Function(BuildContext, dynamic) showClientVisitFormDialog;
+  final Function(BuildContext, dynamic, bool) showClientVisitFormDialog;
   final bool isLoading;
 
   const ResponsiveVisitasTable({
@@ -112,7 +112,7 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
                         child: ElevatedButton(
                           onPressed: widget.isLoading
                               ? null
-                              : () => widget.showClientVisitFormDialog(context, null),
+                              : () => widget.showClientVisitFormDialog(context, null, true),
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.blue,
                             backgroundColor: Colors.white,
@@ -198,7 +198,7 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
         final item = filteredVisitas[index];
         return GestureDetector(
           onTap: () {
-            widget.showClientVisitFormDialog(context, item);
+            widget.showClientVisitFormDialog(context, item, false);
           },
           child: Card(
             margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
@@ -219,7 +219,7 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
                 icon: const Icon(Icons.more_vert),
                 onSelected: (String result) {
                   if (result == 'Editar') {
-                    widget.showClientVisitFormDialog(context, item);
+                    widget.showClientVisitFormDialog(context, item, true);
                   } else if (result == 'Eliminar') {
                     widget.deleteVisit(item);
                   }
@@ -317,7 +317,7 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
 class VisitasDataTableSource extends DataTableSource {
   final List<Visita> visitas;
   final Function(Visita) deleteVisit;
-  final Function(BuildContext, dynamic) showClientVisitFormDialog;
+  final Function(BuildContext, dynamic, bool) showClientVisitFormDialog;
   final BuildContext context;
 
   VisitasDataTableSource(
@@ -352,7 +352,7 @@ class VisitasDataTableSource extends DataTableSource {
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     child: const Text('Editar'),
-                    onTap: () => showClientVisitFormDialog(context, visita),
+                    onTap: () => showClientVisitFormDialog(context, visita, true),
                   ),
                   PopupMenuItem(
                     child: const Text('Eliminar'),
@@ -364,7 +364,7 @@ class VisitasDataTableSource extends DataTableSource {
           ),
         ),
       ],
-      onTap: () => showClientVisitFormDialog(context, visita),
+      onTap: () => showClientVisitFormDialog(context, visita, false),
     );
   }
 

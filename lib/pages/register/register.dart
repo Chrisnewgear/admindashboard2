@@ -118,7 +118,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return TextFormField(
       controller: controller,
       obscureText: isPassword
-          ? (labelText == 'Password'
+          ? (labelText == 'Password*'
               ? notVisiblePassword
               : notVisibleRepeatPassword)
           : false,
@@ -179,7 +179,7 @@ class _RegisterPageState extends State<RegisterPage> {
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(
-                  (labelText == 'Password'
+                  (labelText == 'Password*'
                           ? notVisiblePassword
                           : notVisibleRepeatPassword)
                       ? Icons.visibility_off
@@ -187,9 +187,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 onPressed: () {
                   setState(() {
-                    if (labelText == 'Password') {
+                    if (labelText == 'Password*') {
                       notVisiblePassword = !notVisiblePassword;
-                    } else if (labelText == 'Repita su Password') {
+                    } else if (labelText == 'Repita su Password*') {
                       notVisibleRepeatPassword = !notVisibleRepeatPassword;
                     }
                   });
@@ -235,7 +235,7 @@ class _RegisterPageState extends State<RegisterPage> {
         return null;
       },
       onChanged: (value) {
-        if (isRepeatedPassword || labelText == 'Password') {
+        if (isRepeatedPassword || labelText == 'Password*') {
           setState(() {
             _passwordsMatch = _repeated_password.text == _password.text;
           });

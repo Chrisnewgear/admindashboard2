@@ -36,12 +36,8 @@ class MyApp extends StatelessWidget {
                 transition: Transition.downToUp),
             getPages: [
               GetPage(name: rootRoute, page: () => SiteLayout()),
-              GetPage(
-                  name: authenticationPageRoute,
-                  page: () => const AuthenticationPage()),
-              GetPage(
-                  name: pageNotFoundPageRoute,
-                  page: () => const PageNotFound()),
+              GetPage(name: authenticationPageRoute, page: () => const AuthenticationPage()),
+              GetPage(name: pageNotFoundPageRoute, page: () => const PageNotFound()),
             ],
             debugShowCheckedModeBanner: false,
             title: "Dashboard",

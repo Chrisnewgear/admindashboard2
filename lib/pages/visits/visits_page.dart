@@ -150,8 +150,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
         'PropositoVisita': selectedPurpose,
         'NombreCliente': _nombreClienteController.text,
         'UserId': user.uid,
-        'Fecha': Timestamp.fromDate(
-            DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
+        'Fecha': Timestamp.fromDate(DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
         'Location': geoPoint,
         'updatedAt': Timestamp.now(),
       };
@@ -271,9 +270,9 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     _nombreClienteController.clear();
   }
 
-  void _showClientVisitFormDialog(BuildContext context, Visita? visita) {
+  void _showClientVisitFormDialog(BuildContext context, Visita? visita, bool editModeOn) {
     final formKey = GlobalKey<FormState>();
-    final ValueNotifier<bool> isEditable = ValueNotifier<bool>(visita == null);
+    final ValueNotifier<bool> isEditable = editModeOn ? ValueNotifier<bool>(true) : ValueNotifier<bool>(visita == null);
 
     if (visita != null) {
       _accionesController.text = visita.acciones;
@@ -852,8 +851,8 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
               child: ResponsiveVisitasTable(
                 visitas: visitas,
                 deleteVisit: (visita) => _deleteVisit(visita),
-                showClientVisitFormDialog: (context, visita) =>
-                    _showClientVisitFormDialog(context, visita),
+                showClientVisitFormDialog: (context, visita, editModeOn) =>
+                    _showClientVisitFormDialog(context, visita, editModeOn),
                 isLoading: isLoading,
               ),
             ),
@@ -954,6 +953,9 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
         setState(() {
           visitas.removeWhere((v) => v.id == visita.id);
         });
+
+        // Cargar la lista de visitas actualizada
+        await _loadVisits(FirebaseAuth.instance.currentUser!.uid);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Visita eliminada con éxito')),

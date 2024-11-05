@@ -706,6 +706,8 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
             employees.removeWhere((e) => e.email == employee.email);
           });
 
+          await _loadUsers();
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Empleado eliminado con éxito')),
           );
