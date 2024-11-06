@@ -110,8 +110,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     }
   }
 
-  Future<void> _saveOrUpdateVisit(
-      BuildContext context, Visita? existingVisit) async {
+  Future<void> _saveOrUpdateVisit(BuildContext context, Visita? existingVisit) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     showLoadingDialog(context);

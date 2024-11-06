@@ -14,7 +14,6 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, Tar
 /// );
 /// ```
 
-
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -22,15 +21,9 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -59,7 +52,25 @@ class DefaultFirebaseOptions {
     messagingSenderId: '205358134276',
     projectId: 'admindashboard-e6275',
     authDomain: 'admindashboard-e6275.firebaseapp.com',
-    storageBucket: 'admindashboard-e6275.appspot.com',
+    storageBucket: 'admindashboard-e6275.firebasestorage.app',
     measurementId: 'G-JQJV7BSJB9',
   );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDjxtiu8gt7LNWmhIBNXUAuk69KqrTS1VE',
+    appId: '1:205358134276:ios:334537c27e656bc1d23151',
+    messagingSenderId: '205358134276',
+    projectId: 'admindashboard-e6275',
+    storageBucket: 'admindashboard-e6275.firebasestorage.app',
+    iosBundleId: 'com.example.admindashboard',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyBD9hJkDi-aZOUaKyL7jG5LVWBlL_d9dm8',
+    appId: '1:205358134276:android:1d0162ac5626bbf2d23151',
+    messagingSenderId: '205358134276',
+    projectId: 'admindashboard-e6275',
+    storageBucket: 'admindashboard-e6275.firebasestorage.app',
+  );
+
 }

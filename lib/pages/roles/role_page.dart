@@ -442,248 +442,81 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
     );
   }
 
-  // Widget _buildUserTable() {
-  //   return Card(
-  //     elevation: 4,
-  //     color: Colors.white70,
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(16),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           const Row(
-  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //             children: [
-  //               Text(
-  //                 'Lista de Usuarios',
-  //                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-  //               ),
-  //               ElevatedButton(
-  //                 onPressed: () => _showFormDialog(context, null),
-  //                 child: const Text('Nuevo Empleado'),
-  //               ),
-  //             ],
-  //           ),
-  //           const SizedBox(height: 16),
-  //           employees.isEmpty
-  //               ? SizedBox(
-  //                   height: 400,
-  //                   child: FutureBuilder(
-  //                     future: Future.delayed(const Duration(seconds: 1)),
-  //                     builder: (context, snapshot) {
-  //                       if (snapshot.connectionState ==
-  //                           ConnectionState.waiting) {
-  //                         return const Center(
-  //                           child: CircularProgressIndicator(strokeWidth: 2),
-  //                         );
-  //                       } else {
-  //                         return const Center(
-  //                           child: Text(
-  //                             "No hay usuarios para mostrar",
-  //                             style: TextStyle(fontSize: 18),
-  //                           ),
-  //                         );
-  //                       }
-  //                     },
-  //                   ),
-  //                 )
-  //               : SizedBox(
-  //                   height: 400,
-  //                   child: DataTable2(
-  //                     columnSpacing: 12,
-  //                     horizontalMargin: 12,
-  //                     minWidth: 600,
-  //                     decoration: BoxDecoration(
-  //                       color: Colors.grey[100],
-  //                       borderRadius: BorderRadius.circular(8),
-  //                     ),
-  //                     headingRowColor:
-  //                         WidgetStateProperty.all(Colors.grey[200]),
-  //                     columns: const [
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Codigo',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Nombres',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Apellidos',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Email',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Teléfono',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Role',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                       DataColumn2(
-  //                         label: Center(
-  //                           child: Text('Fecha Ingreso',
-  //                               style: TextStyle(
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.bold,
-  //                                 color: Colors.blue,
-  //                               )),
-  //                         ),
-  //                         size: ColumnSize.L,
-  //                       ),
-  //                     ],
-  //                     rows: employees
-  //                         .map((employee) => DataRow2(
-  //                               cells: [
-  //                                 DataCell(
-  //                                     Center(child: Text(employee.codigo))),
-  //                                 DataCell(
-  //                                     Center(child: Text(employee.nombres))),
-  //                                 DataCell(
-  //                                     Center(child: Text(employee.apellidos))),
-  //                                 DataCell(Center(child: Text(employee.email))),
-  //                                 DataCell(
-  //                                     Center(child: Text(employee.telefono))),
-  //                                 DataCell(
-  //                                   Center(
-  //                                     child: Container(
-  //                                       padding: const EdgeInsets.symmetric(
-  //                                           horizontal: 8, vertical: 4),
-  //                                       decoration: BoxDecoration(
-  //                                         color: _getRoleColor(employee.role),
-  //                                         borderRadius:
-  //                                             BorderRadius.circular(12),
-  //                                       ),
-  //                                       child: Text(
-  //                                         employee.role,
-  //                                         style: const TextStyle(
-  //                                             color: Colors.white),
-  //                                       ),
-  //                                     ),
-  //                                   ),
-  //                                 ),
-  //                                 ... (otras celdas) ...
-  //                                 DataCell(
-  //                                   Row(
-  //                                     mainAxisAlignment:
-  //                                         MainAxisAlignment.spaceBetween,
-  //                                     children: [
-  //                                       Text(DateFormat('dd/MM/yyyy')
-  //                                           .format(employee.fechaIngreso)),
-  //                                       PopupMenuButton<String>(
-  //                                         onSelected: (value) {
-  //                                           if (value == 'Eliminar') {
-  //                                             _deleteEmployee(employee);
-  //                                           } else if (value ==
-  //                                               'Deshabilitar') {
-  //                                             _disableEmployee(employee);
-  //                                             print(
-  //                                                 'Aqui se va a deshabilitar');
-  //                                           }
-  //                                         },
-  //                                         itemBuilder: (BuildContext context) =>
-  //                                             [
-  //                                           const PopupMenuItem<String>(
-  //                                             value: 'Eliminar',
-  //                                             child: Text('Eliminar'),
-  //                                           ),
-  //                                           const PopupMenuItem<String>(
-  //                                             value: 'Deshabilitar',
-  //                                             child: Text('Deshabilitar'),
-  //                                           ),
-  //                                         ],
-  //                                         icon: const Icon(Icons.more_vert),
-  //                                       ),
-  //                                     ],
-  //                                   ),
-  //                                 ),
-  //                               ],
-  //                               color: WidgetStateProperty.resolveWith<Color?>(
-  //                                 (Set<WidgetState> states) {
-  //                                   if (states.contains(WidgetState.hovered)) {
-  //                                     return Colors.grey[300];
-  //                                   }
-  //                                   return null;
-  //                                 },
-  //                               ),
-  //                               onDoubleTap: () =>
-  //                                   _showFormDialog(context, employee),
-  //                             ))
-  //                         .toList(),
-  //                   ),
-  //                 ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
   void _deleteEmployee(Usuario employee) async {
-    // Mostrar un diálogo de confirmación
+    // Eliminar el usuario de la base de datos
     bool confirmDelete = await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar eliminación'),
-          content: Text(
-              '¿Está seguro de que desea eliminar a ${employee.nombres} ${employee.apellidos}?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () => Navigator.of(context).pop(false),
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            width: 400, // Ajusta el tamaño según tu diseño
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Confirmar eliminación',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  '¿Está seguro de que desea eliminar este usuario?',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Colors.red, // Color del botón "Guardar"
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                      child: const Text('Eliminar',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            TextButton(
-              child: const Text('Eliminar'),
-              onPressed: () => Navigator.of(context).pop(true),
-            ),
-          ],
+          ),
         );
       },
     );

@@ -4,6 +4,8 @@ import 'package:admindashboard/pages/clients/widgets/clients_paginated_table.dar
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 
 class ClientsPage extends StatefulWidget {
@@ -144,6 +146,20 @@ class _ClientsPageState extends State<ClientsPage> {
     showLoadingDialog(context);
 
     try {
+      // Mostrar el loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(
+            child: SpinKitFadingCircle(
+              color: Colors.blue,
+              size: 50.0,
+            ),
+          );
+        },
+      );
+
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         throw Exception('No hay ningún usuario logeado.');
@@ -181,7 +197,9 @@ class _ClientsPageState extends State<ClientsPage> {
       }
 
       await _loadUsers();
+      _clearFormFields();
 
+      Navigator.of(context, rootNavigator: true).pop();
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text(existingClient == null
@@ -191,6 +209,7 @@ class _ClientsPageState extends State<ClientsPage> {
         ),
       );
     } catch (e) {
+      Navigator.of(context, rootNavigator: true).pop();
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
@@ -200,6 +219,15 @@ class _ClientsPageState extends State<ClientsPage> {
     }finally{
       Navigator.of(context, rootNavigator: true).pop();
     }
+  }
+
+  void _clearFormFields() {
+    _nombresController.clear();
+    _apellidosController.clear();
+    _emailController.clear();
+    _telefonoController.clear();
+    _direccionController.clear();
+    _empresaController.clear();
   }
 
   void _showFormDialog(BuildContext context, Cliente? client, bool editModeOn) {
@@ -469,53 +497,64 @@ class _ClientsPageState extends State<ClientsPage> {
         : Column(children: children);
   }
 
-  Widget _buildInputField(TextEditingController controller, String label,
-      {bool isEmail = false, required bool enabled}) {
+  Widget _buildInputField(
+    TextEditingController controller,
+    String label,
+    {bool isEmail = false, required bool enabled}) {
     // Check if the field requires validation
     bool requiresValidation =
         label == 'Nombres*' || label == 'Apellidos*' || label == 'Teléfono*';
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        enabled: enabled,
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: requiresValidation ? label : label.replaceAll('*', ''),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Colors.indigo),
-          ),
-          filled: true,
-          fillColor: Colors.grey[50],
+    padding: const EdgeInsets.only(bottom: 16),
+    child: TextFormField(
+      enabled: enabled,
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: requiresValidation ? label : label.replaceAll('*', ''),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
-        validator: (value) {
-          // Only validate required fields
-          if (requiresValidation) {
-            if (value == null || value.isEmpty) {
-              return 'Por favor ingrese ${label.replaceAll('*', '')}';
-            }
-          }
-          // Email validation is optional now
-          if (isEmail &&
-              value!.isNotEmpty &&
-              !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-            return 'Por favor ingrese un email válido';
-          }
-          return null;
-        },
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.indigo),
+        ),
+        filled: true,
+        fillColor: Colors.grey[50],
       ),
-    );
-  }
-
+      validator: (value) {
+        // Only validate required fields
+        if (requiresValidation) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor ingrese ${label.replaceAll('*', '')}';
+          }
+          // Validate phone number field
+          if (label == 'Teléfono*' && value.length > 10) {
+            return 'El número de teléfono debe tener 10 dígitos o menos';
+          }
+        }
+        // Email validation is optional now
+        if (isEmail &&
+            value!.isNotEmpty &&
+            !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+          return 'Por favor ingrese un email válido';
+        }
+        return null;
+      },
+      inputFormatters: label == 'Teléfono*'
+          ? [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(10),
+            ]
+          : [], // Limita a 10 dígitos y solo números
+    ),
+  );
+}
   Widget _buildDatePicker(
       BuildContext context, TextEditingController controller, String label,
       {required bool enabled}) {

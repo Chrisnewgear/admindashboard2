@@ -35,24 +35,24 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
         MaterialPageRoute(builder: (context) => SiteLayout()),
       );
     }else{
-      showCustomAlert(context, 'You have to verify your email first');
+      showCustomAlert(context, 'Debes verificar tu email para poder iniciar sesión.');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Verify Email')),
+      appBar: AppBar(title: const Text('Verificar tu Email'),),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (!isEmailVerified)
-              const Text('Please verify your email address'),
+              const Text('Por favor verifica tu email, revisa la bandeja de entrada o de spam de tu correo y da clic en el enlace de verificación.'),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: verifyEmail,
-              child: const Text('I have verified my email'),
+              child: const Text('Ya verifiqué el email'),
             ),
           ],
         ),
