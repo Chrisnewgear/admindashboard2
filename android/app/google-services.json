@@ -7,28 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:205358134276:android:1d0162ac5626bbf2d23151",
+        "mobilesdk_app_id": "1:205358134276:android:464f85cfec5b0eead23151",
         "android_client_info": {
           "package_name": "com.gosoftware.admindashboard"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBD9hJkDi-aZOUaKyL7jG5LVWBlL_d9dm8"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:205358134276:android:5857e586919f8bc3d23151",
-        "android_client_info": {
-          "package_name": "com.gosoftware.androidadmindashboard"
         }
       },
       "oauth_client": [],
