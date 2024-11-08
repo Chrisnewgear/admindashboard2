@@ -91,9 +91,8 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
           .get();
 
       setState(() {
-        visitas = querySnapshot.docs
-            .map((doc) => Visita.fromFirestore(doc))
-            .toList();
+        visitas =
+            querySnapshot.docs.map((doc) => Visita.fromFirestore(doc)).toList();
         isLoading = false; // Desactivar loading cuando los datos están listos
       });
     } catch (e) {
@@ -110,7 +109,8 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     }
   }
 
-  Future<void> _saveOrUpdateVisit(BuildContext context, Visita? existingVisit) async {
+  Future<void> _saveOrUpdateVisit(
+      BuildContext context, Visita? existingVisit) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     showLoadingDialog(context);
@@ -149,7 +149,8 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
         'PropositoVisita': selectedPurpose,
         'NombreCliente': _nombreClienteController.text,
         'UserId': user.uid,
-        'Fecha': Timestamp.fromDate(DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
+        'Fecha': Timestamp.fromDate(
+            DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
         'Location': geoPoint,
         'updatedAt': Timestamp.now(),
       };
@@ -269,9 +270,12 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     _nombreClienteController.clear();
   }
 
-  void _showClientVisitFormDialog(BuildContext context, Visita? visita, bool editModeOn) {
+  void _showClientVisitFormDialog(
+      BuildContext context, Visita? visita, bool editModeOn) {
     final formKey = GlobalKey<FormState>();
-    final ValueNotifier<bool> isEditable = editModeOn ? ValueNotifier<bool>(true) : ValueNotifier<bool>(visita == null);
+    final ValueNotifier<bool> isEditable = editModeOn
+        ? ValueNotifier<bool>(true)
+        : ValueNotifier<bool>(visita == null);
 
     if (visita != null) {
       _accionesController.text = visita.acciones;
@@ -866,76 +870,61 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     bool confirmDelete = await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
+        return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            width: 400, // Ajusta el tamaño según tu diseño
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Confirmar eliminación',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.of(context).pop(false);
-                      },
-                    ),
-                  ],
+          contentPadding: const EdgeInsets.all(20),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: Text(
+                  'Confirmar eliminación',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                const SizedBox(height: 10),
-                const Text(
-                  '¿Está seguro de que desea eliminar esta visita?',
-                  style: TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(false);
-                      },
-                      child: const Text(
-                        'Cancelar',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Colors.red, // Color del botón "Guardar"
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pop(true);
-                      },
-                      child: const Text('Eliminar',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+            ],
           ),
+          content: const Text(
+            '¿Está seguro de que desea eliminar esta visita?',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                'Eliminar',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         );
       },
     );

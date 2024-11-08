@@ -243,7 +243,7 @@ class _AuthenticationPageState extends State<AuthenticationPage>
                             ),
                           );
                         },
-                        child: const Text("Olvidaste tu contraseña?"),
+                        child: const Text("Olvidaste tu password?"),
                       )
                     ],
                   ),

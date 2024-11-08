@@ -210,8 +210,8 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                         children: [
                           Text(
                             employee == null
-                                ? 'Nuevo Empleado'
-                                : 'Editar Empleado',
+                                ? 'Nuevo Rol'
+                                : 'Editar Rol',
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -219,7 +219,8 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close, color: Colors.black54),
+                            icon:
+                                const Icon(Icons.close, color: Colors.black54),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                         ],
@@ -234,7 +235,8 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                             return Column(
                               children: [
                                 _buildResponsiveRow(isLargeScreen, [
-                                  _buildInputField(_nombresController, 'Nombres'),
+                                  _buildInputField(
+                                      _nombresController, 'Nombres'),
                                   _buildInputField(
                                       _apellidosController, 'Apellidos'),
                                 ]),
@@ -271,9 +273,10 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                           Flexible(
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
-                                maxWidth: MediaQuery.of(context).size.width < 768
-                                    ? double.infinity
-                                    : 200,
+                                maxWidth:
+                                    MediaQuery.of(context).size.width < 768
+                                        ? double.infinity
+                                        : 200,
                               ),
                               child: TextButton.icon(
                                 onPressed: () => Navigator.of(context).pop(),
@@ -297,9 +300,10 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
                           Flexible(
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
-                                maxWidth: MediaQuery.of(context).size.width < 768
-                                    ? double.infinity
-                                    : 200,
+                                maxWidth:
+                                    MediaQuery.of(context).size.width < 768
+                                        ? double.infinity
+                                        : 200,
                               ),
                               child: ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
@@ -426,7 +430,6 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
-
             Expanded(
               child: ResponsiveRolesTable(
                 usuarios: employees,
@@ -447,76 +450,61 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
     bool confirmDelete = await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
+        return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            width: 400, // Ajusta el tamaño según tu diseño
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Confirmar eliminación',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.of(context).pop(false);
-                      },
-                    ),
-                  ],
+          contentPadding: const EdgeInsets.all(20),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: Text(
+                  'Confirmar eliminación',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                const SizedBox(height: 10),
-                const Text(
-                  '¿Está seguro de que desea eliminar este usuario?',
-                  style: TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(false);
-                      },
-                      child: const Text(
-                        'Cancelar',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Colors.red, // Color del botón "Guardar"
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pop(true);
-                      },
-                      child: const Text('Eliminar',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+            ],
           ),
+          content: const Text(
+            '¿Está seguro de que desea eliminar este usuario?',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                'Eliminar',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         );
       },
     );

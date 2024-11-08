@@ -33,6 +33,9 @@ android {
         targetSdkVersion 33  // Specify version directly for clarity
         versionCode flutter.versionCode
         versionName flutter.versionName
+        ndk {
+            abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
+        }
     }
 
     // buildTypes {

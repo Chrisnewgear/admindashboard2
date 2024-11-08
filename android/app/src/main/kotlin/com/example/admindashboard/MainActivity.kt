@@ -1,4 +1,4 @@
-package com.example.admindashboard
+package com.gosoftware.admindashboard
 
 import io.flutter.embedding.android.FlutterActivity
 

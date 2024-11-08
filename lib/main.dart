@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
         builder: (context, snapshot) {
           return GetMaterialApp(
             initialRoute: authenticationPageRoute,
+            //initialRoute: pageNotFoundPageRoute,
             unknownRoute: GetPage(
                 name: "/not-found",
                 page: () => const PageNotFound(),

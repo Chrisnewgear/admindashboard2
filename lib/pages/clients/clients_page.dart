@@ -22,9 +22,6 @@ class _ClientsPageState extends State<ClientsPage> {
   bool isLoading = false;
   String currentVendorCode = '';
   List<Cliente> clients = [];
-  
-
-
 
   final TextEditingController _nombresController = TextEditingController();
   final TextEditingController _apellidosController = TextEditingController();
@@ -139,7 +136,8 @@ class _ClientsPageState extends State<ClientsPage> {
     return code;
   }
 
-  Future<void> _saveOrUpdateClient(BuildContext context, Cliente? existingClient) async {
+  Future<void> _saveOrUpdateClient(
+      BuildContext context, Cliente? existingClient) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     // Mostrar el diálogo de carga al iniciar la operación
@@ -216,7 +214,7 @@ class _ClientsPageState extends State<ClientsPage> {
           backgroundColor: Colors.red,
         ),
       );
-    }finally{
+    } finally {
       Navigator.of(context, rootNavigator: true).pop();
     }
   }
@@ -232,7 +230,9 @@ class _ClientsPageState extends State<ClientsPage> {
 
   void _showFormDialog(BuildContext context, Cliente? client, bool editModeOn) {
     final formKey = GlobalKey<FormState>();
-    final ValueNotifier<bool> isEditable = editModeOn ? ValueNotifier<bool>(true) : ValueNotifier<bool>(client == null);
+    final ValueNotifier<bool> isEditable = editModeOn
+        ? ValueNotifier<bool>(true)
+        : ValueNotifier<bool>(client == null);
 
     if (client != null) {
       _nombresController.text = client.nombre;
@@ -275,7 +275,7 @@ class _ClientsPageState extends State<ClientsPage> {
               //   modalWidth = constraints.maxWidth * 0.7;
               // } else {
               //   modalWidth = constraints.maxWidth * 0.9;
-              
+
               double modalWidth;
               if (constraints.maxWidth > 1024) {
                 // iPad Pro y pantallas grandes
@@ -286,7 +286,6 @@ class _ClientsPageState extends State<ClientsPage> {
                 modalWidth = constraints.maxWidth * 0.7;
               } else {
                 modalWidth = constraints.maxWidth * 0.9;
-
               }
 
               return Container(
@@ -313,7 +312,8 @@ class _ClientsPageState extends State<ClientsPage> {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close, color: Colors.black54),
+                            icon:
+                                const Icon(Icons.close, color: Colors.black54),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                         ],
@@ -328,7 +328,8 @@ class _ClientsPageState extends State<ClientsPage> {
                             return Column(
                               children: [
                                 _buildResponsiveRow(isLargeScreen, [
-                                  _buildInputField(_nombresController, 'Nombres*',
+                                  _buildInputField(
+                                      _nombresController, 'Nombres*',
                                       enabled: editable),
                                   _buildInputField(
                                       _apellidosController, 'Apellidos*',
@@ -342,10 +343,13 @@ class _ClientsPageState extends State<ClientsPage> {
                                       enabled: editable),
                                 ]),
                                 _buildResponsiveRow(isLargeScreen, [
-                                  _buildInputField(_empresaController, 'Empresa',
+                                  _buildInputField(
+                                      _empresaController, 'Empresa',
                                       enabled: editable),
-                                  _buildDatePicker(context,
-                                      _fechaIngresoController, 'Fecha de Ingreso',
+                                  _buildDatePicker(
+                                      context,
+                                      _fechaIngresoController,
+                                      'Fecha de Ingreso',
                                       enabled: editable),
                                 ]),
                                 _buildResponsiveRow(isLargeScreen, [
@@ -377,11 +381,12 @@ class _ClientsPageState extends State<ClientsPage> {
                                     return ElevatedButton.icon(
                                       style: ElevatedButton.styleFrom(
                                         padding: EdgeInsets.symmetric(
-                                          horizontal:
-                                              MediaQuery.of(context).size.width <
-                                                      768
-                                                  ? 12
-                                                  : 16,
+                                          horizontal: MediaQuery.of(context)
+                                                      .size
+                                                      .width <
+                                                  768
+                                              ? 12
+                                              : 16,
                                           vertical: 12,
                                         ),
                                       ),
@@ -391,12 +396,12 @@ class _ClientsPageState extends State<ClientsPage> {
                                       icon: editable
                                           ? const Icon(Icons.edit_off)
                                           : const Icon(Icons.edit),
-                                      label:
-                                          MediaQuery.of(context).size.width < 768
-                                              ? const SizedBox.shrink()
-                                              : Text(editable
-                                                  ? 'Cancelar Edición'
-                                                  : 'Editar'),
+                                      label: MediaQuery.of(context).size.width <
+                                              768
+                                          ? const SizedBox.shrink()
+                                          : Text(editable
+                                              ? 'Cancelar Edición'
+                                              : 'Editar'),
                                     );
                                   },
                                 ),
@@ -406,9 +411,10 @@ class _ClientsPageState extends State<ClientsPage> {
                           Flexible(
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
-                                maxWidth: MediaQuery.of(context).size.width < 768
-                                    ? double.infinity
-                                    : 200,
+                                maxWidth:
+                                    MediaQuery.of(context).size.width < 768
+                                        ? double.infinity
+                                        : 200,
                               ),
                               child: TextButton.icon(
                                 onPressed: () => Navigator.of(context).pop(),
@@ -432,9 +438,10 @@ class _ClientsPageState extends State<ClientsPage> {
                           Flexible(
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
-                                maxWidth: MediaQuery.of(context).size.width < 768
-                                    ? double.infinity
-                                    : 200,
+                                maxWidth:
+                                    MediaQuery.of(context).size.width < 768
+                                        ? double.infinity
+                                        : 200,
                               ),
                               child: ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
@@ -497,64 +504,63 @@ class _ClientsPageState extends State<ClientsPage> {
         : Column(children: children);
   }
 
-  Widget _buildInputField(
-    TextEditingController controller,
-    String label,
-    {bool isEmail = false, required bool enabled}) {
+  Widget _buildInputField(TextEditingController controller, String label,
+      {bool isEmail = false, required bool enabled}) {
     // Check if the field requires validation
     bool requiresValidation =
         label == 'Nombres*' || label == 'Apellidos*' || label == 'Teléfono*';
 
     return Padding(
-    padding: const EdgeInsets.only(bottom: 16),
-    child: TextFormField(
-      enabled: enabled,
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: requiresValidation ? label : label.replaceAll('*', ''),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        enabled: enabled,
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: requiresValidation ? label : label.replaceAll('*', ''),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.indigo),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey[300]!),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.indigo),
-        ),
-        filled: true,
-        fillColor: Colors.grey[50],
+        validator: (value) {
+          // Only validate required fields
+          if (requiresValidation) {
+            if (value == null || value.isEmpty) {
+              return 'Por favor ingrese ${label.replaceAll('*', '')}';
+            }
+            // Validate phone number field
+            if (label == 'Teléfono*' && value.length > 10) {
+              return 'El número de teléfono debe tener 10 dígitos o menos';
+            }
+          }
+          // Email validation is optional now
+          if (isEmail &&
+              value!.isNotEmpty &&
+              !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+            return 'Por favor ingrese un email válido';
+          }
+          return null;
+        },
+        inputFormatters: label == 'Teléfono*'
+            ? [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(10),
+              ]
+            : [], // Limita a 10 dígitos y solo números
       ),
-      validator: (value) {
-        // Only validate required fields
-        if (requiresValidation) {
-          if (value == null || value.isEmpty) {
-            return 'Por favor ingrese ${label.replaceAll('*', '')}';
-          }
-          // Validate phone number field
-          if (label == 'Teléfono*' && value.length > 10) {
-            return 'El número de teléfono debe tener 10 dígitos o menos';
-          }
-        }
-        // Email validation is optional now
-        if (isEmail &&
-            value!.isNotEmpty &&
-            !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-          return 'Por favor ingrese un email válido';
-        }
-        return null;
-      },
-      inputFormatters: label == 'Teléfono*'
-          ? [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(10),
-            ]
-          : [], // Limita a 10 dígitos y solo números
-    ),
-  );
-}
+    );
+  }
+
   Widget _buildDatePicker(
       BuildContext context, TextEditingController controller, String label,
       {required bool enabled}) {
@@ -679,76 +685,61 @@ class _ClientsPageState extends State<ClientsPage> {
     bool confirmDelete = await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
+        return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            width: 400, // Ajusta el tamaño según tu diseño
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Confirmar eliminación',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.of(context).pop(false);
-                      },
-                    ),
-                  ],
+          contentPadding: const EdgeInsets.all(20),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: Text(
+                  'Confirmar eliminación',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  '¿Está seguro de que desea eliminar a ${client.nombre} ${client.apellido}?',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(false);
-                      },
-                      child: const Text(
-                        'Cancelar',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Colors.red, // Color del botón "Guardar"
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pop(true);
-                      },
-                      child: const Text('Eliminar',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+            ],
           ),
+          content: Text(
+            '¿Está seguro de que desea eliminar a ${client.nombre} ${client.apellido}?',
+            style: const TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                'Eliminar',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         );
       },
     );

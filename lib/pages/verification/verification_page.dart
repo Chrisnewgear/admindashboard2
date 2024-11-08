@@ -44,17 +44,20 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
     return Scaffold(
       appBar: AppBar(title: const Text('Verificar tu Email'),),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (!isEmailVerified)
-              const Text('Por favor verifica tu email, revisa la bandeja de entrada o de spam de tu correo y da clic en el enlace de verificación.'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: verifyEmail,
-              child: const Text('Ya verifiqué el email'),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (!isEmailVerified)
+                const Text('Por favor verifica tu email, revisa la bandeja de entrada o de spam de tu correo y da clic en el enlace de verificación.'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: verifyEmail,
+                child: const Text('Ya verifiqué el email'),
+              ),
+            ],
+          ),
         ),
       ),
     );
