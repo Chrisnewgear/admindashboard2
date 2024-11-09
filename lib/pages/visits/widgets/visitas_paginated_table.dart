@@ -10,6 +10,7 @@ class ResponsiveVisitasTable extends StatefulWidget {
   final Function(Visita) deleteVisit;
   final Function(BuildContext, dynamic, bool) showClientVisitFormDialog;
   final bool isLoading;
+  final Future<bool> Function() hasRole;
 
   const ResponsiveVisitasTable({
     super.key,
@@ -17,6 +18,7 @@ class ResponsiveVisitasTable extends StatefulWidget {
     required this.deleteVisit,
     required this.showClientVisitFormDialog,
     required this.isLoading,
+    required this.hasRole,
   });
 
   @override
@@ -27,13 +29,46 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
   List<Visita> filteredVisitas = [];
   final TextEditingController _searchController = TextEditingController();
   bool isSearchExpanded = false;
+  bool hasRol = false;
 
   @override
   void initState() {
     super.initState();
     filteredVisitas = widget.visitas;
     _searchController.addListener(_filterVisitas);
+    _checkRole();
   }
+
+  Future<void> _checkRole() async {
+    final role = await widget.hasRole();
+    setState(() {
+      hasRol = role;
+    });
+
+    if (!hasRol) {
+      _showNoRoleDialog();
+    }
+  }
+
+  void _showNoRoleDialog() {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("Acceso Denegado"),
+        content: const Text("No tiene asignado un rol, por lo que no podrá crear, ver o editar las visitas, comuníquese con su supervisor."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Aceptar"),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   @override
   void didUpdateWidget(ResponsiveVisitasTable oldWidget) {
@@ -67,7 +102,6 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
   }
 
   @override
-
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -77,14 +111,15 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final bool isSmallScreen = constraints.maxWidth <= 430; // iPhone 14 Pro Max width
+        final bool isSmallScreen = constraints.maxWidth <= 430;
 
         return SizedBox(
           height: 200,
           child: Card(
             elevation: 4,
             color: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -110,7 +145,7 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
                         child: ElevatedButton(
-                          onPressed: widget.isLoading
+                          onPressed: (widget.isLoading || !hasRol)
                               ? null
                               : () => widget.showClientVisitFormDialog(context, null, true),
                           style: ElevatedButton.styleFrom(
@@ -271,7 +306,8 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
         columns: const [
           DataColumn2(
             label: Center(
-              child: Text('NombreCliente', style: TextStyle(color: Colors.white)),
+              child:
+                  Text('NombreCliente', style: TextStyle(color: Colors.white)),
             ),
             size: ColumnSize.L,
           ),
@@ -283,13 +319,15 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
           ),
           DataColumn2(
             label: Center(
-              child: Text('Producto/Servicio', style: TextStyle(color: Colors.white)),
+              child: Text('Producto/Servicio',
+                  style: TextStyle(color: Colors.white)),
             ),
             size: ColumnSize.L,
           ),
           DataColumn2(
             label: Center(
-              child: Text('Propósito Visita', style: TextStyle(color: Colors.white)),
+              child: Text('Propósito Visita',
+                  style: TextStyle(color: Colors.white)),
             ),
             size: ColumnSize.L,
           ),
@@ -352,7 +390,8 @@ class VisitasDataTableSource extends DataTableSource {
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     child: const Text('Editar'),
-                    onTap: () => showClientVisitFormDialog(context, visita, true),
+                    onTap: () =>
+                        showClientVisitFormDialog(context, visita, true),
                   ),
                   PopupMenuItem(
                     child: const Text('Eliminar'),

@@ -57,7 +57,17 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
           });
 
           // Load visits corresponding to the user's code
-          await _loadVisits(currentUser.uid);
+          if (userDoc.exists) {
+            bool hasRole = userDoc.get('Role') == 'None' ? false : true;
+
+            if (hasRole) {
+              await _loadVisits(currentUser.uid);
+            } else {
+              setState(() {
+                visitas = [];
+              });
+            }
+          }
         }
       }
     } catch (e) {
@@ -72,6 +82,38 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
         ),
       );
     }
+  }
+
+  Future<bool> _getRole() async {
+    bool hasRole = false;
+
+    try {
+      // Get the current user
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        // Fetch the user document from Firestore
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(currentUser.uid)
+            .get();
+
+        if (userDoc.exists) {
+          hasRole = userDoc.get('Role') == 'None' ? false : true;
+        }
+      }
+
+      return hasRole;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              Text('Error al cargar información del usuario y visitas: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+    return hasRole;
   }
 
   Future<void> _loadVisits(String codVendedor) async {
@@ -839,6 +881,8 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
 
   @override
   Widget build(BuildContext context) {
+    //_getRole();
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -857,6 +901,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                 showClientVisitFormDialog: (context, visita, editModeOn) =>
                     _showClientVisitFormDialog(context, visita, editModeOn),
                 isLoading: isLoading,
+                hasRole: _getRole,
               ),
             ),
           ],

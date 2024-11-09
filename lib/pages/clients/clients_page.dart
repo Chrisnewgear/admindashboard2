@@ -21,7 +21,7 @@ class _ClientsPageState extends State<ClientsPage> {
   //List<String> roles = ['Vendedor', 'Supervisor'];
   bool isLoading = false;
   String currentVendorCode = '';
-  List<Cliente> clients = [];
+  List<Cliente> clientes = [];
 
   final TextEditingController _nombresController = TextEditingController();
   final TextEditingController _apellidosController = TextEditingController();
@@ -57,10 +57,22 @@ class _ClientsPageState extends State<ClientsPage> {
             _codVendedorController.text = userCode;
             currentVendorCode = _codVendedorController.text;
           });
+
+          if (userDoc.exists) {
+            bool hasRole = userDoc.get('Role') == 'None' ? false : true;
+
+            if (hasRole) {
+              await _loadUsers();
+            } else {
+              setState(() {
+                clientes = [];
+              });
+            }
+          }
+
         }
       }
 
-      await _loadUsers();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -70,6 +82,38 @@ class _ClientsPageState extends State<ClientsPage> {
         ),
       );
     }
+  }
+
+  Future<bool> _getRole() async {
+    bool hasRole = false;
+
+    try {
+      // Get the current user
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        // Fetch the user document from Firestore
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(currentUser.uid)
+            .get();
+
+        if (userDoc.exists) {
+          hasRole = userDoc.get('Role') == 'None' ? false : true;
+        }
+      }
+
+      return hasRole;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              Text('Error al cargar información del usuario y visitas: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+    return hasRole;
   }
 
   Future<void> _loadUsers() async {
@@ -91,7 +135,7 @@ class _ClientsPageState extends State<ClientsPage> {
           .get();
 
       setState(() {
-        clients = querySnapshot.docs
+        clientes = querySnapshot.docs
             .map((doc) => Cliente.fromFirestore(doc))
             .toList();
         isLoading = false;
@@ -667,11 +711,12 @@ class _ClientsPageState extends State<ClientsPage> {
             //_buildUserTable(context) // Llama al widget desde el archivo externo
             Expanded(
               child: ResponsiveClientsTable(
-                clientes: clients,
+                clientes: clientes,
                 deleteClient: (cliente) => _deleteClient(cliente),
                 showClientVisitFormDialog: (context, cliente, editModeOn) =>
                     _showFormDialog(context, cliente, editModeOn),
                 isLoading: isLoading,
+                hasRole: _getRole,
               ),
             ),
           ],
@@ -759,7 +804,7 @@ class _ClientsPageState extends State<ClientsPage> {
 
           // Actualizar la lista de empleados
           setState(() {
-            clients.removeWhere((e) => e.codigo == client.codigo);
+            clientes.removeWhere((e) => e.codigo == client.codigo);
           });
 
           await _loadUsers();

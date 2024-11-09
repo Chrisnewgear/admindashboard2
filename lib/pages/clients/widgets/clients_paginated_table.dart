@@ -9,6 +9,7 @@ class ResponsiveClientsTable extends StatefulWidget {
   final Function(Cliente) deleteClient;
   final Function(BuildContext, dynamic, bool) showClientVisitFormDialog;
   final bool isLoading;
+  final Future<bool> Function() hasRole;
 
   const ResponsiveClientsTable({
     super.key,
@@ -16,6 +17,7 @@ class ResponsiveClientsTable extends StatefulWidget {
     required this.deleteClient,
     required this.showClientVisitFormDialog,
     required this.isLoading,
+    required this.hasRole,
   });
 
   @override
@@ -26,13 +28,46 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
   List<Cliente> filteredClientes = [];
   final TextEditingController _searchController = TextEditingController();
   bool isSearchExpanded = false;
+  bool hasRol = false;
 
   @override
   void initState() {
     super.initState();
     filteredClientes = widget.clientes;
     _searchController.addListener(_filterClientes);
+    _checkRole();
   }
+
+  Future<void> _checkRole() async {
+    final role = await widget.hasRole();
+    setState(() {
+      hasRol = role;
+    });
+
+    if (!hasRol) {
+      _showNoRoleDialog();
+    }
+  }
+
+  void _showNoRoleDialog() {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("Acceso Denegado"),
+        content: const Text("No tiene asignado un rol, por lo que no podrá crear, ver o editar sus clientes, comuníquese con su supervisor."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Aceptar"),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   @override
   void didUpdateWidget(ResponsiveClientsTable oldWidget) {
@@ -117,10 +152,9 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
                         child: ElevatedButton(
-                          onPressed: widget.isLoading
+                          onPressed: (widget.isLoading || !hasRol)
                               ? null
-                              : () =>
-                                  widget.showClientVisitFormDialog(context, null, true),
+                              : () => widget.showClientVisitFormDialog(context, null, true),
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.blue,
                             backgroundColor: Colors.white,
