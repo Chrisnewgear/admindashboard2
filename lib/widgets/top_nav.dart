@@ -1,7 +1,8 @@
+import 'package:admindashboard/constants/controllers.dart';
 import 'package:admindashboard/constants/style.dart';
 import 'package:admindashboard/helpers/responsiveness.dart';
 import 'package:admindashboard/pages/authentication/authentication.dart';
-import 'package:admindashboard/pages/profile/profile_page.dart';
+import 'package:admindashboard/routing/routes.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -158,10 +159,11 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
                       PopupMenuItem<String>(
                         value: 'Perfil',
                         onTap: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                                builder: (context) => const ProfileWidget()),
-                          );
+                          // Navigator.of(context).pushReplacement(
+                          //   MaterialPageRoute(
+                          //       builder: (context) => const ProfileWidget()),
+                          // );
+                          navigationController.navigateTo(profilePageRoute);
                         },
                         child: const Row(
                           children: [
