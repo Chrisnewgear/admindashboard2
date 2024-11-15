@@ -1,969 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:google_fonts/google_fonts.dart';
-// import 'package:admindashboard/constants/style.dart';
-// import 'package:admindashboard/widgets/custom_text.dart';
-
-// class ProfileWidget extends StatelessWidget {
-//   const ProfileWidget({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final User? user = FirebaseAuth.instance.currentUser;
-
-//     return StreamBuilder<DocumentSnapshot>(
-//       stream: FirebaseFirestore.instance.collection('Users').doc(user?.uid).snapshots(),
-//       builder: (context, snapshot) {
-//         if (snapshot.connectionState == ConnectionState.waiting) {
-//           return const Center(child: CircularProgressIndicator());
-//         }
-
-//         if (snapshot.hasError) {
-//           return Center(child: Text('Error: ${snapshot.error}'));
-//         }
-
-//         if (!snapshot.hasData || !snapshot.data!.exists) {
-//           return const Center(child: Text('No user data found'));
-//         }
-
-//         final userData = snapshot.data!.data() as Map<String, dynamic>;
-
-//         return SingleChildScrollView(
-//           child: Container(
-//             constraints: const BoxConstraints(maxWidth: 600),
-//             padding: const EdgeInsets.all(24),
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Text(
-//                   'Perfil de Usuario',
-//                   style: GoogleFonts.roboto(fontSize: 30, fontWeight: FontWeight.bold),
-//                 ),
-//                 const SizedBox(height: 20),
-//                 _buildProfileItem('Código', userData['Codigo'] ?? 'N/A'),
-//                 _buildProfileItem('Nombre', userData['Nombre'] ?? 'N/A'),
-//                 _buildProfileItem('Apellidos', userData['Apellidos'] ?? 'N/A'),
-//                 _buildProfileItem('Email', userData['email'] ?? 'N/A'),
-//                 _buildProfileItem('Teléfono', userData['Telefono'] ?? 'N/A'),
-//                 const SizedBox(height: 30),
-//                 Center(
-//                   child: ElevatedButton(
-//                     style: ElevatedButton.styleFrom(
-//                       backgroundColor: active,
-//                       shape: RoundedRectangleBorder(
-//                         borderRadius: BorderRadius.circular(20),
-//                       ),
-//                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-//                     ),
-//                     onPressed: () {
-//                       // Aquí puedes agregar la lógica para editar el perfil
-//                     },
-//                     child: const CustomText(
-//                       text: "Editar Perfil",
-//                       color: Colors.white,
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         );
-//       },
-//     );
-//   }
-
-//   Widget _buildProfileItem(String label, String value) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(vertical: 8),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Text(
-//             label,
-//             style: GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.bold, color: lightGrey),
-//           ),
-//           const SizedBox(height: 4),
-//           Text(
-//             value,
-//             style: GoogleFonts.roboto(fontSize: 18),
-//           ),
-//           const Divider(),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-// import 'package:flutter/material.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:google_fonts/google_fonts.dart';
-
-// class ProfileWidget extends StatelessWidget {
-//   const ProfileWidget({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final User? user = FirebaseAuth.instance.currentUser;
-
-//     return StreamBuilder<DocumentSnapshot>(
-//       stream: FirebaseFirestore.instance.collection('Users').doc(user?.uid).snapshots(),
-//       builder: (context, snapshot) {
-//         if (snapshot.connectionState == ConnectionState.waiting) {
-//           return const Center(child: CircularProgressIndicator());
-//         }
-
-//         if (snapshot.hasError) {
-//           return Center(child: Text('Error: ${snapshot.error}'));
-//         }
-
-//         if (!snapshot.hasData || !snapshot.data!.exists) {
-//           return const Center(child: Text('No user data found'));
-//         }
-
-//         final userData = snapshot.data!.data() as Map<String, dynamic>;
-
-//         return Scaffold(
-//           body: SingleChildScrollView(
-//             child: Container(
-//               constraints: const BoxConstraints(maxWidth: 450),
-//               padding: const EdgeInsets.all(24),
-//               decoration: BoxDecoration(
-//                 color: Colors.white,
-//                 borderRadius: BorderRadius.circular(16),
-//                 boxShadow: [
-//                   BoxShadow(
-//                     color: Colors.grey.withOpacity(0.1),
-//                     spreadRadius: 1,
-//                     blurRadius: 10,
-//                   ),
-//                 ],
-//               ),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   // Tab navigation
-//                   Row(
-//                     children: [
-//                       _buildTab('Edit Profile', isSelected: true),
-//                       _buildTab('Preference'),
-//                       _buildTab('Security'),
-//                     ],
-//                   ),
-//                   const SizedBox(height: 30),
-
-//                   // Profile photo section
-//                   Center(
-//                     child: Stack(
-//                       children: [
-//                         Container(
-//                           width: 100,
-//                           height: 100,
-//                           decoration: BoxDecoration(
-//                             color: Colors.grey[200],
-//                             shape: BoxShape.circle,
-//                           ),
-//                           child: const Icon(Icons.photo_library_outlined, size: 40, color: Colors.grey),
-//                         ),
-//                         Positioned(
-//                           right: 0,
-//                           bottom: 0,
-//                           child: Container(
-//                             padding: const EdgeInsets.all(8),
-//                             decoration: BoxDecoration(
-//                               color: Colors.indigo,
-//                               shape: BoxShape.circle,
-//                             ),
-//                             child: const Icon(Icons.camera_alt, size: 20, color: Colors.white),
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                   const SizedBox(height: 30),
-
-//                   // Form fields
-//                   _buildTextField('Your Name', userData['Nombre'] ?? 'Charlene Reed'),
-//                   _buildTextField('User Name', userData['Nombre'] ?? 'Charlene Reed'),
-//                   _buildTextField('Email', userData['email'] ?? 'user@gmail.com'),
-//                   _buildTextField('Password', '********', isPassword: true),
-//                 ],
-//               ),
-//             ),
-//           ),
-//         );
-//       },
-//     );
-//   }
-
-//   Widget _buildTab(String text, {bool isSelected = false}) {
-//     return Padding(
-//       padding: const EdgeInsets.all(24),
-//       child: Column(
-//         children: [
-//           Text(
-//             text,
-//             style: TextStyle(
-//               color: isSelected ? Colors.indigo : Colors.grey,
-//               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-//             ),
-//           ),
-//           const SizedBox(height: 4),
-//           if (isSelected)
-//             Container(
-//               height: 2,
-//               width: 80,
-//               color: Colors.indigo,
-//             ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _buildTextField(String label, String value, {bool isPassword = false}) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(vertical: 12),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Text(
-//             label,
-//             style: const TextStyle(
-//               fontSize: 14,
-//               color: Colors.grey,
-//             ),
-//           ),
-//           const SizedBox(height: 8),
-//           TextField(
-//             obscureText: isPassword,
-//             controller: TextEditingController(text: value),
-//             decoration: InputDecoration(
-//               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-//               border: OutlineInputBorder(
-//                 borderRadius: BorderRadius.circular(8),
-//                 borderSide: BorderSide(color: Colors.grey[300]!),
-//               ),
-//               enabledBorder: OutlineInputBorder(
-//                 borderRadius: BorderRadius.circular(8),
-//                 borderSide: BorderSide(color: Colors.grey[300]!),
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-// import 'package:flutter/material.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:google_fonts/google_fonts.dart';
-
-// class ProfileWidget extends StatelessWidget {
-//   const ProfileWidget({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final User? user = FirebaseAuth.instance.currentUser;
-//     final screenSize = MediaQuery.of(context).size;
-//     final isSmallScreen = screenSize.width < 600;
-//     final isPadSize = screenSize.width < 1024 && screenSize.width >= 600;
-
-//     return StreamBuilder<DocumentSnapshot>(
-//       stream: FirebaseFirestore.instance.collection('Users').doc(user?.uid).snapshots(),
-//       builder: (context, snapshot) {
-//         if (snapshot.connectionState == ConnectionState.waiting) {
-//           return const Center(child: CircularProgressIndicator());
-//         }
-
-//         if (snapshot.hasError) {
-//           return Center(child: Text('Error: ${snapshot.error}'));
-//         }
-
-//         if (!snapshot.hasData || !snapshot.data!.exists) {
-//           return const Center(child: Text('No user data found'));
-//         }
-
-//         final userData = snapshot.data!.data() as Map<String, dynamic>;
-
-//         return Scaffold(
-//           body: Center(
-//             child: SingleChildScrollView(
-//               child: Container(
-//                 constraints: BoxConstraints(
-//                   maxWidth: isSmallScreen
-//                       ? screenSize.width * 0.95
-//                       : isPadSize
-//                           ? screenSize.width * 0.8
-//                           : 450,
-//                 ),
-//                 margin: EdgeInsets.symmetric(
-//                   vertical: isSmallScreen ? 16 : 24,
-//                   horizontal: isSmallScreen ? 12 : 24,
-//                 ),
-//                 padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
-//                 decoration: BoxDecoration(
-//                   color: Colors.white,
-//                   borderRadius: BorderRadius.circular(16),
-//                   boxShadow: [
-//                     BoxShadow(
-//                       color: Colors.grey.withOpacity(0.1),
-//                       spreadRadius: 1,
-//                       blurRadius: 10,
-//                     ),
-//                   ],
-//                 ),
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     // Tab navigation with horizontal scroll for small screens
-//                     SingleChildScrollView(
-//                       scrollDirection: Axis.horizontal,
-//                       child: Row(
-//                         children: [
-//                           _buildTab('Edit Profile', isSelected: true),
-//                           _buildTab('Preference'),
-//                           _buildTab('Security'),
-//                         ],
-//                       ),
-//                     ),
-//                     const SizedBox(height: 30),
-
-//                     // Profile photo section
-//                     Center(
-//                       child: Stack(
-//                         children: [
-//                           Container(
-//                             width: isSmallScreen ? 80 : 100,
-//                             height: isSmallScreen ? 80 : 100,
-//                             decoration: BoxDecoration(
-//                               color: Colors.grey[200],
-//                               shape: BoxShape.circle,
-//                             ),
-//                             child: Icon(
-//                               Icons.photo_library_outlined,
-//                               size: isSmallScreen ? 32 : 40,
-//                               color: Colors.grey
-//                             ),
-//                           ),
-//                           Positioned(
-//                             right: 0,
-//                             bottom: 0,
-//                             child: Container(
-//                               padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
-//                               decoration: const BoxDecoration(
-//                                 color: Colors.indigo,
-//                                 shape: BoxShape.circle,
-//                               ),
-//                               child: Icon(
-//                                 Icons.camera_alt,
-//                                 size: isSmallScreen ? 16 : 20,
-//                                 color: Colors.white
-//                               ),
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                     ),
-//                     SizedBox(height: isSmallScreen ? 20 : 30),
-
-//                     // Form fields
-//                     _buildTextField(
-//                       context,
-//                       'Your Name',
-//                       userData['Nombre'] ?? 'Charlene Reed'
-//                     ),
-//                     _buildTextField(
-//                       context,
-//                       'User Name',
-//                       userData['Nombre'] ?? 'Charlene Reed'
-//                     ),
-//                     _buildTextField(
-//                       context,
-//                       'Email',
-//                       userData['email'] ?? 'user@gmail.com'
-//                     ),
-//                     _buildTextField(
-//                       context,
-//                       'Password',
-//                       '********',
-//                       isPassword: true
-//                     ),
-
-//                     // Save Button
-//                     const SizedBox(height: 20),
-//                     Center(
-//                       child: ElevatedButton(
-//                         style: ElevatedButton.styleFrom(
-//                           backgroundColor: Colors.indigo,
-//                           padding: EdgeInsets.symmetric(
-//                             horizontal: isSmallScreen ? 30 : 40,
-//                             vertical: isSmallScreen ? 12 : 16,
-//                           ),
-//                           shape: RoundedRectangleBorder(
-//                             borderRadius: BorderRadius.circular(8),
-//                           ),
-//                         ),
-//                         onPressed: () {
-//                           // Add save functionality here
-//                         },
-//                         child: const Text(
-//                           'Save Changes',
-//                           style: TextStyle(
-//                             color: Colors.white,
-//                             fontSize: 16,
-//                           ),
-//                         ),
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//           ),
-//         );
-//       },
-//     );
-//   }
-
-//   Widget _buildTab(String text, {bool isSelected = false}) {
-//     return Padding(
-//       padding: const EdgeInsets.only(right: 24),
-//       child: Column(
-//         children: [
-//           Text(
-//             text,
-//             style: TextStyle(
-//               color: isSelected ? Colors.indigo : Colors.grey,
-//               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-//             ),
-//           ),
-//           const SizedBox(height: 4),
-//           if (isSelected)
-//             Container(
-//               height: 2,
-//               width: 80,
-//               color: Colors.indigo,
-//             ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _buildTextField(BuildContext context, String label, String value, {bool isPassword = false}) {
-//     final isSmallScreen = MediaQuery.of(context).size.width < 600;
-
-//     return Padding(
-//       padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 8 : 12),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Text(
-//             label,
-//             style: TextStyle(
-//               fontSize: isSmallScreen ? 12 : 14,
-//               color: Colors.grey,
-//             ),
-//           ),
-//           SizedBox(height: isSmallScreen ? 6 : 8),
-//           TextField(
-//             obscureText: isPassword,
-//             controller: TextEditingController(text: value),
-//             style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
-//             decoration: InputDecoration(
-//               contentPadding: EdgeInsets.symmetric(
-//                 horizontal: isSmallScreen ? 12 : 16,
-//                 vertical: isSmallScreen ? 8 : 12,
-//               ),
-//               border: OutlineInputBorder(
-//                 borderRadius: BorderRadius.circular(8),
-//                 borderSide: BorderSide(color: Colors.grey[300]!),
-//               ),
-//               enabledBorder: OutlineInputBorder(
-//                 borderRadius: BorderRadius.circular(8),
-//                 borderSide: BorderSide(color: Colors.grey[300]!),
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-// import 'package:flutter/material.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:google_fonts/google_fonts.dart';
-
-// class ProfileWidget extends StatelessWidget {
-//   const ProfileWidget({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final User? user = FirebaseAuth.instance.currentUser;
-//     final screenSize = MediaQuery.of(context).size;
-//     final isDesktop = screenSize.width > 1024;
-
-//     return StreamBuilder<DocumentSnapshot>(
-//       stream: FirebaseFirestore.instance.collection('Users').doc(user?.uid).snapshots(),
-//       builder: (context, snapshot) {
-//         if (snapshot.connectionState == ConnectionState.waiting) {
-//           return const Center(child: CircularProgressIndicator());
-//         }
-
-//         if (snapshot.hasError) {
-//           return Center(child: Text('Error: ${snapshot.error}'));
-//         }
-
-//         if (!snapshot.hasData || !snapshot.data!.exists) {
-//           return const Center(child: Text('No user data found'));
-//         }
-
-//         final userData = snapshot.data!.data() as Map<String, dynamic>;
-
-//         return Scaffold(
-//           body: isDesktop
-//               ? _buildDesktopLayout(context, userData)
-//               : _buildMobileLayout(context, userData),
-//         );
-//       },
-//     );
-//   }
-
-//   Widget _buildDesktopLayout(BuildContext context, Map<String, dynamic> userData) {
-//     return SingleChildScrollView(
-//       child: Padding(
-//         padding: const EdgeInsets.all(32.0),
-//         child: Row(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             // Left sidebar with navigation
-//             Card(
-//               elevation: 2,
-//               child: Container(
-//                 width: 250,
-//                 padding: const EdgeInsets.all(24),
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     // Profile photo section
-//                     Center(
-//                       child: Stack(
-//                         children: [
-//                           Container(
-//                             width: 120,
-//                             height: 120,
-//                             decoration: BoxDecoration(
-//                               color: Colors.grey[200],
-//                               shape: BoxShape.circle,
-//                             ),
-//                             child: const Icon(
-//                               Icons.photo_library_outlined,
-//                               size: 50,
-//                               color: Colors.grey,
-//                             ),
-//                           ),
-//                           Positioned(
-//                             right: 0,
-//                             bottom: 0,
-//                             child: Container(
-//                               padding: const EdgeInsets.all(8),
-//                               decoration: const BoxDecoration(
-//                                 color: Colors.indigo,
-//                                 shape: BoxShape.circle,
-//                               ),
-//                               child: const Icon(
-//                                 Icons.camera_alt,
-//                                 size: 20,
-//                                 color: Colors.white,
-//                               ),
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                     ),
-//                     const SizedBox(height: 24),
-//                     _buildNavItem('Edit Profile', isSelected: true),
-//                     _buildNavItem('Preference'),
-//                     _buildNavItem('Security'),
-//                     _buildNavItem('Notifications'),
-//                     _buildNavItem('Connected Accounts'),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//             const SizedBox(width: 24),
-//             // Main content area
-//             Expanded(
-//               child: Card(
-//                 elevation: 2,
-//                 child: Container(
-//                   padding: const EdgeInsets.all(32),
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       Text(
-//                         'Edit Profile',
-//                         style: GoogleFonts.roboto(
-//                           fontSize: 24,
-//                           fontWeight: FontWeight.bold,
-//                         ),
-//                       ),
-//                       const SizedBox(height: 24),
-//                       Row(
-//                         children: [
-//                           Expanded(
-//                             child: _buildTextField(
-//                               context,
-//                               'Your Name',
-//                               userData['Nombre'] ?? 'Charlene Reed',
-//                             ),
-//                           ),
-//                           const SizedBox(width: 24),
-//                           Expanded(
-//                             child: _buildTextField(
-//                               context,
-//                               'User Name',
-//                               userData['Nombre'] ?? 'Charlene Reed',
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                       Row(
-//                         children: [
-//                           Expanded(
-//                             child: _buildTextField(
-//                               context,
-//                               'Email',
-//                               userData['email'] ?? 'user@gmail.com',
-//                             ),
-//                           ),
-//                           const SizedBox(width: 24),
-//                           Expanded(
-//                             child: _buildTextField(
-//                               context,
-//                               'Password',
-//                               '********',
-//                               isPassword: true,
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                       const SizedBox(height: 24),
-//                       // Additional fields for desktop
-//                       Row(
-//                         children: [
-//                           Expanded(
-//                             child: _buildTextField(
-//                               context,
-//                               'Phone Number',
-//                               userData['Telefono'] ?? '+1 234 567 890',
-//                             ),
-//                           ),
-//                           const SizedBox(width: 24),
-//                           Expanded(
-//                             child: _buildTextField(
-//                               context,
-//                               'Location',
-//                               userData['Location'] ?? 'New York, USA',
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                       const SizedBox(height: 32),
-//                       Row(
-//                         mainAxisAlignment: MainAxisAlignment.end,
-//                         children: [
-//                           OutlinedButton(
-//                             onPressed: () {},
-//                             style: OutlinedButton.styleFrom(
-//                               padding: const EdgeInsets.symmetric(
-//                                 horizontal: 32,
-//                                 vertical: 16,
-//                               ),
-//                             ),
-//                             child: const Text('Cancel'),
-//                           ),
-//                           const SizedBox(width: 16),
-//                           ElevatedButton(
-//                             onPressed: () {},
-//                             style: ElevatedButton.styleFrom(
-//                               backgroundColor: Colors.indigo,
-//                               padding: const EdgeInsets.symmetric(
-//                                 horizontal: 32,
-//                                 vertical: 16,
-//                               ),
-//                             ),
-//                             child: const Text(
-//                               'Save Changes',
-//                               style: TextStyle(color: Colors.white),
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildMobileLayout(BuildContext context, Map<String, dynamic> userData) {
-//     return SingleChildScrollView(
-//       child: Container(
-//         constraints: BoxConstraints(
-//           maxWidth: MediaQuery.of(context).size.width * 0.95,
-//         ),
-//         margin: const EdgeInsets.symmetric(
-//           vertical: 16,
-//           horizontal: 12,
-//         ),
-//         padding: const EdgeInsets.all(16),
-//         decoration: BoxDecoration(
-//           color: Colors.white,
-//           borderRadius: BorderRadius.circular(16),
-//           boxShadow: [
-//             BoxShadow(
-//               color: Colors.grey.withOpacity(0.1),
-//               spreadRadius: 1,
-//               blurRadius: 10,
-//             ),
-//           ],
-//         ),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             SingleChildScrollView(
-//               scrollDirection: Axis.horizontal,
-//               child: Row(
-//                 children: [
-//                   _buildTab('Edit Profile', isSelected: true),
-//                   _buildTab('Preference'),
-//                   _buildTab('Security'),
-//                 ],
-//               ),
-//             ),
-//             const SizedBox(height: 24),
-//             Center(
-//               child: Stack(
-//                 children: [
-//                   Container(
-//                     width: 80,
-//                     height: 80,
-//                     decoration: BoxDecoration(
-//                       color: Colors.grey[200],
-//                       shape: BoxShape.circle,
-//                     ),
-//                     child: const Icon(
-//                       Icons.photo_library_outlined,
-//                       size: 32,
-//                       color: Colors.grey,
-//                     ),
-//                   ),
-//                   Positioned(
-//                     right: 0,
-//                     bottom: 0,
-//                     child: Container(
-//                       padding: const EdgeInsets.all(6),
-//                       decoration: const BoxDecoration(
-//                         color: Colors.indigo,
-//                         shape: BoxShape.circle,
-//                       ),
-//                       child: const Icon(
-//                         Icons.camera_alt,
-//                         size: 16,
-//                         color: Colors.white,
-//                       ),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             const SizedBox(height: 24),
-//             _buildTextField(context, 'Your Name', userData['Nombre'] ?? 'Charlene Reed'),
-//             _buildTextField(context, 'User Name', userData['Nombre'] ?? 'Charlene Reed'),
-//             _buildTextField(context, 'Email', userData['email'] ?? 'user@gmail.com'),
-//             _buildTextField(context, 'Password', '********', isPassword: true),
-//             const SizedBox(height: 24),
-//             Center(
-//               child: ElevatedButton(
-//                 style: ElevatedButton.styleFrom(
-//                   backgroundColor: Colors.indigo,
-//                   padding: const EdgeInsets.symmetric(
-//                     horizontal: 32,
-//                     vertical: 16,
-//                   ),
-//                   shape: RoundedRectangleBorder(
-//                     borderRadius: BorderRadius.circular(8),
-//                   ),
-//                 ),
-//                 onPressed: () {},
-//                 child: const Text(
-//                   'Save Changes',
-//                   style: TextStyle(
-//                     color: Colors.white,
-//                     fontSize: 16,
-//                   ),
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildNavItem(String text, {bool isSelected = false}) {
-//     return Container(
-//       margin: const EdgeInsets.only(bottom: 8),
-//       decoration: BoxDecoration(
-//         borderRadius: BorderRadius.circular(8),
-//         color: isSelected ? Colors.indigo.withOpacity(0.1) : null,
-//       ),
-//       child: ListTile(
-//         selected: isSelected,
-//         selectedColor: Colors.indigo,
-//         leading: Icon(
-//           _getIconForNavItem(text),
-//           color: isSelected ? Colors.indigo : Colors.grey,
-//         ),
-//         title: Text(
-//           text,
-//           style: TextStyle(
-//             color: isSelected ? Colors.indigo : Colors.grey[700],
-//             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-//           ),
-//         ),
-//         onTap: () {
-//           // Handle navigation
-//         },
-//       ),
-//     );
-//   }
-
-//   IconData _getIconForNavItem(String text) {
-//     switch (text) {
-//       case 'Edit Profile':
-//         return Icons.person_outline;
-//       case 'Preference':
-//         return Icons.settings_outlined;
-//       case 'Security':
-//         return Icons.security_outlined;
-//       case 'Notifications':
-//         return Icons.notifications_outlined;
-//       case 'Connected Accounts':
-//         return Icons.link_outlined;
-//       default:
-//         return Icons.circle_outlined;
-//     }
-//   }
-
-//   Widget _buildTab(String text, {bool isSelected = false}) {
-//     return Padding(
-//       padding: const EdgeInsets.only(right: 24),
-//       child: Column(
-//         children: [
-//           Text(
-//             text,
-//             style: TextStyle(
-//               color: isSelected ? Colors.indigo : Colors.grey,
-//               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-//             ),
-//           ),
-//           const SizedBox(height: 4),
-//           if (isSelected)
-//             Container(
-//               height: 2,
-//               width: 80,
-//               color: Colors.indigo,
-//             ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   // Widget _buildTextField(BuildContext context, String label, String value,
-//   //     {bool isPassword = false}) {
-//   //   return Padding(
-//   //     padding: const EdgeInsets.symmetric(vertical: 12),
-//   //     child: Column(
-//   //       crossAxisAlignment: CrossAxisAlignment.start,
-//   //       children: [
-//   //         Text(
-//   //           label,
-//   //           style: const TextStyle(
-//   //             fontSize: 14,
-//   //             color: Colors.grey,
-//   //           ),
-//   //         ),
-//   //         const SizedBox(height: 8),
-//   //         TextField(
-//   //           obscureText: isPassword,
-//   //           controller: TextEditingController(text: value),
-//   //           decoration: InputDecoration(
-//   //             contentPadding:
-//   //                 const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-//   //             border: OutlineInputBorder(
-//   //               borderRadius: BorderRadius.circular(8),
-//   //               borderSide: BorderSide(color: Colors.grey[300]!),
-//   //             ),
-//   //             enabledBorder: OutlineInputBorder(
-//   //               borderRadius: BorderRadius.circular(8),
-//   //               borderSide: BorderSide(color: Colors.grey[300]!),
-//   //             ),
-//   //           ),
-//   //         ),
-//   //       ],
-//   //     ),
-//   //   );
-//   // }
-
-//     Widget _buildInputField(TextEditingController controller, String label,
-//       {bool isEmail = false, required bool enabled}) {
-//     return Padding(
-//       padding: const EdgeInsets.only(bottom: 16),
-//       child: TextFormField(
-//         enabled: enabled,
-//         controller: controller,
-//         decoration: InputDecoration(
-//           labelText: label,
-//           border: OutlineInputBorder(
-//             borderRadius: BorderRadius.circular(8),
-//             borderSide: BorderSide(color: Colors.grey[300]!),
-//           ),
-//           enabledBorder: OutlineInputBorder(
-//             borderRadius: BorderRadius.circular(8),
-//             borderSide: BorderSide(color: Colors.grey[300]!),
-//           ),
-//           focusedBorder: OutlineInputBorder(
-//             borderRadius: BorderRadius.circular(8),
-//             borderSide: const BorderSide(color: Colors.indigo),
-//           ),
-//           filled: true,
-//           fillColor: Colors.grey[50],
-//         ),
-//         validator: (value) {
-//           if (value == null || value.isEmpty) {
-//             return 'Por favor ingrese $label';
-//           }
-//           if (isEmail &&
-//               !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-//             return 'Por favor ingrese un email válido';
-//           }
-//           return null;
-//         },
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -973,19 +7,30 @@ class ProfileWidget extends StatefulWidget {
   const ProfileWidget({super.key});
 
   @override
-  State<ProfileWidget> createState() => _ProfileWidgetState();
+  _ProfileWidgetState createState() => _ProfileWidgetState();
 }
 
 class _ProfileWidgetState extends State<ProfileWidget> {
+  final ValueNotifier<int> _selectedIndex =
+      ValueNotifier<int>(0); // Notificador para evitar recargas completas
   final _formKey = GlobalKey<FormState>();
+  final ValueNotifier<bool> isEditing = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> isPasswordEditMode = ValueNotifier(false);
+  final ValueNotifier<bool> _obscurePasswordNotifier =
+      ValueNotifier<bool>(true);
+
   late TextEditingController nameController;
   late TextEditingController apellidoController;
   late TextEditingController emailController;
   late TextEditingController passwordController;
+  late TextEditingController newPasswordController;
+  late TextEditingController confirmPasswordController;
   late TextEditingController phoneController;
   late TextEditingController locationController;
-  bool _obscurePassword = true;
-  bool _isEditMode = false;
+  //bool _obscurePassword = true;
+  //bool _isEditMode = false;
+  //bool _isPasswordEditMode = false;
+  //int _selectedIndex = 0; // Index to track the selected tab
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
@@ -995,18 +40,24 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     apellidoController = TextEditingController();
     emailController = TextEditingController();
     passwordController = TextEditingController();
+    newPasswordController = TextEditingController();
+    confirmPasswordController = TextEditingController();
     phoneController = TextEditingController();
     locationController = TextEditingController();
   }
 
   @override
   void dispose() {
+    _selectedIndex.dispose();
     nameController.dispose();
     apellidoController.dispose();
     emailController.dispose();
     passwordController.dispose();
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
     phoneController.dispose();
     locationController.dispose();
+    isPasswordEditMode.dispose();
     super.dispose();
   }
 
@@ -1051,471 +102,355 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     );
   }
 
-  Widget _buildDesktopLayout(BuildContext context) {
-  bool isSmallScreen = MediaQuery.of(context).size.width < 800;
-  bool showText = !isSmallScreen;
+  // Widget _buildDesktopLayout(BuildContext context) {
+  //   return SingleChildScrollView(
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(32.0),
+  //       child: Row(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           // Left sidebar with navigation
+  //           Card(
+  //             elevation: 2,
+  //             child: Container(
+  //               width: 250,
+  //               padding: const EdgeInsets.all(24),
+  //               child: Column(
+  //                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                 children: [
+  //                   // Profile photo section
+  //                   Center(
+  //                     child: Stack(
+  //                       children: [
+  //                         Container(
+  //                           width: 120,
+  //                           height: 120,
+  //                           decoration: BoxDecoration(
+  //                             color: Colors.grey[200],
+  //                             shape: BoxShape.circle,
+  //                           ),
+  //                           child: const Icon(
+  //                             Icons.photo_library_outlined,
+  //                             size: 50,
+  //                             color: Colors.grey,
+  //                           ),
+  //                         ),
+  //                         Positioned(
+  //                           right: 0,
+  //                           bottom: 0,
+  //                           child: Container(
+  //                             padding: const EdgeInsets.all(8),
+  //                             decoration: const BoxDecoration(
+  //                               color: Colors.indigo,
+  //                               shape: BoxShape.circle,
+  //                             ),
+  //                             child: const Icon(
+  //                               Icons.camera_alt,
+  //                               size: 20,
+  //                               color: Colors.white,
+  //                             ),
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                   const SizedBox(height: 24),
+  //                   _buildNavItem('Edit Profile', isSelected: _selectedIndex == 0),
+  //                   _buildNavItem('Preference', isSelected: _selectedIndex == 1),
+  //                   _buildNavItem('Security', isSelected: _selectedIndex == 2),
+  //                   _buildNavItem('Notifications', isSelected: _selectedIndex == 3),
+  //                   //_buildNavItem('Connected Accounts'),
+  //                 ],
+  //               ),
+  //             ),
+  //           ),
+  //           const SizedBox(width: 24),
+  //           // Main content area
+  //           Expanded(
+  //             child: Card(
+  //               elevation: 2,
+  //               child: Container(
+  //                 padding: const EdgeInsets.all(32),
+  //                 child: _selectedIndex == 0
+  //                     ? _buildProfileEditSection()
+  //                     : _selectedIndex == 2
+  //                         ? _buildPasswordChangeSection()
+  //                         : const SizedBox.shrink(),
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  return SingleChildScrollView(
-    child: Padding(
-      padding: const EdgeInsets.all(32.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Left sidebar with navigation
-          Card(
-            elevation: 2,
-            child: Container(
-              width: 250,
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Profile photo section
-                  Center(
-                    child: Stack(
-                      children: [
-                        Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.photo_library_outlined,
-                            size: 50,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(
-                              color: Colors.indigo,
+  Widget _buildDesktopLayout(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Barra lateral izquierda con navegación
+            Card(
+              elevation: 2,
+              child: Container(
+                width: 250,
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Sección de foto de perfil
+                    Center(
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
-                              Icons.camera_alt,
-                              size: 20,
-                              color: Colors.white,
+                              Icons.photo_library_outlined,
+                              size: 50,
+                              color: Colors.grey,
                             ),
                           ),
-                        ),
-                      ],
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: Colors.indigo,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt,
+                                size: 20,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildNavItem('Edit Profile', isSelected: true),
-                  _buildNavItem('Preference'),
-                  _buildNavItem('Security'),
-                  _buildNavItem('Notifications'),
-                  _buildNavItem('Connected Accounts'),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 24),
-          // Main content area
-          Expanded(
-            child: Card(
-              elevation: 2,
-              child: Container(
-                padding: const EdgeInsets.all(32),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Edit Profile',
-                        style: GoogleFonts.roboto(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildInputField(
-                              nameController,
-                              'Nombre',
-                              enabled: _isEditMode,
-                            ),
-                          ),
-                          const SizedBox(width: 24),
-                          Expanded(
-                            child: _buildInputField(
-                              apellidoController,
-                              'Apellidos',
-                              enabled: _isEditMode,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildInputField(
-                              emailController,
-                              'Email',
-                              isEmail: true,
-                              enabled: _isEditMode,
-                            ),
-                          ),
-                          const SizedBox(width: 24),
-                          Expanded(
-                            child: _buildInputField(
-                              phoneController,
-                              'Teléfono',
-                              enabled: _isEditMode,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          if (!_isEditMode)
-                            ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  _isEditMode = true;
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.indigo,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.edit, color: Colors.white),
-                                  if (showText) const SizedBox(width: 8),
-                                  if (showText)
-                                    const Text(
-                                      'Editar',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          const SizedBox(width: 16),
-                          if (_isEditMode)
-                            OutlinedButton(
-                              onPressed: () {
-                                setState(() {
-                                  _isEditMode = false;
-                                });
-                              },
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.cancel,
-                                      color: Colors.grey),
-                                  if (showText) const SizedBox(width: 8),
-                                  if (showText)
-                                    const Text(
-                                      'Cancelar',
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          const SizedBox(width: 16),
-                          if (_isEditMode)
-                            ElevatedButton(
-                              onPressed: () async {
-                                if (_formKey.currentState!.validate()) {
-                                  await saveProfile(); // Call the saveProfile method
-                                  setState(() {
-                                    _isEditMode = false;
-                                  });
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.indigo,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.save, color: Colors.white),
-                                  if (showText) const SizedBox(width: 8),
-                                  if (showText)
-                                    const Text(
-                                      'Guardar',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    const SizedBox(height: 24),
+                    _buildNavItem('Edit Profile'),
+                    _buildNavItem('Preference'),
+                    _buildNavItem('Security'),
+                    _buildNavItem('Notifications'),
+                    //_buildNavItem('Connected Accounts'),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-  Widget _buildMobileLayout(BuildContext context) {
-  return SingleChildScrollView(
-    child: Container(
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width * 0.95,
-      ),
-      margin: const EdgeInsets.symmetric(
-        vertical: 16,
-        horizontal: 12,
-      ),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildTab('Edit Profile', isSelected: true),
-                  _buildTab('Preference'),
-                  _buildTab('Security'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            Center(
-              child: Stack(
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.photo_library_outlined,
-                      size: 32,
-                      color: Colors.grey,
-                    ),
+            const SizedBox(width: 24),
+            // Área de contenido principal
+            Expanded(
+              child: Card(
+                elevation: 2,
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  child: ValueListenableBuilder<int>(
+                    valueListenable: _selectedIndex,
+                    builder: (context, selectedIndex, _) {
+                      // Renderizamos la sección según el índice seleccionado
+                      if (selectedIndex == 0) {
+                        return _buildProfileEditSection();
+                      } else if (selectedIndex == 2) {
+                        return _buildPasswordChangeSection();
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
                   ),
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(
-                        color: Colors.indigo,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.camera_alt,
-                        size: 16,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            _buildInputField(
-              nameController,
-              'Nombre',
-              enabled: _isEditMode,
-            ),
-            _buildInputField(
-              apellidoController,
-              'Apellido',
-              enabled: _isEditMode,
-            ),
-            _buildInputField(
-              emailController,
-              'Email',
-              isEmail: true,
-              enabled: _isEditMode,
-            ),
-            _buildInputField(
-              phoneController,
-              'Teléfono',
-              enabled: _isEditMode,
-            ),
-            const SizedBox(height: 24),
-            Center(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  bool showText = constraints.maxWidth >
-                      280; // Reduce the width threshold to fit smaller screens
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (!_isEditMode)
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _isEditMode = true;
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.indigo,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16, // Reduced padding
-                              vertical: 10,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.edit, color: Colors.white),
-                              if (showText)
-                                const SizedBox(width: 4), // Reduced spacing
-                              if (showText)
-                                const Text('Editar',
-                                    style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                        ),
-                      const SizedBox(
-                          width: 8), // Reduced spacing between buttons
-                      if (_isEditMode)
-                        OutlinedButton(
-                          onPressed: () {
-                            setState(() {
-                              _isEditMode = false;
-                            });
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16, // Reduced padding
-                              vertical: 10,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.cancel, color: Colors.grey),
-                              if (showText)
-                                const SizedBox(width: 4), // Reduced spacing
-                              if (showText)
-                                const Text('Cancelar',
-                                    style: TextStyle(color: Colors.grey)),
-                            ],
-                          ),
-                        ),
-                      const SizedBox(
-                          width: 8), // Reduced spacing between buttons
-                      if (_isEditMode)
-                        ElevatedButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              await saveProfile(); // Call the saveProfile method
-                              setState(() {
-                                _isEditMode =
-                                    false; // Exit edit mode after saving
-                              });
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.indigo,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16, // Reduced padding
-                              vertical: 10,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.save, color: Colors.white),
-                              if (showText)
-                                const SizedBox(width: 4), // Reduced spacing
-                              if (showText)
-                                const Text('Guardar',
-                                    style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                        ),
-                    ],
-                  );
-                },
+                ),
               ),
             ),
           ],
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-  Widget _buildNavItem(String text, {bool isSelected = false}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: isSelected ? Colors.indigo.withOpacity(0.1) : null,
-      ),
-      child: ListTile(
-        selected: isSelected,
-        selectedColor: Colors.indigo,
-        leading: Icon(
-          _getIconForNavItem(text),
-          color: isSelected ? Colors.indigo : Colors.grey,
+  // Widget _buildMobileLayout(BuildContext context) {
+  //   return SingleChildScrollView(
+  //     child: Container(
+  //       constraints: BoxConstraints(
+  //         maxWidth: MediaQuery.of(context).size.width * 0.95,
+  //       ),
+  //       margin: const EdgeInsets.symmetric(
+  //         vertical: 16,
+  //         horizontal: 12,
+  //       ),
+  //       padding: const EdgeInsets.all(16),
+  //       decoration: BoxDecoration(
+  //         color: Colors.white,
+  //         borderRadius: BorderRadius.circular(16),
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: Colors.grey.withOpacity(0.1),
+  //             spreadRadius: 1,
+  //             blurRadius: 10,
+  //           ),
+  //         ],
+  //       ),
+  //       child: Form(
+  //         key: _formKey,
+  //         child: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             SingleChildScrollView(
+  //               scrollDirection: Axis.horizontal,
+  //               child: Row(
+  //                 children: [
+  //                   _buildTab('Edit Profile', isSelected: _selectedIndex == 0, index: 0),
+  //                   _buildTab('Preference', isSelected: _selectedIndex == 1, index: 1),
+  //                   _buildTab('Security', isSelected: _selectedIndex == 2, index: 2),
+  //                 ],
+  //               ),
+  //             ),
+  //             const SizedBox(height: 24),
+  //             if (_selectedIndex == 0)
+  //               _buildProfileEditSection()
+  //             else if (_selectedIndex == 2)
+  //               _buildPasswordChangeSection()
+  //             else
+  //               const SizedBox.shrink(),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  Widget _buildMobileLayout(BuildContext context) {
+    return SingleChildScrollView(
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.95,
         ),
-        title: Text(
-          text,
-          style: TextStyle(
-            color: isSelected ? Colors.indigo : Colors.grey[700],
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        margin: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 12,
+        ),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildTab('Edit Profile', 0),
+                    _buildTab('Preference', 1),
+                    _buildTab('Security', 2),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              ValueListenableBuilder<int>(
+                valueListenable: _selectedIndex,
+                builder: (context, index, _) {
+                  if (index == 0) {
+                    return _buildProfileEditSection();
+                  } else if (index == 2) {
+                    return _buildPasswordChangeSection();
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
+              ),
+            ],
           ),
         ),
-        onTap: () {
-          // Handle navigation
+      ),
+    );
+  }
+
+  Widget _buildNavItem(String text) {
+    return GestureDetector(
+      onTap: () {
+        // Actualizamos el valor de `_selectedIndex` directamente para evitar el uso de `setState`
+        switch (text) {
+          case 'Edit Profile':
+            _selectedIndex.value = 0;
+            break;
+          case 'Preference':
+            _selectedIndex.value = 1;
+            break;
+          case 'Security':
+            _selectedIndex.value = 2;
+            break;
+          case 'Notifications':
+            _selectedIndex.value = 3;
+            break;
+        }
+      },
+      child: ValueListenableBuilder<int>(
+        valueListenable: _selectedIndex,
+        builder: (context, selectedIndex, _) {
+          // Comprobamos si este elemento está seleccionado comparando el `selectedIndex`
+          final isSelected = selectedIndex == _getIndexForNavItem(text);
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: isSelected ? Colors.indigo.withOpacity(0.1) : null,
+            ),
+            child: ListTile(
+              selected: isSelected,
+              selectedColor: Colors.indigo,
+              leading: Icon(
+                _getIconForNavItem(
+                    text), // Asegúrate de implementar esta función
+                color: isSelected ? Colors.indigo : Colors.grey,
+              ),
+              title: Text(
+                text,
+                style: TextStyle(
+                  color: isSelected ? Colors.indigo : Colors.grey[700],
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ),
+          );
         },
       ),
     );
+  }
+
+// Helper method to map text to index values
+  int _getIndexForNavItem(String text) {
+    switch (text) {
+      case 'Edit Profile':
+        return 0;
+      case 'Preference':
+        return 1;
+      case 'Security':
+        return 2;
+      case 'Notifications':
+        return 3;
+      default:
+        return -1;
+    }
   }
 
   IconData _getIconForNavItem(String text) {
@@ -1535,77 +470,760 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     }
   }
 
-  Widget _buildTab(String text, {bool isSelected = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 24),
-      child: Column(
-        children: [
-          Text(
-            text,
-            style: TextStyle(
-              color: isSelected ? Colors.indigo : Colors.grey,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+  // Widget _buildTab(String text, {bool isSelected = false}) {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(right: 24),
+  //     child: Column(
+  //       children: [
+  //         Text(
+  //           text,
+  //           style: TextStyle(
+  //             color: isSelected ? Colors.indigo : Colors.grey,
+  //             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+  //           ),
+  //         ),
+  //         const SizedBox(height: 4),
+  //         if (isSelected)
+  //           Container(
+  //             height: 2,
+  //             width: 80,
+  //             color: Colors.indigo,
+  //           ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+//   Widget _buildTab(String title, {required bool isSelected, required int index}) {
+//   return GestureDetector(
+//     onTap: () {
+//       setState(() {
+//         _selectedIndex = index;
+//       });
+//     },
+//     child: Container(
+//       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+//       decoration: BoxDecoration(
+//         border: Border(
+//           bottom: BorderSide(
+//             color: isSelected ? Colors.blue : Colors.transparent,
+//             width: 2,
+//           ),
+//         ),
+//       ),
+//       child: Text(
+//         title,
+//         style: TextStyle(
+//           color: isSelected ? Colors.blue : Colors.grey,
+//           fontWeight: FontWeight.bold,
+//         ),
+//       ),
+//     ),
+//   );
+// }
+
+  Widget _buildTab(String title, int index) {
+    return GestureDetector(
+      onTap: () {
+        _selectedIndex.value = index; // Actualiza solo el ValueNotifier
+      },
+      child: ValueListenableBuilder<int>(
+        valueListenable: _selectedIndex,
+        builder: (context, selectedIndex, _) {
+          final isSelected = selectedIndex == index;
+          return Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: isSelected ? Colors.blue : Colors.transparent,
+                  width: 2,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          if (isSelected)
-            Container(
-              height: 2,
-              width: 80,
-              color: Colors.indigo,
+            child: Text(
+              title,
+              style: TextStyle(
+                color: isSelected ? Colors.blue : Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-        ],
+          );
+        },
       ),
     );
   }
+
+  // Widget _buildInputField(TextEditingController controller, String label,
+  //     {bool isPassword = false, bool isEmail = false, required bool enabled}) {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(bottom: 16),
+  //     child: TextFormField(
+  //       enabled: enabled,
+  //       controller: controller,
+  //       obscureText: isPassword && _obscurePassword,
+  //       decoration: InputDecoration(
+  //         labelText: label,
+  //         border: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(8),
+  //           borderSide: BorderSide(color: Colors.grey[300]!),
+  //         ),
+  //         enabledBorder: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(8),
+  //           borderSide: BorderSide(color: Colors.grey[300]!),
+  //         ),
+  //         focusedBorder: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(8),
+  //           borderSide: const BorderSide(color: Colors.indigo),
+  //         ),
+  //         filled: true,
+  //         fillColor: Colors.grey[50],
+  //         suffixIcon: isPassword
+  //             ? IconButton(
+  //                 icon: Icon(_obscurePassword
+  //                     ? Icons.visibility_off
+  //                     : Icons.visibility),
+  //                 onPressed: () {
+  //                   setState(() {
+  //                     _obscurePassword = !_obscurePassword;
+  //                   });
+  //                 },
+  //               )
+  //             : null,
+  //       ),
+  //       validator: (value) {
+  //         if (value == null || value.isEmpty) {
+  //           return 'Por favor ingrese $label';
+  //         }
+  //         if (isEmail &&
+  //             !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+  //           return 'Por favor ingrese un email válido';
+  //         }
+  //         return null;
+  //       },
+  //     ),
+  //   );
+  // }
 
   Widget _buildInputField(TextEditingController controller, String label,
       {bool isPassword = false, bool isEmail = false, required bool enabled}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        enabled: enabled,
-        controller: controller,
-        obscureText: isPassword && _obscurePassword,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Colors.indigo),
-          ),
-          filled: true,
-          fillColor: Colors.grey[50],
-          suffixIcon: isPassword
-              ? IconButton(
-                  icon: Icon(_obscurePassword
-                      ? Icons.visibility_off
-                      : Icons.visibility),
-                  onPressed: () {
-                    setState(() {
-                      _obscurePassword = !_obscurePassword;
-                    });
-                  },
-                )
-              : null,
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Por favor ingrese $label';
-          }
-          if (isEmail &&
-              !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-            return 'Por favor ingrese un email válido';
-          }
-          return null;
+      child: ValueListenableBuilder<bool>(
+        valueListenable: _obscurePasswordNotifier,
+        builder: (context, obscurePassword, child) {
+          return TextFormField(
+            enabled: enabled,
+            controller: controller,
+            obscureText: isPassword && obscurePassword,
+            decoration: InputDecoration(
+              labelText: label,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.indigo),
+              ),
+              filled: true,
+              fillColor: Colors.grey[50],
+              suffixIcon: isPassword
+                  ? IconButton(
+                      icon: Icon(
+                        obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        _obscurePasswordNotifier.value = !obscurePassword;
+                      },
+                    )
+                  : null,
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Por favor ingrese $label';
+              }
+              if (isEmail &&
+                  !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                      .hasMatch(value)) {
+                return 'Por favor ingrese un email válido';
+              }
+              return null;
+            },
+          );
         },
+      ),
+    );
+  }
+
+  // Widget _buildProfileEditSection() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(
+  //         'Editar Perfil',
+  //         style: GoogleFonts.roboto(
+  //           fontSize: 24,
+  //           fontWeight: FontWeight.bold,
+  //         ),
+  //       ),
+  //       const SizedBox(height: 24),
+  //       Row(
+  //         children: [
+  //           Expanded(
+  //             child: _buildInputField(
+  //               nameController,
+  //               'Nombre',
+  //               enabled: _isEditMode,
+  //             ),
+  //           ),
+  //           const SizedBox(width: 24),
+  //           Expanded(
+  //             child: _buildInputField(
+  //               apellidoController,
+  //               'Apellidos',
+  //               enabled: _isEditMode,
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       const SizedBox(height: 16),
+  //       Row(
+  //         children: [
+  //           Expanded(
+  //             child: _buildInputField(
+  //               emailController,
+  //               'Email',
+  //               isEmail: true,
+  //               enabled: _isEditMode,
+  //             ),
+  //           ),
+  //           const SizedBox(width: 24),
+  //           Expanded(
+  //             child: _buildInputField(
+  //               phoneController,
+  //               'Teléfono',
+  //               enabled: _isEditMode,
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       const SizedBox(height: 32),
+  //       Row(
+  //         mainAxisAlignment: MainAxisAlignment.end,
+  //         children: [
+  //           if (!_isEditMode)
+  //             ElevatedButton(
+  //               onPressed: () {
+  //                 setState(() {
+  //                   _isEditMode = true;
+  //                 });
+  //               },
+  //               style: ElevatedButton.styleFrom(
+  //                 backgroundColor: Colors.indigo,
+  //                 padding: const EdgeInsets.symmetric(
+  //                   horizontal: 24,
+  //                   vertical: 12,
+  //                 ),
+  //               ),
+  //               child: const Row(
+  //                 mainAxisSize: MainAxisSize.min,
+  //                 children: [
+  //                   Icon(Icons.edit, color: Colors.white),
+  //                   SizedBox(width: 8),
+  //                   Text(
+  //                     'Editar',
+  //                     style: TextStyle(color: Colors.white),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           const SizedBox(width: 16),
+  //           if (_isEditMode)
+  //             OutlinedButton(
+  //               onPressed: () {
+  //                 setState(() {
+  //                   _isEditMode = false;
+  //                 });
+  //               },
+  //               style: OutlinedButton.styleFrom(
+  //                 padding: const EdgeInsets.symmetric(
+  //                   horizontal: 24,
+  //                   vertical: 12,
+  //                 ),
+  //               ),
+  //               child: const Row(
+  //                 mainAxisSize: MainAxisSize.min,
+  //                 children: [
+  //                   Icon(Icons.cancel, color: Colors.grey),
+  //                   SizedBox(width: 8),
+  //                   Text(
+  //                     'Cancelar',
+  //                     style: TextStyle(color: Colors.grey),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           const SizedBox(width: 16),
+  //           if (_isEditMode)
+  //             ElevatedButton(
+  //               onPressed: () async {
+  //                 if (_formKey.currentState!.validate()) {
+  //                   await saveProfile();
+  //                   setState(() {
+  //                     _isEditMode = false;
+  //                   });
+  //                 }
+  //               },
+  //               style: ElevatedButton.styleFrom(
+  //                 backgroundColor: Colors.indigo,
+  //                 padding: const EdgeInsets.symmetric(
+  //                   horizontal: 24,
+  //                   vertical: 12,
+  //                 ),
+  //               ),
+  //               child: const Row(
+  //                 mainAxisSize: MainAxisSize.min,
+  //                 children: [
+  //                   Icon(Icons.save, color: Colors.white),
+  //                   SizedBox(width: 8),
+  //                   Text(
+  //                     'Guardar',
+  //                     style: TextStyle(color: Colors.white),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //         ],
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  Widget _buildProfileEditSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            // Botón de editar o cancelar
+            ValueListenableBuilder<bool>(
+              valueListenable: isEditing,
+              builder: (context, editing, child) {
+                return ElevatedButton.icon(
+                  icon: Icon(editing ? Icons.cancel : Icons.edit),
+                  label: Text(editing ? 'Cancelar' : 'Editar Perfil'),
+                  onPressed: () {
+                    isEditing.value = !editing;
+                  },
+                );
+              },
+            ),
+            const SizedBox(width: 8),
+            // Botón de guardar
+            ValueListenableBuilder<bool>(
+              valueListenable: isEditing,
+              builder: (context, editing, child) {
+                return ElevatedButton.icon(
+                  icon: Icon(Icons.save,
+                      color: editing ? Colors.white : Colors.grey),
+                  label: Text(
+                    'Guardar',
+                    style:
+                        TextStyle(color: editing ? Colors.white : Colors.grey),
+                  ),
+                  onPressed: editing
+                      ? () {
+                          saveProfile();
+                          isEditing.value = false;
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: editing ? Colors.indigo : Colors.grey[300],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // Campos de entrada responsivos
+        LayoutBuilder(
+          builder: (context, constraints) {
+            bool isLargeScreen = constraints.maxWidth > 600;
+
+            return Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: [
+                SizedBox(
+                  width: isLargeScreen
+                      ? (constraints.maxWidth / 2) - 8
+                      : constraints.maxWidth,
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: isEditing,
+                    builder: (context, editing, child) {
+                      return _buildInputField(
+                        nameController,
+                        'Nombre',
+                        enabled: editing,
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: isLargeScreen
+                      ? (constraints.maxWidth / 2) - 8
+                      : constraints.maxWidth,
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: isEditing,
+                    builder: (context, editing, child) {
+                      return _buildInputField(
+                        apellidoController,
+                        'Apellidos',
+                        enabled: editing,
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: isLargeScreen
+                      ? (constraints.maxWidth / 2) - 8
+                      : constraints.maxWidth,
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: isEditing,
+                    builder: (context, editing, child) {
+                      return _buildInputField(
+                        emailController,
+                        'Correo electrónico',
+                        isEmail: true,
+                        enabled: editing,
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: isLargeScreen
+                      ? (constraints.maxWidth / 2) - 8
+                      : constraints.maxWidth,
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: isEditing,
+                    builder: (context, editing, child) {
+                      return _buildInputField(
+                        phoneController,
+                        'Teléfono',
+                        enabled: editing,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  // Widget _buildPasswordChangeSection() {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(top: 32),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           'Cambiar Contraseña',
+  //           style: GoogleFonts.roboto(
+  //             fontSize: 20,
+  //             fontWeight: FontWeight.bold,
+  //           ),
+  //         ),
+  //         const SizedBox(height: 16),
+  //         _buildInputField(
+  //           passwordController,
+  //           'Contraseña Actual',
+  //           isPassword: true,
+  //           enabled: _isPasswordEditMode,
+  //         ),
+  //         _buildInputField(
+  //           newPasswordController,
+  //           'Nueva Contraseña',
+  //           isPassword: true,
+  //           enabled: _isPasswordEditMode,
+  //         ),
+  //         _buildInputField(
+  //           confirmPasswordController,
+  //           'Confirmar Nueva Contraseña',
+  //           isPassword: true,
+  //           enabled: _isPasswordEditMode,
+  //         ),
+  //         const SizedBox(height: 24),
+  //         Center(
+  //           child: LayoutBuilder(
+  //             builder: (context, constraints) {
+  //               bool showText = constraints.maxWidth > 280;
+  //               return Row(
+  //                 mainAxisAlignment: MainAxisAlignment.center,
+  //                 children: [
+  //                   if (!_isPasswordEditMode)
+  //                     ElevatedButton(
+  //                       onPressed: () {
+  //                         setState(() {
+  //                           _isPasswordEditMode = true;
+  //                         });
+  //                       },
+  //                       style: ElevatedButton.styleFrom(
+  //                         backgroundColor: Colors.indigo,
+  //                         padding: const EdgeInsets.symmetric(
+  //                           horizontal: 16,
+  //                           vertical: 10,
+  //                         ),
+  //                         shape: RoundedRectangleBorder(
+  //                           borderRadius: BorderRadius.circular(8),
+  //                         ),
+  //                       ),
+  //                       child: Row(
+  //                         mainAxisSize: MainAxisSize.min,
+  //                         children: [
+  //                           const Icon(Icons.lock_outline, color: Colors.white),
+  //                           if (showText) const SizedBox(width: 4),
+  //                           if (showText)
+  //                             const Text('Cambiar Contraseña',
+  //                                 style: TextStyle(color: Colors.white)),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                   const SizedBox(width: 8),
+  //                   if (_isPasswordEditMode)
+  //                     OutlinedButton(
+  //                       onPressed: () {
+  //                         setState(() {
+  //                           _isPasswordEditMode = false;
+  //                         });
+  //                       },
+  //                       style: OutlinedButton.styleFrom(
+  //                         padding: const EdgeInsets.symmetric(
+  //                           horizontal: 16,
+  //                           vertical: 10,
+  //                         ),
+  //                         shape: RoundedRectangleBorder(
+  //                           borderRadius: BorderRadius.circular(8),
+  //                         ),
+  //                       ),
+  //                       child: Row(
+  //                         mainAxisSize: MainAxisSize.min,
+  //                         children: [
+  //                           const Icon(Icons.cancel, color: Colors.grey),
+  //                           if (showText) const SizedBox(width: 4),
+  //                           if (showText)
+  //                             const Text('Cancelar',
+  //                                 style: TextStyle(color: Colors.grey)),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                   const SizedBox(width: 8),
+  //                   if (_isPasswordEditMode)
+  //                     ElevatedButton(
+  //                       onPressed: () async {
+  //                         if (_formKey.currentState!.validate()) {
+  //                           await changePassword();
+  //                           setState(() {
+  //                             _isPasswordEditMode = false;
+  //                           });
+  //                         }
+  //                       },
+  //                       style: ElevatedButton.styleFrom(
+  //                         backgroundColor: Colors.indigo,
+  //                         padding: const EdgeInsets.symmetric(
+  //                           horizontal: 16,
+  //                           vertical: 10,
+  //                         ),
+  //                         shape: RoundedRectangleBorder(
+  //                           borderRadius: BorderRadius.circular(8),
+  //                         ),
+  //                       ),
+  //                       child: Row(
+  //                         mainAxisSize: MainAxisSize.min,
+  //                         children: [
+  //                           const Icon(Icons.save, color: Colors.white),
+  //                           if (showText) const SizedBox(width: 4),
+  //                           if (showText)
+  //                             const Text('Guardar',
+  //                                 style: TextStyle(color: Colors.white)),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                 ],
+  //               );
+  //             },
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  Widget _buildPasswordChangeSection() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Cambiar Contraseña',
+            style: GoogleFonts.roboto(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ValueListenableBuilder<bool>(
+            valueListenable: isPasswordEditMode,
+            builder: (context, editing, child) {
+              return Column(
+                children: [
+                  _buildInputField(
+                    passwordController,
+                    'Contraseña Actual',
+                    isPassword: true,
+                    enabled: editing,
+                  ),
+                  _buildInputField(
+                    newPasswordController,
+                    'Nueva Contraseña',
+                    isPassword: true,
+                    enabled: editing,
+                  ),
+                  _buildInputField(
+                    confirmPasswordController,
+                    'Confirmar Nueva Contraseña',
+                    isPassword: true,
+                    enabled: editing,
+                  ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                bool showText = constraints.maxWidth > 280;
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ValueListenableBuilder<bool>(
+                      valueListenable: isPasswordEditMode,
+                      builder: (context, editing, child) {
+                        return editing
+                            ? OutlinedButton(
+                                onPressed: () {
+                                  isPasswordEditMode.value = false;
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 10,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.cancel,
+                                        color: Colors.grey),
+                                    if (showText) const SizedBox(width: 4),
+                                    if (showText)
+                                      const Text(
+                                        'Cancelar',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                  ],
+                                ),
+                              )
+                            : ElevatedButton(
+                                onPressed: () {
+                                  isPasswordEditMode.value = true;
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.indigo,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 10,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.lock_outline,
+                                        color: Colors.white),
+                                    if (showText) const SizedBox(width: 4),
+                                    if (showText)
+                                      const Text(
+                                        'Cambiar Contraseña',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                  ],
+                                ),
+                              );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: isPasswordEditMode,
+                      builder: (context, editing, child) {
+                        return ElevatedButton(
+                          onPressed: editing
+                              ? () async {
+                                  if (_formKey.currentState!.validate()) {
+                                    await changePassword();
+                                    isPasswordEditMode.value = false;
+                                  }
+                                }
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.indigo,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.save, color: Colors.white),
+                              if (showText) const SizedBox(width: 4),
+                              if (showText)
+                                const Text(
+                                  'Guardar',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1614,34 +1232,57 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     try {
       User? currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
-        // Fetch the user document from Firestore
-        await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(currentUser.uid)
-            .get();
-      }
-      // Replace 'userId' with the actual ID of the user you want to update.
-      String userId = currentUser!.uid; // Retrieve the actual user ID here
-      await _firestore.collection('Users').doc(userId).update({
-        'Nombre': nameController.text,
-        'Apellidos': apellidoController.text,
-        'email': emailController.text,
-        'Telefono': phoneController.text,
-      });
+        await _firestore.collection('Users').doc(currentUser.uid).update({
+          'Nombre': nameController.text,
+          'Apellidos': apellidoController.text,
+          'email': emailController.text,
+          'Telefono': phoneController.text,
+        });
 
-      // Show success SnackBar
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Datos actualizados con éxito!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+        // Show success SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Datos actualizados con éxito!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (error) {
       // Show error SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('Error al actualizar los datos: $error'),
-            backgroundColor: Colors.red),
+          content: Text('Error al actualizar los datos: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> changePassword() async {
+    try {
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        await currentUser.updatePassword(newPasswordController.text);
+        // Update user's password in Firestore
+        await _firestore.collection('Users').doc(currentUser.uid).update({
+          'Contraseña': newPasswordController.text,
+        });
+
+        // Show success SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Contraseña actualizada con éxito!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (error) {
+      // Show error SnackBar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al actualizar la contraseña: $error'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
