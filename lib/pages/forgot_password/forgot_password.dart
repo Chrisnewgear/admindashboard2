@@ -48,8 +48,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         _isLoading = true;
       });
 
-      final emailExists =
-          await _checkIfEmailExists(_emailController.text.trim());
+      final emailExists = await _checkIfEmailExists(_emailController.text.trim());
 
       if (!emailExists) {
         ScaffoldMessenger.of(context).showSnackBar(
