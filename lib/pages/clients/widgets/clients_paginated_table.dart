@@ -212,7 +212,7 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
       );
     }
 
-    if (widget.clientes.isEmpty) {
+    if (filteredClientes.isEmpty) {
       return _buildEmptyState();
     }
 
