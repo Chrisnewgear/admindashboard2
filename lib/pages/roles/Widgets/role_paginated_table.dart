@@ -347,97 +347,127 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
     );
   }
 
+  // Widget _buildPopupMenu(Usuario usuario) {
+  //   return Flexible(
+  //     child: PopupMenuButton<String>(
+  //       icon: const Icon(Icons.more_vert),
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  //       itemBuilder: (context) => [
+  //         PopupMenuItem(
+  //           child: const Row(
+  //             children: [
+  //               Icon(Icons.edit, size: 20),
+  //               SizedBox(width: 8),
+  //               Text('Editar'),
+  //             ],
+  //           ),
+  //           onTap: () => widget.showUsuarioFormDialog(context, usuario),
+  //         ),
+  //         PopupMenuItem(
+  //           child: const Row(
+  //             children: [
+  //               Icon(Icons.delete, size: 20, color: Colors.red),
+  //               SizedBox(width: 8),
+  //               Text('Eliminar', style: TextStyle(color: Colors.red)),
+  //             ],
+  //           ),
+  //           onTap: () => widget.deleteUsuario(usuario),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
   Widget _buildPopupMenu(Usuario usuario) {
-    return Flexible(
-      child: PopupMenuButton<String>(
-        icon: const Icon(Icons.more_vert),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        itemBuilder: (context) => [
-          PopupMenuItem(
-            child: const Row(
-              children: [
-                Icon(Icons.edit, size: 20),
-                SizedBox(width: 8),
-                Text('Editar'),
-              ],
-            ),
-            onTap: () => widget.showUsuarioFormDialog(context, usuario),
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert, size: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          child: const Row(
+            children: [
+              Icon(Icons.edit, size: 20),
+              SizedBox(width: 8),
+              Text('Editar'),
+            ],
           ),
-          PopupMenuItem(
-            child: const Row(
-              children: [
-                Icon(Icons.delete, size: 20, color: Colors.red),
-                SizedBox(width: 8),
-                Text('Eliminar', style: TextStyle(color: Colors.red)),
-              ],
-            ),
-            onTap: () => widget.deleteUsuario(usuario),
+          onTap: () => widget.showUsuarioFormDialog(context, usuario),
+        ),
+        PopupMenuItem(
+          child: const Row(
+            children: [
+              Icon(Icons.delete, size: 20, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Eliminar', style: TextStyle(color: Colors.red)),
+            ],
           ),
-        ],
-      ),
+          onTap: () => widget.deleteUsuario(usuario),
+        ),
+      ],
     );
   }
 
   Widget _buildDataTable(BuildContext context) {
-  return Theme(
-    data: Theme.of(context).copyWith(
-      cardColor: Colors.white, // Cambia el color de fondo de la tabla a blanco
-      dividerColor: Colors.grey[200],
-      dataTableTheme: DataTableThemeData(
-        headingTextStyle: TextStyle(
-          color: Theme.of(context).primaryColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
-        ),
-        dataTextStyle: const TextStyle(
-          color: Colors.black87,
-          fontSize: 14,
-        ),
-      ),
-    ),
-    child: PaginatedDataTable2(
-      columns: _buildColumns(),
-      source: UsuariosDataTableSource(
-        filteredUsuarios,
-        widget.deleteUsuario,
-        widget.showUsuarioFormDialog,
-        context,
-      ),
-      rowsPerPage: _rowsPerPage,
-      columnSpacing: 24,
-      horizontalMargin: 24,
-      showCheckboxColumn: false,
-      headingRowHeight: 48,
-      dataRowHeight: 64,
-      headingRowColor: WidgetStateProperty.resolveWith(
-        (states) => Colors.grey[50]!,
-      ),
-      onSelectAll: null,
-      empty: Center(
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.warning, size: 40, color: Colors.amber[700]),
-              const SizedBox(height: 16),
-              const Text(
-                'No se encontraron registros',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-            ],
+    return Theme(
+      data: Theme.of(context).copyWith(
+        cardColor:
+            Colors.white, // Cambia el color de fondo de la tabla a blanco
+        dividerColor: Colors.grey[200],
+        dataTableTheme: DataTableThemeData(
+          headingTextStyle: TextStyle(
+            color: Theme.of(context).primaryColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+          dataTextStyle: const TextStyle(
+            color: Colors.black87,
+            fontSize: 14,
           ),
         ),
       ),
-    ),
-  );
-}
+      child: PaginatedDataTable2(
+        columns: _buildColumns(),
+        source: UsuariosDataTableSource(
+          filteredUsuarios,
+          widget.deleteUsuario,
+          widget.showUsuarioFormDialog,
+          context,
+        ),
+        rowsPerPage: _rowsPerPage,
+        columnSpacing: 24,
+        horizontalMargin: 24,
+        showCheckboxColumn: false,
+        headingRowHeight: 48,
+        dataRowHeight: 64,
+        headingRowColor: WidgetStateProperty.resolveWith(
+          (states) => Colors.grey[50]!,
+        ),
+        onSelectAll: null,
+        empty: Center(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.warning, size: 40, color: Colors.amber[700]),
+                const SizedBox(height: 16),
+                const Text(
+                  'No se encontraron registros',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   List<DataColumn2> _buildColumns() {
     return [
       _buildColumn('Nombre', 'nombres', ColumnSize.L),
       _buildColumn('Apellidos', 'apellidos', ColumnSize.L),
-      _buildColumn('Email', 'email', ColumnSize.M),
+      _buildColumn('Email', 'email', ColumnSize.L),
       _buildColumn('Teléfono', 'telefono', ColumnSize.M),
       _buildColumn('Role', 'role', ColumnSize.M),
       DataColumn2(
@@ -637,6 +667,7 @@ class UsuariosDataTableSource extends DataTableSource {
                 deleteUsuario(usuario);
                 Navigator.of(context).pop();
               },
+              //onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         );

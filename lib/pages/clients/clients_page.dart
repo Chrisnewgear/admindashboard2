@@ -726,70 +726,9 @@ class _ClientsPageState extends State<ClientsPage> {
   }
 
   void _deleteClient(Cliente client) async {
-    // Mostrar un diálogo de confirmación
-    bool confirmDelete = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          contentPadding: const EdgeInsets.all(20),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Expanded(
-                child: Text(
-                  'Confirmar eliminación',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(false),
-              ),
-            ],
-          ),
-          content: Text(
-            '¿Está seguro de que desea eliminar a ${client.nombre} ${client.apellido}?',
-            style: const TextStyle(fontSize: 16),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text(
-                'Cancelar',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text(
-                'Eliminar',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+    
 
-    if (confirmDelete == true) {
+    //if (confirmDelete == true) {
       try {
         // Buscar el documento por el email del empleado
         QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -822,7 +761,7 @@ class _ClientsPageState extends State<ClientsPage> {
           SnackBar(content: Text('Error al eliminar el cliente: $e')),
         );
       }
-    }
+    //}
   }
 }
 

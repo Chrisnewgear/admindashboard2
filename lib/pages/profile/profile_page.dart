@@ -581,7 +581,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
 }
 
   Widget _buildPasswordChangeSection() {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
 
     return Padding(
       padding: const EdgeInsets.only(top: 32),
@@ -597,7 +597,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
           ),
           const SizedBox(height: 16),
           Form(
-            key: _formKey,
+            key: formKey,
             child: ValueListenableBuilder<bool>(
               valueListenable: isPasswordEditMode,
               builder: (context, editing, child) {
@@ -661,7 +661,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       ),
                       onPressed: editing
                           ? () async {
-                              if (_formKey.currentState!.validate()) {
+                              if (formKey.currentState!.validate()) {
                                 await changePassword();
                                 isPasswordEditMode.value = false;
                                 passwordController.clear();

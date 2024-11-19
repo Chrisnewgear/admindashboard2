@@ -29,6 +29,10 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
   final TextEditingController _searchController = TextEditingController();
   bool isSearchExpanded = false;
   bool hasRol = false;
+  String _sortColumn = 'nombres';
+  bool _sortAscending = true;
+  int _rowsPerPage = 10;
+  final List<int> _availableRowsPerPage = [5, 10, 20, 50];
 
   @override
   void initState() {
@@ -36,6 +40,7 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
     filteredClientes = widget.clientes;
     _searchController.addListener(_filterClientes);
     _checkRole();
+    _sortClientes();
   }
 
   Future<void> _checkRole() async {
@@ -49,32 +54,70 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
     }
   }
 
-  void _showNoRoleDialog() {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text("Acceso Denegado"),
-        content: const Text("No tiene asignado un rol, por lo que no podrá crear, ver o editar sus clientes, comuníquese con su supervisor."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text("Aceptar"),
-          ),
-        ],
-      );
-    },
-  );
-}
+  void _sortClientes() {
+    filteredClientes.sort((a, b) {
+      dynamic valueA;
+      dynamic valueB;
 
-  @override
-  void didUpdateWidget(ResponsiveClientsTable oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.clientes != widget.clientes) {
-      _filterClientes();
-    }
+      switch (_sortColumn) {
+        case 'nombres':
+          valueA = a.nombre;
+          valueB = b.nombre;
+          break;
+        case 'apellidos':
+          valueA = a.apellido;
+          valueB = b.apellido;
+          break;
+        case 'empresa':
+          valueA = a.empresa;
+          valueB = b.empresa;
+          break;
+        case 'telefono':
+          valueA = a.telefono;
+          valueB = b.telefono;
+          break;
+        case 'fechaIngreso':
+          valueA = a.fechaIngreso;
+          valueB = b.fechaIngreso;
+          break;
+        default:
+          valueA = a.nombre;
+          valueB = b.nombre;
+      }
+
+      final comparison = _sortAscending
+          ? Comparable.compare(valueA, valueB)
+          : Comparable.compare(valueB, valueA);
+      return comparison;
+    });
+  }
+
+  void _showNoRoleDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.amber),
+              SizedBox(width: 8),
+              Text('Acceso Denegado'),
+            ],
+          ),
+          content: const Text(
+              "No tiene asignado un rol, por lo que no podrá crear, ver o editar sus clientes, comuníquese con su supervisor."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Aceptar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _filterClientes() {
@@ -91,106 +134,75 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
                 .toLowerCase()
                 .contains(query);
       }).toList();
+      _sortClientes();
     });
   }
 
   void _clearSearch() {
+    _searchController.clear();
     setState(() {
-      filteredClientes = widget.clientes;
+      isSearchExpanded = false;
     });
   }
 
   @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+  void didUpdateWidget(ResponsiveClientsTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.clientes != widget.clientes) {
+      setState(() {
+        filteredClientes = widget.clientes;
+        _sortClientes();
+      });
+    }
+  }
+
+  Widget _buildRowsPerPageDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<int>(
+          value: _rowsPerPage,
+          items: _availableRowsPerPage.map((int value) {
+            return DropdownMenuItem<int>(
+              value: value,
+              child: Text('$value filas'),
+            );
+          }).toList(),
+          onChanged: (int? newValue) {
+            if (newValue != null) {
+              setState(() {
+                _rowsPerPage = newValue;
+              });
+            }
+          },
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-      final bool isSmallScreen = constraints.maxWidth <= 430;
+        final bool isSmallScreen = constraints.maxWidth <= 430;
 
-        return SizedBox(
-          height: 200,
-          child: Card(
-            elevation: 4,
-            color: Colors.white,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    // children: [
-                    //   const Text(
-                    //     '',
-                    //     style: TextStyle(
-                    //         fontSize: 20, fontWeight: FontWeight.bold),
-                    //   ),
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: EnhancedSearchBar(
-                          controller: _searchController,
-                          onClear: _clearSearch,
-                          hintText: 'Buscar Cliente...',
-                          accentColor: Theme.of(context).primaryColor,
-                          onSearchStateChanged: (isExpanded) {
-                              setState(() {
-                                isSearchExpanded = isExpanded;
-                              });
-                            },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                        child: ElevatedButton(
-                          onPressed: (widget.isLoading || !hasRol)
-                              ? null
-                              : () => widget.showClientVisitFormDialog(context, null, true),
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.blue,
-                            backgroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: (isSmallScreen && isSearchExpanded)
-                                ? const EdgeInsets.all(8)
-                                : const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.add_circle_outline, size: 20),
-                              AnimatedSize(
-                                duration: const Duration(milliseconds: 300),
-                                child: (isSmallScreen && isSearchExpanded)
-                                    ? const SizedBox.shrink()
-                                    : const Row(
-                                        children: [
-                                          SizedBox(width: 8),
-                                          Text('Nuevo Cliente'),
-                                        ],
-                                      ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(child: _buildTableContent(context, constraints)),
-                ],
-              ),
+        return Card(
+          elevation: 2,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildHeader(context, isSmallScreen),
+                const SizedBox(height: 16),
+                Expanded(child: _buildTableContent(context, constraints)),
+              ],
             ),
           ),
         );
@@ -198,15 +210,123 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
     );
   }
 
+  // Widget _buildHeader(BuildContext context, bool isSmallScreen) {
+  //   return Row(
+  //     children: [
+  //       Expanded(
+  //         child: EnhancedSearchBar(
+  //           controller: _searchController,
+  //           onClear: _clearSearch,
+  //           hintText: 'Buscar Cliente...',
+  //           accentColor: Theme.of(context).primaryColor,
+  //           onSearchStateChanged: (isExpanded) {
+  //             setState(() {
+  //               isSearchExpanded = isExpanded;
+  //             });
+  //           },
+  //         ),
+  //       ),
+  //       const SizedBox(width: 16),
+  //       if (!isSmallScreen)
+  //         _buildRowsPerPageDropdown(), // Show only on larger screens
+  //       const SizedBox(width: 16),
+  //       ElevatedButton(
+  //         onPressed: (widget.isLoading || !hasRol)
+  //             ? null
+  //             : () => widget.showClientVisitFormDialog(context, null, true),
+  //         style: ElevatedButton.styleFrom(
+  //           foregroundColor: Colors.white,
+  //           backgroundColor: Theme.of(context).primaryColor,
+  //           shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(8),
+  //           ),
+  //           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+  //         ),
+  //         child: const Row(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             Icon(Icons.add_circle_outline, size: 20),
+  //             SizedBox(width: 8),
+  //             Text('Nuevo Cliente'),
+  //           ],
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  Widget _buildHeader(BuildContext context, bool isSmallScreen) {
+    return Row(
+      children: [
+        Expanded(
+          child: EnhancedSearchBar(
+            controller: _searchController,
+            onClear: _clearSearch,
+            hintText: 'Buscar Cliente...',
+            accentColor: Theme.of(context).primaryColor,
+            onSearchStateChanged: (isExpanded) {
+              setState(() {
+                isSearchExpanded = isExpanded;
+              });
+            },
+          ),
+        ),
+        const SizedBox(width: 16),
+        if (!isSmallScreen)
+          _buildRowsPerPageDropdown(), // Show only on larger screens
+        const SizedBox(width: 16),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: isSearchExpanded
+              ? const EdgeInsets.all(0) // Shrink button size when search is expanded
+              : const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // Normal size
+          child: ElevatedButton(
+            onPressed: (widget.isLoading || !hasRol)
+                ? null
+                : () => widget.showClientVisitFormDialog(context, null, true),
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Theme.of(context).primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: isSearchExpanded
+                  ? const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12) // Normal padding when collapsed
+                  : const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12), // Expand padding when expanded
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add_circle_outline, size: 20),
+                if (!isSearchExpanded) const SizedBox(width: 8),
+                if (!isSearchExpanded) const Text('Nuevo Cliente'),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildTableContent(BuildContext context, BoxConstraints constraints) {
     if (widget.isLoading) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Cargando clientes...')
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Cargando clientes...',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 16,
+              ),
+            )
           ],
         ),
       );
@@ -217,174 +337,384 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
     }
 
     final isSmallScreen = constraints.maxWidth < 800;
-
     return isSmallScreen ? _buildListView() : _buildDataTable(context);
   }
 
   Widget _buildEmptyState() {
     return Center(
-      child: Text(
-        _searchController.text.isEmpty
-            ? "No hay clientes para mostrar"
-            : "No se encontraron resultados para '${_searchController.text}'",
-        style: const TextStyle(fontSize: 18),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.person_search,
+            size: 64,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _searchController.text.isEmpty
+                ? "No hay clientes para mostrar"
+                : "No se encontraron resultados para '${_searchController.text}'",
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
       ),
     );
   }
 
+  // Widget _buildListView() {
+  //   return ListView.builder(
+  //     itemCount: filteredClientes.length,
+  //     itemBuilder: (context, index) {
+  //       final item = filteredClientes[index];
+  //       return AnimatedContainer(
+  //         duration: const Duration(milliseconds: 200),
+  //         child: Card(
+  //           elevation: 1,
+  //           margin: const EdgeInsets.symmetric(vertical: 4),
+  //           color: Colors.grey[300], // Light grey color for the card background
+  //           child: InkWell(
+  //             borderRadius: BorderRadius.circular(8),
+  //             onTap: () =>
+  //                 widget.showClientVisitFormDialog(context, item, false),
+  //             child: Padding(
+  //               padding: const EdgeInsets.all(12),
+  //               child: Column(
+  //                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                 children: [
+  //                   Row(
+  //                     children: [
+  //                       CircleAvatar(
+  //                         child: Text(
+  //                           item.nombre[0].toUpperCase(),
+  //                           style: const TextStyle(color: Colors.white),
+  //                         ),
+  //                       ),
+  //                       const SizedBox(width: 12),
+  //                       Expanded(
+  //                         child: Column(
+  //                           crossAxisAlignment: CrossAxisAlignment.start,
+  //                           children: [
+  //                             Text(
+  //                               '${item.nombre} ${item.apellido}',
+  //                               style: const TextStyle(
+  //                                 fontWeight: FontWeight.bold,
+  //                                 fontSize: 16,
+  //                               ),
+  //                             ),
+  //                             const SizedBox(height: 4),
+  //                             Text(
+  //                               item.email,
+  //                               style: TextStyle(
+  //                                 color: Colors.grey[600],
+  //                                 fontSize: 14,
+  //                               ),
+  //                             ),
+  //                             const SizedBox(height: 4),
+  //                             Text(
+  //                               item.empresa,
+  //                               style: TextStyle(
+  //                                 color: Colors.grey[600],
+  //                                 fontSize: 14,
+  //                               ),
+  //                             ),
+  //                             const SizedBox(height: 4),
+  //                             Text(
+  //                               item.telefono,
+  //                               style: TextStyle(
+  //                                 color: Colors.grey[600],
+  //                                 fontSize: 14,
+  //                               ),
+  //                             ),
+  //                           ],
+  //                         ),
+  //                       ),
+  //                       _buildPopupMenu(item),
+  //                     ],
+  //                   ),
+  //                   const SizedBox(height: 8),
+  //                 ],
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
   Widget _buildListView() {
-    return ListView.builder(
-      itemCount: filteredClientes.length,
-      itemBuilder: (context, index) {
-        final item = filteredClientes[index];
-        return GestureDetector(
-          onTap: () {
-            // Al hacer tap en la tarjeta, mostrar el cuadro de diálogo para editar
-            widget.showClientVisitFormDialog(context, item, false);
-          },
-          child: Card(
-            color: Colors.white,
-            elevation: 2,
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            child: ListTile(
-              title: Text(
-                '${item.nombre} ${item.apellido}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                '${item.telefono} - ${DateFormat('dd/MM/yyyy').format(item.fechaIngreso)}',
-                textAlign: TextAlign.center,
-              ),
-              trailing: PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
-                onSelected: (String result) {
-                  if (result == 'Editar') {
-                    widget.showClientVisitFormDialog(context, item, true); // Cuadro de diálogo para editar
-                  } else if (result == 'Eliminar') {
-                    widget.deleteClient(item); // Lógica para eliminar
-                  }
-                },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    value: 'Editar',
-                    child: Text('Editar'),
+  return ListView.builder(
+    itemCount: filteredClientes.length,
+    itemBuilder: (context, index) {
+      final item = filteredClientes[index];
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        child: Card(
+          elevation: 4,  // Slightly higher elevation for a more defined shadow
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          color: Color(0xFFF5F5F5),  // Light pastel beige color
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),  // Slightly more rounded corners
+            onTap: () => widget.showClientVisitFormDialog(context, item, false),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.blueAccent,  // Optional background color for avatar
+                        child: Text(
+                          item.nombre[0].toUpperCase(),
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${item.nombre} ${item.apellido}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              item.email,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              item.empresa,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              item.telefono,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      _buildPopupMenu(item),
+                    ],
                   ),
-                  const PopupMenuItem<String>(
-                    value: 'Eliminar',
-                    child: Text('Eliminar'),
-                  ),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
           ),
+        ),
+      );
+    },
+  );
+}
+
+
+  Widget _buildPopupMenu(Cliente cliente) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          child: const Row(
+            children: [
+              Icon(Icons.edit, size: 20),
+              SizedBox(width: 8),
+              Text('Editar'),
+            ],
+          ),
+          onTap: () => widget.showClientVisitFormDialog(context, cliente, true),
+        ),
+        PopupMenuItem(
+          child: const Row(
+            children: [
+              Icon(Icons.delete, size: 20, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Eliminar', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+          onTap: () => _showDeleteConfirmationDialog(cliente),
+        ),
+      ],
+    );
+  }
+
+  void _showDeleteConfirmationDialog(Cliente cliente) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.amber[700],
+              ),
+              const SizedBox(width: 8),
+              const Text('Confirmar Eliminación'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '¿Está seguro que desea eliminar al cliente ${cliente.nombre} ${cliente.apellido}?',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Esta acción no se puede deshacer.',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Eliminar'),
+              onPressed: () {
+                widget.deleteClient(cliente);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
         );
       },
     );
   }
 
   Widget _buildDataTable(BuildContext context) {
-    final clientesDataSource = ClientesDataTableSource(
-        filteredClientes,
-        widget.deleteClient,
-        widget.showClientVisitFormDialog,
-        context);
-
     return Theme(
       data: Theme.of(context).copyWith(
         cardColor: Colors.white,
-        dividerColor: Colors.grey[300],
+        dividerColor: Colors.grey[200],
         dataTableTheme: DataTableThemeData(
           headingTextStyle: TextStyle(
-            color: Colors.blue[700], // Color del texto del encabezado
-            fontWeight: FontWeight.bold, // Texto en negrita
-            fontSize: 16, // Tamaño de letra más grande
+            color: Theme.of(context).primaryColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
           ),
           dataTextStyle: const TextStyle(
-            color: Colors.black87, // Color del texto de las celdas
-            fontSize: 14, // Tamaño de texto de las celdas
+            color: Colors.black87,
+            fontSize: 14,
           ),
         ),
       ),
       child: PaginatedDataTable2(
-        header: null,
-        columns: const [
-          DataColumn2(
-            label: Center(
-              child: Text(
-                'Nombres',
-                style: TextStyle(color: Colors.white), // Texto blanco
-              ),
-            ),
-            size: ColumnSize.L,
-            numeric:
-                false, // Para evitar que las columnas numéricas se alineen a la derecha
-          ),
-          DataColumn2(
-            label: Center(
-              child: Text(
-                'Apellidos',
-                style: TextStyle(color: Colors.white), // Texto blanco
-              ),
-            ),
-            size: ColumnSize.L,
-          ),
-          DataColumn2(
-            label: Center(
-              child: Text(
-                'Empresa',
-                style: TextStyle(color: Colors.white), // Texto blanco
-              ),
-            ),
-            size: ColumnSize.L,
-          ),
-          DataColumn2(
-            label: Center(
-              child: Text(
-                'Teléfono',
-                style: TextStyle(color: Colors.white), // Texto blanco
-              ),
-            ),
-            size: ColumnSize.L,
-          ),
-          DataColumn2(
-            label: Center(
-              child: Text(
-                'Fecha Ingreso',
-                style: TextStyle(color: Colors.white), // Texto blanco
-              ),
-            ),
-            size: ColumnSize.L,
-          ),
-          // DataColumn2(
-          //   label: Text(''),
-          //   size: ColumnSize.S,
-          // ),
-        ],
-        source: clientesDataSource,
-        rowsPerPage: 10,
-        columnSpacing: 40,
-        horizontalMargin: 20,
+        columns: _buildColumns(),
+        source: ClientesDataTableSource(
+          filteredClientes,
+          widget.deleteClient,
+          widget.showClientVisitFormDialog,
+          context,
+        ),
+        rowsPerPage: _rowsPerPage,
+        columnSpacing: 24,
+        horizontalMargin: 24,
         showCheckboxColumn: false,
-        headingRowHeight: 40,
-        dataRowHeight: 60,
-        headingRowColor: WidgetStateColor.resolveWith((states) =>
-            Theme.of(context).primaryColor), // Fondo azul para el encabezado
+        headingRowHeight: 48,
+        dataRowHeight: 64,
+        headingRowColor: WidgetStateProperty.resolveWith(
+          (states) => Colors.grey[50]!,
+        ),
+        onSelectAll: null,
+        empty: Center(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.warning, size: 40, color: Colors.amber[700]),
+                const SizedBox(height: 16),
+                const Text(
+                  'No se encontraron registros',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
+    );
+  }
+
+  List<DataColumn2> _buildColumns() {
+    return [
+      _buildColumn('Nombre', 'nombres', ColumnSize.L),
+      _buildColumn('Apellidos', 'apellidos', ColumnSize.L),
+      _buildColumn('Empresa', 'empresa', ColumnSize.M),
+      _buildColumn('Teléfono', 'telefono', ColumnSize.M),
+      _buildColumn('Fecha Ingreso', 'fechaIngreso', ColumnSize.M),
+      const DataColumn2(
+        label: Text('Acciones', textAlign: TextAlign.center),
+        size: ColumnSize.S,
+        numeric: false,
+        fixedWidth: 100,
+      ),
+    ];
+  }
+
+  DataColumn2 _buildColumn(String label, String columnId, ColumnSize size) {
+    return DataColumn2(
+      label: Text(label, textAlign: TextAlign.center),
+      size: size,
+      numeric: false,
+      onSort: (columnIndex, ascending) {
+        setState(() {
+          _sortColumn = columnId;
+          _sortAscending = ascending;
+          _sortClientes();
+        });
+      },
     );
   }
 }
 
 class ClientesDataTableSource extends DataTableSource {
   final List<Cliente> clientes;
-  final Function(Cliente) deleteClient;
-  final Function(BuildContext, dynamic, bool) showClientVisitFormDialog;
+  final Function(Cliente) deleteCliente;
+  final Function(BuildContext, dynamic, bool) showClienteFormDialog;
   final BuildContext context;
 
   ClientesDataTableSource(
     this.clientes,
-    this.deleteClient,
-    this.showClientVisitFormDialog,
+    this.deleteCliente,
+    this.showClienteFormDialog,
     this.context,
   );
 
@@ -394,38 +724,127 @@ class ClientesDataTableSource extends DataTableSource {
     return DataRow2(
       color: WidgetStateProperty.resolveWith<Color?>(
         (Set<WidgetState> states) {
-          if (index % 2 == 0) return Colors.grey.withOpacity(0.1);
+          if (states.contains(WidgetState.selected)) {
+            return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+          }
+          if (states.contains(WidgetState.hovered)) {
+            return Colors.grey.withOpacity(0.05);
+          }
+          if (index % 2 == 0) return Colors.grey.withOpacity(0.02);
           return null;
         },
       ),
       cells: [
-        DataCell(Center(child: Text(cliente.nombre))),
-        DataCell(Center(child: Text(cliente.apellido))),
-        DataCell(Center(child: Text(cliente.empresa))),
-        DataCell(Center(child: Text(cliente.telefono))),
-        DataCell(
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        DataCell(Text(cliente.nombre)),
+        DataCell(Text(cliente.apellido)),
+        DataCell(Text(cliente.email)),
+        DataCell(Text(cliente.telefono)),
+        DataCell(_buildDateCell(cliente.fechaIngreso)),
+        DataCell(_buildActionsCell(cliente)),
+      ],
+      onTap: () => showClienteFormDialog(context, cliente, false),
+    );
+  }
+
+  Widget _buildDateCell(DateTime date) {
+    return Text(
+      DateFormat('dd/MM/yy').format(date), // Shortened date format
+      style: TextStyle(
+        color: Colors.grey[800],
+        fontSize: 13, // Slightly smaller font
+      ),
+    );
+  }
+
+  Widget _buildActionsCell(Cliente cliente) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center, // Center the icons
+      children: [
+        IconButton(
+          constraints: const BoxConstraints(), // Remove minimum constraints
+          padding: const EdgeInsets.all(8), // Reduce padding
+          icon: Icon(
+            Icons.edit_outlined,
+            color: Colors.blue[700],
+            size: 20,
+          ),
+          tooltip: 'Editar',
+          onPressed: () => showClienteFormDialog(context, cliente, true),
+        ),
+        IconButton(
+          constraints: const BoxConstraints(), // Remove minimum constraints
+          padding: const EdgeInsets.all(8), // Reduce padding
+          icon: const Icon(
+            Icons.delete_outline,
+            color: Colors.red,
+            size: 20,
+          ),
+          tooltip: 'Eliminar',
+          onPressed: () => _showDeleteConfirmationDialog(cliente),
+        ),
+      ],
+    );
+  }
+
+  void _showDeleteConfirmationDialog(Cliente cliente) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Row(
             children: [
-              Text(DateFormat('dd/MM/yyyy').format(cliente.fechaIngreso)),
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    child: const Text('Editar'),
-                    onTap: () => showClientVisitFormDialog(context, cliente, true),
-                  ),
-                  PopupMenuItem(
-                    child: const Text('Eliminar'),
-                    onTap: () => deleteClient(cliente),
-                  ),
-                ],
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.amber[700],
+              ),
+              const SizedBox(width: 8),
+              const Text('Confirmar Eliminación'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '¿Está seguro que desea eliminar al usuario ${cliente.nombre} ${cliente.apellido}?',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Esta acción no se puede deshacer.',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
-        ),
-      ],
-      onTap: () => showClientVisitFormDialog(context, cliente, false),
+          actions: [
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Eliminar'),
+              onPressed: () {
+                deleteCliente(cliente);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -437,4 +856,63 @@ class ClientesDataTableSource extends DataTableSource {
 
   @override
   int get selectedRowCount => 0;
+}
+
+class TableShimmer extends StatelessWidget {
+  const TableShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: 5,
+      itemBuilder: (context, index) {
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 3,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              _buildShimmerBox(40, 40, true),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildShimmerBox(120, 16),
+                    const SizedBox(height: 8),
+                    _buildShimmerBox(80, 12),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              _buildShimmerBox(60, 24),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildShimmerBox(double width, double height,
+      [bool isCircle = false]) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(isCircle ? height / 2 : 4),
+      ),
+    );
+  }
 }
