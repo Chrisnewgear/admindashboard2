@@ -40,15 +40,6 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
     _sortUsuarios();
   }
 
-  @override
-  void didUpdateWidget(ResponsiveRolesTable oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.usuarios != widget.usuarios) {
-      _filterUsuarios();
-      _sortUsuarios();
-    }
-  }
-
   void _sortUsuarios() {
     filteredUsuarios.sort((a, b) {
       dynamic valueA;
@@ -112,6 +103,16 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
       isSearchExpanded = false;
     });
   }
+
+  @override
+  void didUpdateWidget(ResponsiveRolesTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.usuarios != widget.usuarios) {
+      _filterUsuarios();
+      _sortUsuarios();
+    }
+  }
+
 
   @override
   void dispose() {
@@ -251,32 +252,66 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
   }
 
   Widget _buildListView() {
+
+    final Map<String, Color> letterColors = {
+    'A': Colors.red,
+    'B': Colors.orange,
+    'C': Colors.yellow.shade700,
+    'D': Colors.green,
+    'E': Colors.blue,
+    'F': Colors.purple,
+    'G': Colors.pink,
+    'H': Colors.brown,
+    'I': Colors.grey,
+    'J': Colors.blueGrey,
+    'K': Colors.deepPurple,
+    'L': Colors.deepOrange,
+    'M': Colors.deepPurpleAccent,
+    'N': Colors.indigo,
+    'O': Colors.indigoAccent,
+    'P': Colors.pinkAccent,
+    'Q': Colors.purpleAccent,
+    'R': Colors.redAccent,
+    'S': Colors.teal,
+    'T': Colors.tealAccent,
+    'U': Colors.greenAccent,
+    'V': Colors.lightGreen,
+    'W': Colors.lightGreenAccent,
+    'X': Colors.amber,
+    'Y': Colors.amberAccent,
+    'Z': Colors.purple,
+  };
+
     return ListView.builder(
       itemCount: filteredUsuarios.length,
       itemBuilder: (context, index) {
-        final item = filteredUsuarios[index];
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          child: Card(
-            elevation: 1,
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(8),
-              onTap: () => widget.showUsuarioFormDialog(context, item),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: _getRoleColor(item.role),
-                          child: Text(
-                            item.nombres[0].toUpperCase(),
-                            style: const TextStyle(color: Colors.white),
-                          ),
+      final item = filteredUsuarios[index];
+      final firstLetter = item.nombres[0].toUpperCase();
+      final backgroundColor = letterColors[firstLetter] ?? Colors.grey; // Default color if not found
+
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        child: Card(
+          elevation: 3,  // Slightly higher elevation for a more defined shadow
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          color: const Color( 0xFFFFFFFF),  // Light pastel beige color
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),  // Slightly more rounded corners
+            onTap: () => widget.showUsuarioFormDialog(context, item),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: backgroundColor,
+                        child: Text(
+                          firstLetter,
+                          style: const TextStyle(color: Colors.white),
                         ),
+                      ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(

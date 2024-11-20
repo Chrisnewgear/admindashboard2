@@ -312,7 +312,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     _nombreClienteController.clear();
   }
 
-  void _showClientVisitFormDialog(
+  void _showVisitFormDialog(
       BuildContext context, Visita? visita, bool editModeOn) {
     final formKey = GlobalKey<FormState>();
     final ValueNotifier<bool> isEditable = editModeOn
@@ -898,8 +898,8 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
               child: ResponsiveVisitasTable(
                 visitas: visitas,
                 deleteVisit: (visita) => _deleteVisit(visita),
-                showClientVisitFormDialog: (context, visita, editModeOn) =>
-                    _showClientVisitFormDialog(context, visita, editModeOn),
+                showVisitFormDialog: (context, visita, editModeOn) =>
+                    _showVisitFormDialog(context, visita, editModeOn),
                 isLoading: isLoading,
                 hasRole: _getRole,
               ),
@@ -911,93 +911,28 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   }
 
   void _deleteVisit(Visita visita) async {
-    // Mostrar un diálogo de confirmación
-    bool confirmDelete = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          contentPadding: const EdgeInsets.all(20),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Expanded(
-                child: Text(
-                  'Confirmar eliminación',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(false),
-              ),
-            ],
-          ),
-          content: const Text(
-            '¿Está seguro de que desea eliminar esta visita?',
-            style: TextStyle(fontSize: 16),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text(
-                'Cancelar',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text(
-                'Eliminar',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+    try {
+      // Eliminar el documento directamente usando su ID
+      await FirebaseFirestore.instance
+          .collection('Visits')
+          .doc(visita.id)
+          .delete();
 
-    if (confirmDelete == true) {
-      try {
-        // Eliminar el documento directamente usando su ID
-        await FirebaseFirestore.instance
-            .collection('Visits')
-            .doc(visita.id)
-            .delete();
+      // Actualizar la lista de visitas localmente
+      setState(() {
+        visitas.removeWhere((v) => v.id == visita.id);
+      });
 
-        // Actualizar la lista de visitas localmente
-        setState(() {
-          visitas.removeWhere((v) => v.id == visita.id);
-        });
+      // Cargar la lista de visitas actualizada
+      await _loadVisits(FirebaseAuth.instance.currentUser!.uid);
 
-        // Cargar la lista de visitas actualizada
-        await _loadVisits(FirebaseAuth.instance.currentUser!.uid);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Visita eliminada con éxito')),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al eliminar la visita: $e')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Visita eliminada con éxito')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al eliminar la visita: $e')),
+      );
     }
   }
 }

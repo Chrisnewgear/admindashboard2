@@ -10,10 +10,10 @@ class RoleManagementWidget extends StatefulWidget {
   const RoleManagementWidget({super.key});
 
   @override
-  _RoleManagementWidgetState createState() => _RoleManagementWidgetState();
+  RoleManagementWidgetState createState() => RoleManagementWidgetState();
 }
 
-class _RoleManagementWidgetState extends State<RoleManagementWidget> {
+class RoleManagementWidgetState extends State<RoleManagementWidget> {
   //final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
   String selectedRole = 'Vendedor';
@@ -442,107 +442,6 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
       ),
     );
   }
-
-//   void _deleteEmployee(Usuario employee) async {
-//   // Display a confirmation dialog
-//   bool confirmDelete = await showDialog(
-//     context: context,
-//     builder: (BuildContext context) {
-//       return AlertDialog(
-//         shape: RoundedRectangleBorder(
-//           borderRadius: BorderRadius.circular(10),
-//         ),
-//         contentPadding: const EdgeInsets.all(20),
-//         title: Row(
-//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//           children: [
-//             const Expanded(
-//               child: Text(
-//                 'Confirmar eliminación',
-//                 style: TextStyle(
-//                   fontSize: 20,
-//                   fontWeight: FontWeight.bold,
-//                 ),
-//               ),
-//             ),
-//             IconButton(
-//               padding: EdgeInsets.zero,
-//               constraints: const BoxConstraints(),
-//               icon: const Icon(Icons.close),
-//               onPressed: () => Navigator.of(context).pop(false),
-//             ),
-//           ],
-//         ),
-//         content: const Text(
-//           '¿Está seguro de que desea eliminar este usuario?',
-//           style: TextStyle(fontSize: 16),
-//         ),
-//         actions: [
-//           TextButton(
-//             onPressed: () => Navigator.of(context).pop(false),
-//             child: const Text(
-//               'Cancelar',
-//               style: TextStyle(color: Colors.grey),
-//             ),
-//           ),
-//           ElevatedButton(
-//             style: ElevatedButton.styleFrom(
-//               backgroundColor: Colors.red,
-//               shape: RoundedRectangleBorder(
-//                 borderRadius: BorderRadius.circular(10),
-//               ),
-//             ),
-//             onPressed: () => Navigator.of(context).pop(true),
-//             child: const Text(
-//               'Eliminar',
-//               style: TextStyle(
-//                 fontSize: 16,
-//                 fontWeight: FontWeight.bold,
-//                 color: Colors.white,
-//               ),
-//             ),
-//           ),
-//         ],
-//       );
-//     },
-//   );
-
-//   if (confirmDelete == true) {
-//     try {
-//       // Find the user document by email
-//       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-//           .collection('Users')
-//           .where('email', isEqualTo: employee.email)
-//           .limit(1)
-//           .get();
-
-//       if (querySnapshot.docs.isNotEmpty) {
-//         // Delete the document
-//         await querySnapshot.docs.first.reference.delete();
-
-//         // Update the employee list in the UI
-//         setState(() {
-//           employees.removeWhere((e) => e.email == employee.email);
-//         });
-
-//         // Reload users if necessary
-//         await _loadUsers();
-
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           const SnackBar(content: Text('Empleado eliminado con éxito')),
-//         );
-//       } else {
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           const SnackBar(content: Text('No se encontró el empleado')),
-//         );
-//       }
-//     } catch (e) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(content: Text('Error al eliminar el empleado: $e')),
-//       );
-//     }
-//   }
-// }
 
   void _deleteEmployee(Usuario employee) async {
     try {

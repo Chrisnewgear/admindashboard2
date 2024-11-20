@@ -726,9 +726,6 @@ class _ClientsPageState extends State<ClientsPage> {
   }
 
   void _deleteClient(Cliente client) async {
-    
-
-    //if (confirmDelete == true) {
       try {
         // Buscar el documento por el email del empleado
         QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -761,7 +758,6 @@ class _ClientsPageState extends State<ClientsPage> {
           SnackBar(content: Text('Error al eliminar el cliente: $e')),
         );
       }
-    //}
   }
 }
 
