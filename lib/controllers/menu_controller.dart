@@ -41,15 +41,15 @@ class MyMenuController extends GetxController{
   Widget returnIconFor(String itemName) {
     switch (itemName) {
       case overviewPageDisplayName:
-        return _customIcon(Icons.trending_up, itemName);
-      case driversPageDisplayName:
-        return _customIcon(Icons.house_rounded, itemName);
+        return _customIcon(Icons.insights, itemName);
+      case visitasPageDisplayName:
+        return _customIcon(Icons.location_on, itemName);
       case clientsPageDisplayName:
-        return _customIcon(Icons.people_alt_outlined, itemName);
+        return _customIcon(Icons.person, itemName);
       case roleManagementWidgetDisplayName:
         return _customIcon(Icons.assignment_ind, itemName);
       default:
-        return _customIcon(Icons.exit_to_app, itemName);
+        return _customIcon(Icons.supervisor_account, itemName);
     }
   }
 

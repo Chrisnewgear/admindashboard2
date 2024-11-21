@@ -436,11 +436,74 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
               Text('Eliminar', style: TextStyle(color: Colors.red)),
             ],
           ),
-          onTap: () => widget.deleteUsuario(usuario),
+          onTap: () => _showDeleteConfirmationDialog(usuario),
         ),
       ],
     );
   }
+
+  void _showDeleteConfirmationDialog(Usuario usuario) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.amber[700],
+            ),
+            const SizedBox(width: 8),
+            const Text('Eliminación'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '¿Está seguro que desea eliminar a ${usuario.nombres} ${usuario.apellidos}?',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Esta acción no se puede deshacer.',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Eliminar'),
+            onPressed: () {
+              widget.deleteUsuario(usuario);
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
   Widget _buildDataTable(BuildContext context) {
     return Theme(

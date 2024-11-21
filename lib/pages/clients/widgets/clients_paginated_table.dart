@@ -480,7 +480,7 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
                 color: Colors.amber[700],
               ),
               const SizedBox(width: 8),
-              const Text('Confirmar Eliminación'),
+              const Text('Eliminación'),
             ],
           ),
           content: Column(

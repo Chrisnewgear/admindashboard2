@@ -8,14 +8,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 
-class ClientsPage extends StatefulWidget {
-  const ClientsPage({super.key});
+class MyTeamPage extends StatefulWidget {
+  const MyTeamPage({super.key});
 
   @override
-  _ClientsPageState createState() => _ClientsPageState();
+  _MyTeamPageState createState() => _MyTeamPageState();
 }
 
-class _ClientsPageState extends State<ClientsPage> {
+class _MyTeamPageState extends State<MyTeamPage> {
   //final _formKey = GlobalKey<FormState>();
   //String selectedRole = 'Cliente';
   //List<String> roles = ['Vendedor', 'Supervisor'];
@@ -99,7 +99,7 @@ class _ClientsPageState extends State<ClientsPage> {
             .get();
 
         if (userDoc.exists) {
-          hasRole = userDoc.get('Role') == 'None' ? false : true;
+          hasRole = userDoc.get('Role') == 'Supervisor' ? false : true;
         }
       }
 

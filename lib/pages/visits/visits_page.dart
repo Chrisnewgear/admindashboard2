@@ -75,9 +75,10 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       //   print('Error loading user code and visits: $e');
       // }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content:
-              Text('Error al cargar información del usuario y visitas: $e'),
+              //Text('Error al cargar información del usuario y visitas: $e'),
+              Text('No tiene asignado un rol'),
           backgroundColor: Colors.red,
         ),
       );

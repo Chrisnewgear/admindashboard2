@@ -1,48 +1,3 @@
-// const rootRoute = "/";
-
-// const overviewPageDisplayName = "Overview";
-// const overviewPageRoute = "/overview";
-
-// const driversPageDisplayName = "Visits";
-// const driversPageRoute = "/drivers";
-
-// const clientsPageDisplayName = "Clients";
-// const clientsPageRoute = "/clients";
-
-// const authenticationPageDisplayName = "Log out";
-// const authenticationPageRoute = "/auth";
-
-// const registerPageDisplayName = "sign up";
-// const registerPageRoute = "/register";
-
-// const verifyEmailDisplayName = "verify mail";
-// const verifyEmailPageRoute = "/verify-email";
-
-// const roleManagementWidgetDisplayName = "Roles";
-// const roleManagementWidgetPageRoute = "/roles";
-
-// const profileDisplayName = "Profile";
-// const profilePageRoute = "/profile";
-
-// const pageNotFoundDisplayName = "Page not found";
-// const pageNotFoundPageRoute = "/404";
-
-// class MenuItem {
-//   final String name;
-//   final String route;
-
-//   MenuItem(this.name, this.route);
-// }
-
-// List<MenuItem> sideMenuItemRoutes = [
-//   MenuItem(overviewPageDisplayName, overviewPageRoute),
-//   MenuItem(driversPageDisplayName, driversPageRoute),
-//   MenuItem(clientsPageDisplayName, clientsPageRoute),
-//   MenuItem(roleManagementWidgetDisplayName, roleManagementWidgetPageRoute),
-//   //MenuItem(authenticationPageDisplayName, authenticationPageRoute),
-//   //MenuItem(registerPageDisplayName, registerPageRoute),
-//   //MenuItem(pageNotFoundDisplayName, pageNotFoundPageRoute),
-// ];
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -50,8 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 const rootRoute = "/";
 const overviewPageDisplayName = "Overview";
 const overviewPageRoute = "/overview";
-const driversPageDisplayName = "Visits";
-const driversPageRoute = "/drivers";
+const visitasPageDisplayName = "Visits";
+const visitasPageRoute = "/drivers";
 const clientsPageDisplayName = "Clients";
 const clientsPageRoute = "/clients";
 const authenticationPageDisplayName = "Log out";
@@ -60,6 +15,8 @@ const registerPageDisplayName = "sign up";
 const registerPageRoute = "/register";
 const verifyEmailDisplayName = "verify mail";
 const verifyEmailPageRoute = "/verify-email";
+const myTeamWidgetDisplayName = "My team";
+const myTeamWidgetPageRoute = "/myteam";
 const roleManagementWidgetDisplayName = "Roles";
 const roleManagementWidgetPageRoute = "/roles";
 const profileDisplayName = "Profile";
@@ -78,7 +35,7 @@ Future<List<MenuItem>> getSideMenuItemRoutes() async {
   // Lista base de elementos del menú
   List<MenuItem> menuItems = [
     MenuItem(overviewPageDisplayName, overviewPageRoute),
-    MenuItem(driversPageDisplayName, driversPageRoute),
+    MenuItem(visitasPageDisplayName, visitasPageRoute),
     MenuItem(clientsPageDisplayName, clientsPageRoute),
   ];
 
@@ -101,6 +58,13 @@ Future<List<MenuItem>> getSideMenuItemRoutes() async {
           menuItems.add(
             MenuItem(
                 roleManagementWidgetDisplayName, roleManagementWidgetPageRoute),
+          );
+        }
+
+        if(userData['Role'] == 'Supervisor'){
+          menuItems.add(
+            MenuItem(
+                myTeamWidgetDisplayName, myTeamWidgetPageRoute),
           );
         }
       }
