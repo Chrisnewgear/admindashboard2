@@ -187,129 +187,6 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
                           ],
                         ),
                       ),
-                      // PopupMenuItem<String>(
-                      //   value: 'Log Out',
-                      //   onTap: () async {
-                      //     WidgetsBinding.instance
-                      //         .addPostFrameCallback((_) async {
-                      //       bool? confirmLogout = await showDialog<bool>(
-                      //         context: context,
-                      //         builder: (BuildContext context) {
-                      //           return Dialog(
-                      //             shape: RoundedRectangleBorder(
-                      //               borderRadius: BorderRadius.circular(16),
-                      //             ),
-                      //             child: Container(
-                      //               padding: const EdgeInsets.all(20),
-                      //               width: 320,
-                      //               child: Column(
-                      //                 mainAxisSize: MainAxisSize.min,
-                      //                 crossAxisAlignment:
-                      //                     CrossAxisAlignment.start,
-                      //                 children: [
-                      //                   Row(
-                      //                     mainAxisAlignment:
-                      //                         MainAxisAlignment.spaceBetween,
-                      //                     children: [
-                      //                       const Text(
-                      //                         'Cerrar Sesión',
-                      //                         style: TextStyle(
-                      //                           fontSize: 18,
-                      //                           fontWeight: FontWeight.bold,
-                      //                         ),
-                      //                       ),
-                      //                       IconButton(
-                      //                         padding: EdgeInsets.zero,
-                      //                         constraints:
-                      //                             const BoxConstraints(),
-                      //                         icon: const Icon(Icons.close),
-                      //                         onPressed: () =>
-                      //                             Navigator.of(context)
-                      //                                 .pop(false),
-                      //                       ),
-                      //                     ],
-                      //                   ),
-                      //                   const SizedBox(height: 16),
-                      //                   const Text(
-                      //                     'Está seguro de cerrar la sesión?',
-                      //                     style: TextStyle(
-                      //                       fontSize: 14,
-                      //                       color: Colors.black87,
-                      //                     ),
-                      //                   ),
-                      //                   const SizedBox(height: 24),
-                      //                   Row(
-                      //                     mainAxisAlignment:
-                      //                         MainAxisAlignment.end,
-                      //                     children: [
-                      //                       TextButton(
-                      //                         onPressed: () =>
-                      //                             Navigator.of(context)
-                      //                                 .pop(false),
-                      //                         style: TextButton.styleFrom(
-                      //                           padding:
-                      //                               const EdgeInsets.symmetric(
-                      //                             horizontal: 16,
-                      //                             vertical: 8,
-                      //                           ),
-                      //                         ),
-                      //                         child: const Text(
-                      //                           'Cancelar',
-                      //                           style: TextStyle(
-                      //                             color: Colors.black54,
-                      //                             fontSize: 14,
-                      //                           ),
-                      //                         ),
-                      //                       ),
-                      //                       const SizedBox(width: 8),
-                      //                       TextButton(
-                      //                         onPressed: () =>
-                      //                             Navigator.of(context)
-                      //                                 .pop(true),
-                      //                         style: TextButton.styleFrom(
-                      //                           backgroundColor: Colors.red,
-                      //                           padding:
-                      //                               const EdgeInsets.symmetric(
-                      //                             horizontal: 16,
-                      //                             vertical: 8,
-                      //                           ),
-                      //                         ),
-                      //                         child: const Text(
-                      //                           'Cerrar sesión',
-                      //                           style: TextStyle(
-                      //                             color: Colors.white,
-                      //                             fontSize: 14,
-                      //                           ),
-                      //                         ),
-                      //                       ),
-                      //                     ],
-                      //                   ),
-                      //                 ],
-                      //               ),
-                      //             ),
-                      //           );
-                      //         },
-                      //       );
-
-                      //       if (confirmLogout == true) {
-                      //         await FirebaseAuth.instance.signOut();
-                      //         Navigator.of(context).pushReplacement(
-                      //           MaterialPageRoute(
-                      //               builder: (context) =>
-                      //                   const AuthenticationPage()),
-                      //         );
-                      //       }
-                      //     });
-                      //   },
-                      //   child: const Row(
-                      //     children: [
-                      //       Icon(Icons.logout, color: Colors.black),
-                      //       SizedBox(width: 8),
-                      //       Text('Log Out'),
-                      //     ],
-                      //   ),
-                      // )
-
                       PopupMenuItem<String>(
                         value: 'Log Out',
                         onTap: () async {
@@ -415,19 +292,12 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
                             );
 
                             if (confirmLogout == true) {
-                              // Restablecer la opción de menú a 'overview'
-                              navigationController.navigateTo(overviewPageRoute);
-
                               await FirebaseAuth.instance.signOut();
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
                                     builder: (context) =>
                                         const AuthenticationPage()),
                               );
-
-                              //const HorizontalMenuItem(itemName: overviewPageDisplayName );
-
-                              MenuItem(overviewPageDisplayName, overviewPageRoute);
                             }
                           });
                         },
@@ -438,7 +308,137 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
                             Text('Log Out'),
                           ],
                         ),
-                      ),
+                      )
+
+                      // PopupMenuItem<String>(
+                      //   value: 'Log Out',
+                      //   onTap: () async {
+                      //     WidgetsBinding.instance
+                      //         .addPostFrameCallback((_) async {
+                      //       bool? confirmLogout = await showDialog<bool>(
+                      //         context: context,
+                      //         builder: (BuildContext context) {
+                      //           return Dialog(
+                      //             shape: RoundedRectangleBorder(
+                      //               borderRadius: BorderRadius.circular(16),
+                      //             ),
+                      //             child: Container(
+                      //               padding: const EdgeInsets.all(20),
+                      //               width: 320,
+                      //               child: Column(
+                      //                 mainAxisSize: MainAxisSize.min,
+                      //                 crossAxisAlignment:
+                      //                     CrossAxisAlignment.start,
+                      //                 children: [
+                      //                   Row(
+                      //                     mainAxisAlignment:
+                      //                         MainAxisAlignment.spaceBetween,
+                      //                     children: [
+                      //                       const Text(
+                      //                         'Cerrar Sesión',
+                      //                         style: TextStyle(
+                      //                           fontSize: 18,
+                      //                           fontWeight: FontWeight.bold,
+                      //                         ),
+                      //                       ),
+                      //                       IconButton(
+                      //                         padding: EdgeInsets.zero,
+                      //                         constraints:
+                      //                             const BoxConstraints(),
+                      //                         icon: const Icon(Icons.close),
+                      //                         onPressed: () =>
+                      //                             Navigator.of(context)
+                      //                                 .pop(false),
+                      //                       ),
+                      //                     ],
+                      //                   ),
+                      //                   const SizedBox(height: 16),
+                      //                   const Text(
+                      //                     'Está seguro de cerrar la sesión?',
+                      //                     style: TextStyle(
+                      //                       fontSize: 14,
+                      //                       color: Colors.black87,
+                      //                     ),
+                      //                   ),
+                      //                   const SizedBox(height: 24),
+                      //                   Row(
+                      //                     mainAxisAlignment:
+                      //                         MainAxisAlignment.end,
+                      //                     children: [
+                      //                       TextButton(
+                      //                         onPressed: () =>
+                      //                             Navigator.of(context)
+                      //                                 .pop(false),
+                      //                         style: TextButton.styleFrom(
+                      //                           padding:
+                      //                               const EdgeInsets.symmetric(
+                      //                             horizontal: 16,
+                      //                             vertical: 8,
+                      //                           ),
+                      //                         ),
+                      //                         child: const Text(
+                      //                           'Cancelar',
+                      //                           style: TextStyle(
+                      //                             color: Colors.black54,
+                      //                             fontSize: 14,
+                      //                           ),
+                      //                         ),
+                      //                       ),
+                      //                       const SizedBox(width: 8),
+                      //                       TextButton(
+                      //                         onPressed: () =>
+                      //                             Navigator.of(context)
+                      //                                 .pop(true),
+                      //                         style: TextButton.styleFrom(
+                      //                           backgroundColor: Colors.red,
+                      //                           padding:
+                      //                               const EdgeInsets.symmetric(
+                      //                             horizontal: 16,
+                      //                             vertical: 8,
+                      //                           ),
+                      //                         ),
+                      //                         child: const Text(
+                      //                           'Cerrar sesión',
+                      //                           style: TextStyle(
+                      //                             color: Colors.white,
+                      //                             fontSize: 14,
+                      //                           ),
+                      //                         ),
+                      //                       ),
+                      //                     ],
+                      //                   ),
+                      //                 ],
+                      //               ),
+                      //             ),
+                      //           );
+                      //         },
+                      //       );
+
+                      //       if (confirmLogout == true) {
+                      //         // Restablecer la opción de menú a 'overview'
+                      //         navigationController.navigateTo(overviewPageRoute);
+
+                      //         await FirebaseAuth.instance.signOut();
+                      //         Navigator.of(context).pushReplacement(
+                      //           MaterialPageRoute(
+                      //               builder: (context) =>
+                      //                   const AuthenticationPage()),
+                      //         );
+
+                      //         //const HorizontalMenuItem(itemName: overviewPageDisplayName );
+
+                      //         MenuItem(overviewPageDisplayName, overviewPageRoute);
+                      //       }
+                      //     });
+                      //   },
+                      //   child: const Row(
+                      //     children: [
+                      //       Icon(Icons.logout, color: Colors.black),
+                      //       SizedBox(width: 8),
+                      //       Text('Log Out'),
+                      //     ],
+                      //   ),
+                      // ),
                     ];
                   },
                 ),
