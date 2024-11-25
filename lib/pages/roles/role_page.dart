@@ -149,10 +149,9 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
     final formKey = GlobalKey<FormState>();
     final ValueNotifier<bool> isEditable =
         ValueNotifier<bool>(employee == null);
-    //String? selectedField;
-    String searchQuery = '';
-
-    // Verificar rol del usuario logueado (supongamos que está almacenado en loggedInUserRole)
+    final TextEditingController searchController = TextEditingController();
+    final ValueNotifier<String> searchQuery = ValueNotifier<String>('');
+    List<Usuario> selectedVendedores = [];
 
     if (employee != null) {
       _nombresController.text = employee.nombres;
@@ -175,233 +174,14 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
 
     bool isSupervisor = selectedRole == 'Supervisor';
 
-    // Función para obtener la lista de usuarios Vendedores desde Firebase
     Future<List<Usuario>> fetchVendedores() async {
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('Users')
           .where('Role', isEqualTo: 'Vendedor')
           .get();
-
       return snapshot.docs.map((doc) => Usuario.fromFirestore(doc)).toList();
     }
 
-    // showDialog(
-    //   context: context,
-    //   builder: (BuildContext context) {
-    //     return Dialog(
-    //       shape: RoundedRectangleBorder(
-    //         borderRadius: BorderRadius.circular(16),
-    //       ),
-    //       elevation: 0,
-    //       backgroundColor: Colors.transparent,
-    //       child: LayoutBuilder(
-    //         builder: (context, constraints) {
-    //           // Ajustamos los breakpoints para mejor soporte de tablets
-    //           double modalWidth;
-    //           if (constraints.maxWidth > 1024) {
-    //             // iPad Pro y pantallas grandes
-    //             modalWidth =
-    //                 constraints.maxWidth * 0.5; // 50% del ancho disponible
-    //           } else if (constraints.maxWidth > 768) {
-    //             // iPads regulares
-    //             modalWidth = constraints.maxWidth * 0.7;
-    //           } else {
-    //             modalWidth = constraints.maxWidth * 0.9;
-    //           }
-
-    //           return Container(
-    //             width: modalWidth,
-    //             padding: const EdgeInsets.all(24),
-    //             decoration: BoxDecoration(
-    //               color: Colors.white,
-    //               borderRadius: BorderRadius.circular(16),
-    //             ),
-    //             child: SingleChildScrollView(
-    //               child: Column(
-    //                 mainAxisSize: MainAxisSize.min,
-    //                 crossAxisAlignment: CrossAxisAlignment.start,
-    //                 children: <Widget>[
-    //                   Row(
-    //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //                     children: [
-    //                       Text(
-    //                         employee == null ? 'Nuevo Rol' : 'Editar Rol',
-    //                         style: const TextStyle(
-    //                           fontSize: 24,
-    //                           fontWeight: FontWeight.bold,
-    //                           color: Colors.black87,
-    //                         ),
-    //                       ),
-    //                       IconButton(
-    //                         icon:
-    //                             const Icon(Icons.close, color: Colors.black54),
-    //                         onPressed: () => Navigator.of(context).pop(),
-    //                       ),
-    //                     ],
-    //                   ),
-    //                   const SizedBox(height: 24),
-    //                   Form(
-    //                     key: formKey,
-    //                     child: ValueListenableBuilder<bool>(
-    //                       valueListenable: isEditable,
-    //                       builder: (context, editable, _) {
-    //                         bool isLargeScreen = constraints.maxWidth > 986;
-    //                         return Column(
-    //                           children: [
-    //                             _buildResponsiveRow(isLargeScreen, [
-    //                               _buildInputField(
-    //                                   _nombresController, 'Nombres'),
-    //                               _buildInputField(
-    //                                   _apellidosController, 'Apellidos'),
-    //                             ]),
-    //                             _buildResponsiveRow(isLargeScreen, [
-    //                               _buildInputField(_emailController, 'Email',
-    //                                   isEmail: true),
-    //                               _buildInputField(
-    //                                   _telefonoController, 'Teléfono'),
-    //                             ]),
-    //                             _buildResponsiveRow(isLargeScreen, [
-    //                               _buildDropdown(
-    //                                 selectedRole,
-    //                                 (String? newValue) {
-    //                                   setState(() {
-    //                                     selectedRole = newValue!;
-    //                                   });
-    //                                 },
-    //                               ),
-    //                               _buildDatePicker(
-    //                                   context,
-    //                                   _fechaIngresoController,
-    //                                   'Fecha de Ingreso'),
-    //                             ]),
-
-    //                             // Mostrar DropdownButton si el usuario es Supervisor
-    //                             if (isSupervisor)
-    //                               Padding(
-    //                                 padding: const EdgeInsets.all(8.0),
-    //                                 child: Column(
-    //                                   crossAxisAlignment:
-    //                                       CrossAxisAlignment.start,
-    //                                   children: [
-    //                                     Text("Selecciona un campo:"),
-    //                                     DropdownButton<String>(
-    //                                       value: selectedField,
-    //                                       items: [
-    //                                         DropdownMenuItem(
-    //                                           value: 'Codigo',
-    //                                           child: Text('Codigo'),
-    //                                         ),
-    //                                         DropdownMenuItem(
-    //                                           value: 'Nombre',
-    //                                           child: Text('Nombre'),
-    //                                         ),
-    //                                         DropdownMenuItem(
-    //                                           value: 'Apellidos',
-    //                                           child: Text('Apellidos'),
-    //                                         ),
-    //                                       ],
-    //                                       onChanged: (String? newValue) {
-    //                                         selectedField = newValue!;
-    //                                         // Implementar acciones según el campo seleccionado
-    //                                       },
-    //                                     ),
-    //                                   ],
-    //                                 ),
-    //                               ),
-    //                           ],
-    //                         );
-    //                       },
-    //                     ),
-    //                   ),
-    //                   const SizedBox(height: 24),
-    //                   Row(
-    //                     mainAxisAlignment: MainAxisAlignment.end,
-    //                     children: [
-    //                       if (employee != null) const SizedBox(width: 8),
-    //                       Flexible(
-    //                         child: ConstrainedBox(
-    //                           constraints: BoxConstraints(
-    //                             maxWidth:
-    //                                 MediaQuery.of(context).size.width < 768
-    //                                     ? double.infinity
-    //                                     : 200,
-    //                           ),
-    //                           child: TextButton.icon(
-    //                             onPressed: () => Navigator.of(context).pop(),
-    //                             icon: const Icon(Icons.cancel),
-    //                             label: MediaQuery.of(context).size.width < 768
-    //                                 ? const SizedBox.shrink()
-    //                                 : const Text('Cancelar'),
-    //                             style: TextButton.styleFrom(
-    //                               padding: EdgeInsets.symmetric(
-    //                                 horizontal:
-    //                                     MediaQuery.of(context).size.width < 768
-    //                                         ? 12
-    //                                         : 16,
-    //                                 vertical: 12,
-    //                               ),
-    //                             ),
-    //                           ),
-    //                         ),
-    //                       ),
-    //                       const SizedBox(width: 8),
-    //                       Flexible(
-    //                         child: ConstrainedBox(
-    //                           constraints: BoxConstraints(
-    //                             maxWidth:
-    //                                 MediaQuery.of(context).size.width < 768
-    //                                     ? double.infinity
-    //                                     : 200,
-    //                           ),
-    //                           child: ElevatedButton.icon(
-    //                             style: ElevatedButton.styleFrom(
-    //                               backgroundColor: Colors.indigo,
-    //                               shape: RoundedRectangleBorder(
-    //                                 borderRadius: BorderRadius.circular(8),
-    //                               ),
-    //                               padding: EdgeInsets.symmetric(
-    //                                 horizontal:
-    //                                     MediaQuery.of(context).size.width < 768
-    //                                         ? 12
-    //                                         : 16,
-    //                                 vertical: 12,
-    //                               ),
-    //                             ),
-    //                             onPressed: () {
-    //                               if (formKey.currentState!.validate()) {
-    //                                 _saveOrUpdateEmployee(employee);
-    //                                 Navigator.of(context).pop();
-    //                               }
-    //                             },
-    //                             icon: const Icon(
-    //                               Icons.save,
-    //                               color: Colors.white,
-    //                             ),
-    //                             label: MediaQuery.of(context).size.width < 768
-    //                                 ? const SizedBox.shrink()
-    //                                 : const Text(
-    //                                     'Guardar',
-    //                                     style: TextStyle(color: Colors.white),
-    //                                   ),
-    //                           ),
-    //                         ),
-    //                       ),
-    //                     ],
-    //                   ),
-    //                 ],
-    //               ),
-    //             ),
-    //           );
-    //         },
-    //       ),
-    //     );
-    //   },
-    // );
-
-    // Declaración de la lista para almacenar los vendedores seleccionados
-    List<Usuario> selectedVendedores = [];
-
-// Método para seleccionar o deseleccionar vendedores
     void toggleSelection(Usuario vendedor) {
       setState(() {
         if (selectedVendedores.contains(vendedor)) {
@@ -412,225 +192,273 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
       });
     }
 
+    // bool matchesSearchQuery(Usuario vendedor, String query) {
+    //   final fullName = '${vendedor.nombres} ${vendedor.apellidos}';
+    //   return fullName.toLowerCase().contains(query.toLowerCase());
+    // }
+
+    bool matchesSearchQuery(Usuario vendedor, String query) {
+      final fullName =
+          '${vendedor.nombres} ${vendedor.apellidos}'.toLowerCase();
+      final codigo = vendedor.codigo.toLowerCase();
+      query = query
+          .toLowerCase()
+          .trim(); // Asegurarse de normalizar y limpiar el query
+
+      // Retorna true si el query está en el nombre completo o en el código
+      return fullName.contains(query) || codigo.contains(query);
+    }
+
     showDialog(
-  context: context,
-  builder: (BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          double modalWidth;
-          if (constraints.maxWidth > 1024) {
-            modalWidth = constraints.maxWidth * 0.5;
-          } else if (constraints.maxWidth > 768) {
-            modalWidth = constraints.maxWidth * 0.7;
-          } else {
-            modalWidth = constraints.maxWidth * 0.9;
-          }
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              double modalWidth = constraints.maxWidth > 1024
+                  ? constraints.maxWidth * 0.5
+                  : constraints.maxWidth > 768
+                      ? constraints.maxWidth * 0.7
+                      : constraints.maxWidth * 0.9;
 
-          return Container(
-            width: modalWidth,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Nuevo Rol',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+              return Container(
+                width: modalWidth,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Nuevo Rol',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          IconButton(
+                            icon:
+                                const Icon(Icons.close, color: Colors.black54),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Form(
+                        key: formKey,
+                        child: ValueListenableBuilder<bool>(
+                          valueListenable: isEditable,
+                          builder: (context, editable, _) {
+                            bool isLargeScreen = constraints.maxWidth > 986;
+                            return Column(
+                              children: [
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(
+                                      _nombresController, 'Nombres'),
+                                  _buildInputField(
+                                      _apellidosController, 'Apellidos'),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(_emailController, 'Email',
+                                      isEmail: true),
+                                  _buildInputField(
+                                      _telefonoController, 'Teléfono'),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildDropdown(
+                                    selectedRole,
+                                    (String? newValue) {
+                                      setState(() {
+                                        selectedRole = newValue!;
+                                      });
+                                    },
+                                  ),
+                                  _buildDatePicker(
+                                      context,
+                                      _fechaIngresoController,
+                                      'Fecha de Ingreso'),
+                                ]),
+                              ],
+                            );
+                          },
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.black54),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Form(
-                    key: formKey,
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: isEditable,
-                      builder: (context, editable, _) {
-                        bool isLargeScreen = constraints.maxWidth > 986;
-                        return Column(
-                          children: [
-                            _buildResponsiveRow(isLargeScreen, [
-                              _buildInputField(_nombresController, 'Nombres'),
-                              _buildInputField(_apellidosController, 'Apellidos'),
-                            ]),
-                            _buildResponsiveRow(isLargeScreen, [
-                              _buildInputField(_emailController, 'Email', isEmail: true),
-                              _buildInputField(_telefonoController, 'Teléfono'),
-                            ]),
-                            _buildResponsiveRow(isLargeScreen, [
-                              _buildDropdown(
-                                selectedRole,
-                                (String? newValue) {
-                                  setState(() {
-                                    selectedRole = newValue!;
-                                  });
-                                },
-                              ),
-                              _buildDatePicker(
-                                  context,
-                                  _fechaIngresoController,
-                                  'Fecha de Ingreso'),
-                            ]),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Mostrar lista de Vendedores solo si isSupervisor es true
-                  if (isSupervisor) ...[
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text(
-                        "Lista de Vendedores",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    TextField(
-                      onChanged: (value) {
-                        setState(() {
-                          searchQuery = value.toLowerCase();
-                        });
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'Buscar vendedor',
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 24),
+                      if (isSupervisor) ...[
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            "Lista de Vendedores",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    FutureBuilder<List<Usuario>>(
-                      future: fetchVendedores(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const Text('No se encontraron vendedores.');
-                        } else {
-                          // Ordenar los vendedores por nombre
-                          List<Usuario> vendedores = snapshot.data!;
-                          vendedores.sort((a, b) => a.nombres.compareTo(b.nombres));
-                          
-                          // Filtrar los vendedores según la búsqueda
-                          List<Usuario> filteredVendedores = vendedores.where((vendedor) {
-                            String nombreCompleto = '${vendedor.nombres} ${vendedor.apellidos}'.toLowerCase();
-                            return nombreCompleto.contains(searchQuery) ||
-                                   vendedor.codigo.toLowerCase().contains(searchQuery);
-                          }).toList();
-
-                          return SizedBox(
-                            height: 200, // Altura fija para mostrar solo 3 ListTile
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: filteredVendedores.length,
-                              itemBuilder: (context, index) {
-                                final vendedor = filteredVendedores[index];
-                                bool isSelected = selectedVendedores.contains(vendedor);
-                                return Container(
-                                  margin: const EdgeInsets.symmetric(vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[100],
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: Colors.grey.shade300),
-                                  ),
-                                  child: ListTile(
-                                    leading: const Icon(Icons.person, color: Colors.indigo),
-                                    title: Text(
-                                      '${vendedor.nombres} ${vendedor.apellidos}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          vendedor.codigo,
-                                          style: TextStyle(
-                                            color: Colors.indigo.shade700,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Checkbox(
-                                          value: isSelected,
-                                          onChanged: (bool? value) {
-                                            toggleSelection(vendedor);
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
+                        TextField(
+                          controller: searchController,
+                          onChanged: (value) => searchQuery.value = value,
+                          decoration: InputDecoration(
+                            labelText: 'Buscar vendedor',
+                            prefixIcon: const Icon(Icons.search),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                searchController.clear();
+                                searchQuery.value = '';
                               },
                             ),
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                  
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Flexible(
-                        child: TextButton.icon(
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: const Icon(Icons.cancel),
-                          label: const Text('Cancelar'),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              _saveOrUpdateEmployee(employee);
-                              Navigator.of(context).pop();
+                        const SizedBox(height: 12),
+                        FutureBuilder<List<Usuario>>(
+                          future: fetchVendedores(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else if (!snapshot.hasData ||
+                                snapshot.data!.isEmpty) {
+                              return const Text(
+                                  'No se encontraron vendedores.');
+                            } else {
+                              List<Usuario> vendedores = snapshot.data!;
+                              vendedores.sort(
+                                  (a, b) => a.nombres.compareTo(b.nombres));
+
+                              return ValueListenableBuilder<String>(
+                                valueListenable: searchQuery,
+                                builder: (context, query, _) {
+                                  List<Usuario> filteredVendedores = vendedores
+                                      .where((vendedor) =>
+                                          matchesSearchQuery(vendedor, query))
+                                      .toList();
+
+                                  return SizedBox(
+                                    height: 200,
+                                    child: filteredVendedores.isEmpty
+                                        ? const Center(
+                                            child: Text(
+                                                'No se encontraron vendedores'))
+                                        : ListView.builder(
+                                            shrinkWrap: true,
+                                            itemCount:
+                                                filteredVendedores.length,
+                                            itemBuilder: (context, index) {
+                                              final vendedor =
+                                                  filteredVendedores[index];
+                                              bool isSelected =
+                                                  selectedVendedores
+                                                      .contains(vendedor);
+                                              return Container(
+                                                margin:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey[100],
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  border: Border.all(
+                                                      color:
+                                                          Colors.grey.shade300),
+                                                ),
+                                                child: ListTile(
+                                                  leading: const Icon(
+                                                      Icons.person,
+                                                      color: Colors.indigo),
+                                                  title: Text(
+                                                    '${vendedor.nombres} ${vendedor.apellidos}',
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  trailing: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        vendedor.codigo,
+                                                        style: TextStyle(
+                                                          color: Colors
+                                                              .indigo.shade700,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                      Checkbox(
+                                                        value: isSelected,
+                                                        onChanged:
+                                                            (bool? value) {
+                                                          toggleSelection(
+                                                              vendedor);
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                  );
+                                },
+                              );
                             }
                           },
-                          icon: const Icon(Icons.save),
-                          label: const Text('Guardar'),
                         ),
+                      ],
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: TextButton.icon(
+                              onPressed: () => Navigator.of(context).pop(),
+                              icon: const Icon(Icons.cancel),
+                              label: const Text('Cancelar'),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                if (formKey.currentState!.validate()) {
+                                  _saveOrUpdateEmployee(employee);
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                              icon: const Icon(Icons.save),
+                              label: const Text('Guardar'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
-  },
-);
-
   }
 
   Widget _buildResponsiveRow(bool isLargeScreen, List<Widget> children) {
