@@ -57,7 +57,10 @@ class Usuario {
   final String telefono;
   final String role;
   final String codigo;
+  final String codigoSupervisor;
   final DateTime fechaIngreso;
+  final bool asignado;
+  final List<Usuario> myTeam = [];
 
   Usuario({
     required this.nombres,
@@ -66,7 +69,9 @@ class Usuario {
     required this.telefono,
     required this.role,
     this.codigo = '',
+    this.codigoSupervisor = '',
     required this.fechaIngreso,
+    this.asignado = false,
   });
 
   factory Usuario.fromFirestore(DocumentSnapshot doc) {
@@ -79,9 +84,11 @@ class Usuario {
       telefono: data['Telefono'] ?? '',
       role: data['Role'] ?? 'None',
       codigo: data['Codigo'] ?? '',
+      codigoSupervisor: data['CodigoSupervisor'] ?? '',
       fechaIngreso: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
+      asignado: data['asignado'] ?? false
     );
   }
 
@@ -94,7 +101,9 @@ class Usuario {
       'Telefono': telefono,
       'Role': role,
       'Codigo': codigo,
+      'CodigoSupervisor': codigoSupervisor,
       'createdAt': fechaIngreso,
+      'Asignado': asignado,
     };
   }
 
@@ -107,9 +116,11 @@ class Usuario {
       telefono: map['Telefono'] ?? '',
       role: map['Role'] ?? 'None',
       codigo: map['Codigo'] ?? '',
+      codigoSupervisor: map['CodigoSupervisor'] ?? '',
       fechaIngreso: map['createdAt'] != null
           ? (map['createdAt'] is Timestamp ? (map['createdAt'] as Timestamp).toDate() : map['createdAt'] as DateTime)
           : DateTime.now(),
+      asignado: map['asignado'] ?? false
     );
   }
 }
