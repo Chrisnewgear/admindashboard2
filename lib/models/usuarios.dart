@@ -57,9 +57,9 @@ class Usuario {
   final String telefono;
   final String role;
   final String codigo;
-  final String codigoSupervisor;
+  String codigoSupervisor;
   final DateTime fechaIngreso;
-  final bool asignado;
+  bool asignado;
   final List<Usuario> myTeam = [];
 
   Usuario({
