@@ -593,346 +593,410 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
   // }
 
   Future<void> _showFormDialog(BuildContext context, Usuario? employee) async {
-  final formKey = GlobalKey<FormState>();
-  final ValueNotifier<bool> isEditable = ValueNotifier<bool>(employee == null);
-  final TextEditingController searchController = TextEditingController();
-  final ValueNotifier<String> searchQuery = ValueNotifier<String>('');
-  final ValueNotifier<List<Usuario>> selectedVendedoresNotifier =
-      ValueNotifier<List<Usuario>>([]);
+    final formKey = GlobalKey<FormState>();
+    final ValueNotifier<bool> isEditable =
+        ValueNotifier<bool>(employee == null);
+    final TextEditingController searchController = TextEditingController();
+    final ValueNotifier<String> searchQuery = ValueNotifier<String>('');
+    final ValueNotifier<List<Usuario>> selectedVendedoresNotifier =
+        ValueNotifier<List<Usuario>>([]);
 
-  // Preparar controladores y datos iniciales
-  if (employee != null) {
-    final userDoc = await FirebaseFirestore.instance
-        .collection('Users')
-        .where('Codigo', isEqualTo: employee.codigo)
-        .limit(1)
-        .get()
-        .then((snapshot) => snapshot.docs.first);
+    // Preparar controladores y datos iniciales
+    if (employee != null) {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('Codigo', isEqualTo: employee.codigo)
+          .limit(1)
+          .get()
+          .then((snapshot) => snapshot.docs.first);
 
-    final myTeam = (userDoc.data()['MyTeam'] as List<dynamic>?)
-            ?.map((item) => Usuario.fromMap(item as Map<String, dynamic>))
-            .toList() ??
-        [];
+      final myTeam = (userDoc.data()['MyTeam'] as List<dynamic>?)
+              ?.map((item) => Usuario.fromMap(item as Map<String, dynamic>))
+              .toList() ??
+          [];
 
-    selectedVendedoresNotifier.value = myTeam;
+      selectedVendedoresNotifier.value = myTeam;
 
-    _nombresController.text = employee.nombres;
-    _apellidosController.text = employee.apellidos;
-    _emailController.text = employee.email;
-    _telefonoController.text = employee.telefono;
-    _codigoController.text = employee.codigo;
-    _fechaIngresoController.text =
-        DateFormat('dd/MM/yyyy').format(employee.fechaIngreso);
-    _asignadoController = employee.asignado;
-    selectedRole = employee.role;
-  } else {
-    _nombresController.clear();
-    _apellidosController.clear();
-    _emailController.clear();
-    _telefonoController.clear();
-    _fechaIngresoController.clear();
-    _codigoController.clear();
-    _asignadoController = false;
-    selectedRole = 'Vendedor';
-  }
-
-  // Función para obtener la lista de vendedores
-  Future<List<Usuario>> fetchVendedores() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('Users')
-        .where('Role', isEqualTo: 'Vendedor')
-        .get();
-    return snapshot.docs.map((doc) => Usuario.fromFirestore(doc)).toList();
-  }
-
-  // Función para alternar la selección de un vendedor
-  void toggleSelection(Usuario vendedor) {
-    final currentSelected = selectedVendedoresNotifier.value;
-    if (currentSelected.any((v) => v.codigo == vendedor.codigo)) {
-      selectedVendedoresNotifier.value =
-          currentSelected.where((v) => v.codigo != vendedor.codigo).toList();
+      _nombresController.text = employee.nombres;
+      _apellidosController.text = employee.apellidos;
+      _emailController.text = employee.email;
+      _telefonoController.text = employee.telefono;
+      _codigoController.text = employee.codigo;
+      _fechaIngresoController.text =
+          DateFormat('dd/MM/yyyy').format(employee.fechaIngreso);
+      _asignadoController = employee.asignado;
+      selectedRole = employee.role;
     } else {
-      selectedVendedoresNotifier.value = [...currentSelected, vendedor];
+      _nombresController.clear();
+      _apellidosController.clear();
+      _emailController.clear();
+      _telefonoController.clear();
+      _fechaIngresoController.clear();
+      _codigoController.clear();
+      _asignadoController = false;
+      selectedRole = 'Vendedor';
     }
-  }
 
-  // Función para filtrar vendedores por búsqueda
-  bool matchesSearchQuery(Usuario vendedor, String query) {
-    final fullName =
-        '${vendedor.nombres} ${vendedor.apellidos}'.toLowerCase();
-    final codigo = vendedor.codigo.toLowerCase();
-    query = query.toLowerCase().trim();
-    return fullName.contains(query) || codigo.contains(query);
-  }
+    // Función para obtener la lista de vendedores
+    // Future<List<Usuario>> fetchVendedores() async {
+    //   final snapshot = await FirebaseFirestore.instance
+    //       .collection('Users')
+    //       .where('Role', isEqualTo: 'Vendedor')
+    //       .get();
+    //   return snapshot.docs.map((doc) => Usuario.fromFirestore(doc)).toList();
+    // }
 
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final modalWidth = constraints.maxWidth > 1024
-                ? constraints.maxWidth * 0.5
-                : constraints.maxWidth > 768
-                    ? constraints.maxWidth * 0.7
-                    : constraints.maxWidth * 0.9;
+    Future<List<Usuario>> fetchVendedores() async {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('Role', isEqualTo: 'Vendedor')
+          .where('Asignado', isEqualTo: false)
+          .get();
 
-            return Container(
-              width: modalWidth,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    // Título del modal
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Editar Rol',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+      // If editing existing employee, also include previously assigned vendedores
+      if (employee != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .where('Codigo', isEqualTo: employee.codigo)
+            .limit(1)
+            .get()
+            .then((snapshot) => snapshot.docs.first);
+
+        final myTeam = (userDoc.data()['MyTeam'] as List<dynamic>?)
+                ?.map((item) => Usuario.fromMap(item as Map<String, dynamic>))
+                .toList() ??
+            [];
+
+        // Fetch and combine unassigned vendedores with current team
+        final currentTeamCodes = myTeam.map((u) => u.codigo).toList();
+        final additionalSnapshot = await FirebaseFirestore.instance
+            .collection('Users')
+            .where('Role', isEqualTo: 'Vendedor')
+            .where('Codigo', whereIn: currentTeamCodes)
+            .get();
+
+        final additionalVendedores = additionalSnapshot.docs
+            .map((doc) => Usuario.fromFirestore(doc))
+            .toList();
+
+        return [
+          ...snapshot.docs.map((doc) => Usuario.fromFirestore(doc)),
+          ...additionalVendedores
+        ];
+      }
+
+      return snapshot.docs.map((doc) => Usuario.fromFirestore(doc)).toList();
+    }
+
+    // Función para alternar la selección de un vendedor
+    void toggleSelection(Usuario vendedor) {
+      final currentSelected = selectedVendedoresNotifier.value;
+      if (currentSelected.any((v) => v.codigo == vendedor.codigo)) {
+        selectedVendedoresNotifier.value =
+            currentSelected.where((v) => v.codigo != vendedor.codigo).toList();
+      } else {
+        selectedVendedoresNotifier.value = [...currentSelected, vendedor];
+      }
+    }
+
+    // Función para filtrar vendedores por búsqueda
+    bool matchesSearchQuery(Usuario vendedor, String query) {
+      final fullName =
+          '${vendedor.nombres} ${vendedor.apellidos}'.toLowerCase();
+      final codigo = vendedor.codigo.toLowerCase();
+      query = query.toLowerCase().trim();
+      return fullName.contains(query) || codigo.contains(query);
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final modalWidth = constraints.maxWidth > 1024
+                  ? constraints.maxWidth * 0.5
+                  : constraints.maxWidth > 768
+                      ? constraints.maxWidth * 0.7
+                      : constraints.maxWidth * 0.9;
+
+              return Container(
+                width: modalWidth,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      // Título del modal
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Editar Rol',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          IconButton(
+                            icon:
+                                const Icon(Icons.close, color: Colors.black54),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      // Formulario
+                      Form(
+                        key: formKey,
+                        child: ValueListenableBuilder<bool>(
+                          valueListenable: isEditable,
+                          builder: (context, editable, _) {
+                            final isLargeScreen = constraints.maxWidth > 986;
+                            return Column(
+                              children: [
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(
+                                      _nombresController, 'Nombres'),
+                                  _buildInputField(
+                                      _apellidosController, 'Apellidos'),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(_emailController, 'Email',
+                                      isEmail: true),
+                                  _buildInputField(
+                                      _telefonoController, 'Teléfono'),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildDropdown(
+                                    selectedRole,
+                                    (String? newValue) {
+                                      setState(() {
+                                        selectedRole = newValue!;
+                                      });
+                                    },
+                                  ),
+                                  _buildDatePicker(
+                                      context,
+                                      _fechaIngresoController,
+                                      'Fecha de Ingreso'),
+                                ]),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Lista de vendedores para el rol Supervisor
+                      if (selectedRole == 'Supervisor') ...[
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            "Lista de Vendedores",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.close, color: Colors.black54),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    // Formulario
-                    Form(
-                      key: formKey,
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: isEditable,
-                        builder: (context, editable, _) {
-                          final isLargeScreen = constraints.maxWidth > 986;
-                          return Column(
-                            children: [
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(
-                                    _nombresController, 'Nombres'),
-                                _buildInputField(
-                                    _apellidosController, 'Apellidos'),
-                              ]),
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(_emailController, 'Email',
-                                    isEmail: true),
-                                _buildInputField(
-                                    _telefonoController, 'Teléfono'),
-                              ]),
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildDropdown(
-                                  selectedRole,
-                                  (String? newValue) {
-                                    setState(() {
-                                      selectedRole = newValue!;
-                                    });
-                                  },
-                                ),
-                                _buildDatePicker(
-                                    context,
-                                    _fechaIngresoController,
-                                    'Fecha de Ingreso'),
-                              ]),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Lista de vendedores para el rol Supervisor
-                    if (selectedRole == 'Supervisor') ...[
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text(
-                          "Lista de Vendedores",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      TextField(
-                        controller: searchController,
-                        onChanged: (value) => searchQuery.value = value,
-                        decoration: InputDecoration(
-                          labelText: 'Buscar vendedor',
-                          prefixIcon: const Icon(Icons.search),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              searchController.clear();
-                              searchQuery.value = '';
-                            },
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                        TextField(
+                          controller: searchController,
+                          onChanged: (value) => searchQuery.value = value,
+                          decoration: InputDecoration(
+                            labelText: 'Buscar vendedor',
+                            prefixIcon: const Icon(Icons.search),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                searchController.clear();
+                                searchQuery.value = '';
+                              },
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      FutureBuilder<List<Usuario>>(
-                        future: fetchVendedores(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else if (!snapshot.hasData ||
-                              snapshot.data!.isEmpty) {
-                            return const Text(
-                                'No se encontraron vendedores.');
-                          } else {
-                            final vendedores = snapshot.data!;
-                            vendedores.sort(
-                                (a, b) => a.nombres.compareTo(b.nombres));
+                        const SizedBox(height: 12),
+                        FutureBuilder<List<Usuario>>(
+                          future: fetchVendedores(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else if (!snapshot.hasData ||
+                                snapshot.data!.isEmpty) {
+                              return const Text(
+                                  'No se encontraron vendedores.');
+                            } else {
+                              final vendedores = snapshot.data!;
+                              vendedores.sort(
+                                  (a, b) => a.nombres.compareTo(b.nombres));
 
-                            return ValueListenableBuilder<String>(
-                              valueListenable: searchQuery,
-                              builder: (context, query, _) {
-                                final filteredVendedores = vendedores
-                                    .where((vendedor) =>
-                                        matchesSearchQuery(vendedor, query))
-                                    .toList();
+                              return ValueListenableBuilder<String>(
+                                valueListenable: searchQuery,
+                                builder: (context, query, _) {
+                                  final filteredVendedores = vendedores
+                                      .where((vendedor) =>
+                                          matchesSearchQuery(vendedor, query))
+                                      .toList();
 
-                                return ValueListenableBuilder<
-                                    List<Usuario>>(
-                                  valueListenable:
-                                      selectedVendedoresNotifier,
-                                  builder: (context, selectedVendedores, _) {
-                                    return SizedBox(
-                                      height: 200,
-                                      child: filteredVendedores.isEmpty
-                                          ? const Center(
-                                              child: Text(
-                                                  'No se encontraron vendedores'))
-                                          : ListView.builder(
-                                              shrinkWrap: true,
-                                              itemCount:
-                                                  filteredVendedores.length,
-                                              itemBuilder: (context, index) {
-                                                final vendedor =
-                                                    filteredVendedores[index];
+                                  return ValueListenableBuilder<List<Usuario>>(
+                                    valueListenable: selectedVendedoresNotifier,
+                                    builder: (context, selectedVendedores, _) {
+                                      // Filtrar solo vendedores no asignados al supervisor
+                                      final filteredAndAvailableVendedores =
+                                          filteredVendedores.where((vendedor) {
+                                        // Filtrar por vendedores no asignados o que no tienen un supervisor
+                                        return vendedor.asignado == false ||
+                                            vendedor.codigoSupervisor ==
+                                                employee?.codigo;
+                                      }).toList();
 
-                                                final isSelected =
-                                                    selectedVendedores.any(
-                                                  (v) =>
-                                                      v.codigo ==
-                                                      vendedor.codigo,
-                                                );
+                                      return SizedBox(
+                                        height: 200,
+                                        child: filteredAndAvailableVendedores
+                                                .isEmpty
+                                            ? const Center(
+                                                child: Text(
+                                                    'No se encontraron vendedores disponibles'))
+                                            : ListView.builder(
+                                                shrinkWrap: true,
+                                                itemCount:
+                                                    filteredAndAvailableVendedores
+                                                        .length,
+                                                itemBuilder: (context, index) {
+                                                  final vendedor =
+                                                      filteredAndAvailableVendedores[
+                                                          index];
 
-                                                return Container(
-                                                  margin: const EdgeInsets
-                                                      .symmetric(vertical: 4),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.grey[100],
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    border: Border.all(
-                                                        color: Colors
-                                                            .grey.shade300),
-                                                  ),
-                                                  child: ListTile(
-                                                    leading: const Icon(
-                                                        Icons.person,
-                                                        color:
-                                                            Colors.indigo),
-                                                    title: Text(
-                                                      '${vendedor.nombres} ${vendedor.apellidos}',
-                                                      style: const TextStyle(
-                                                          fontWeight:
-                                                              FontWeight
-                                                                  .w600),
+                                                  final isSelected =
+                                                      selectedVendedores.any(
+                                                    (v) =>
+                                                        v.codigo ==
+                                                        vendedor.codigo,
+                                                  );
+
+                                                  return Container(
+                                                    margin: const EdgeInsets
+                                                        .symmetric(vertical: 4),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.grey[100],
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                      border: Border.all(
+                                                          color: Colors
+                                                              .grey.shade300),
                                                     ),
-                                                    trailing: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Text(
-                                                          vendedor.codigo,
-                                                          style: TextStyle(
-                                                            color: Colors
-                                                                .indigo
-                                                                .shade700,
+                                                    child: ListTile(
+                                                      leading: const Icon(
+                                                          Icons.person,
+                                                          color: Colors.indigo),
+                                                      title: Text(
+                                                        '${vendedor.nombres} ${vendedor.apellidos}',
+                                                        style: const TextStyle(
                                                             fontWeight:
                                                                 FontWeight
-                                                                    .bold,
+                                                                    .w600),
+                                                      ),
+                                                      trailing: Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Text(
+                                                            vendedor.codigo,
+                                                            style: TextStyle(
+                                                              color: Colors
+                                                                  .indigo
+                                                                  .shade700,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
                                                           ),
-                                                        ),
-                                                        Checkbox(
-                                                          value: isSelected,
-                                                          onChanged:
-                                                              (bool? value) {
-                                                            toggleSelection(
-                                                                vendedor);
-                                                          },
-                                                        ),
-                                                      ],
+                                                          IconButton(
+                                                            onPressed: () =>
+                                                                toggleSelection(
+                                                                    vendedor),
+                                                            icon: Icon(
+                                                              isSelected
+                                                                  ? Icons
+                                                                      .check_circle
+                                                                  : Icons
+                                                                      .circle_outlined,
+                                                              color: isSelected
+                                                                  ? Colors.green
+                                                                  : null,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                    );
-                                  },
-                                );
-                              },
-                            );
-                          }
-                        },
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    // Botones de acción
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton.icon(
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: const Icon(Icons.cancel),
-                          label: const Text('Cancelar'),
+                                                  );
+                                                },
+                                              ),
+                                      );
+                                    },
+                                  );
+                                },
+                              );
+                            }
+                          },
                         ),
-                        ElevatedButton.icon(
-                          onPressed: () async {
-                            if (formKey.currentState?.validate() ?? false) {
-                              // Lógica de guardado
-                              await _saveOrUpdateEmployee(
+                      ],
+                      const SizedBox(height: 24),
+                      // Botones de acción
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: TextButton.icon(
+                              onPressed: () => Navigator.of(context).pop(),
+                              icon: const Icon(Icons.cancel),
+                              label: const Text('Cancelar'),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                if (formKey.currentState!.validate()) {
+                                  _saveOrUpdateEmployee(
                                     employee!, // Asegúrate de que no sea null
                                     selectedVendedoresNotifier.value,
                                   );
-                              Navigator.of(context).pop();
-                            }
-                          },
-                          icon: const Icon(Icons.save),
-                          label: const Text('Guardar'),
-                        ),
-                      ],
-                    ),
-                  ],
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                              icon: const Icon(Icons.save),
+                              label: const Text('Guardar'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-      );
-    },
-  );
-}
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
 
   /*********************************************************/
 
