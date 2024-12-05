@@ -255,268 +255,270 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
 
   /*********************************************************/
   Future<void> _showFormDialog(BuildContext context, Usuario? employee) async {
-  final formKey = GlobalKey<FormState>();
-  final ValueNotifier<bool> isEditable = ValueNotifier<bool>(employee == null);
-  final TextEditingController searchController = TextEditingController();
-  final ValueNotifier<String> searchQuery = ValueNotifier<String>('');
-  final ValueNotifier<List<Usuario>> selectedVendedoresNotifier =
-      ValueNotifier<List<Usuario>>([]);
+    final formKey = GlobalKey<FormState>();
+    final ValueNotifier<bool> isEditable =
+        ValueNotifier<bool>(employee == null);
+    final TextEditingController searchController = TextEditingController();
+    final ValueNotifier<String> searchQuery = ValueNotifier<String>('');
+    final ValueNotifier<List<Usuario>> selectedVendedoresNotifier =
+        ValueNotifier<List<Usuario>>([]);
 
-  // Preparar controladores y datos iniciales
-  if (employee != null) {
-    final userDoc = await FirebaseFirestore.instance
-        .collection('Users')
-        .where('Codigo', isEqualTo: employee.codigo)
-        .limit(1)
-        .get()
-        .then((snapshot) => snapshot.docs.first);
+    // Preparar controladores y datos iniciales
+    if (employee != null) {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('Codigo', isEqualTo: employee.codigo)
+          .limit(1)
+          .get()
+          .then((snapshot) => snapshot.docs.first);
 
-    final myTeam = (userDoc.data()['MyTeam'] as List<dynamic>?)
-            ?.map((item) => Usuario.fromMap(item as Map<String, dynamic>))
-            .toList() ??
-        [];
+      final myTeam = (userDoc.data()['MyTeam'] as List<dynamic>?)
+              ?.map((item) => Usuario.fromMap(item as Map<String, dynamic>))
+              .toList() ??
+          [];
 
-    selectedVendedoresNotifier.value = myTeam;
+      selectedVendedoresNotifier.value = myTeam;
 
-    _populateEmployeeData(employee, selectedVendedoresNotifier);
-  } else {
-    _clearEmployeeData();
-  }
+      _populateEmployeeData(employee, selectedVendedoresNotifier);
+    } else {
+      _clearEmployeeData();
+    }
 
-  Future<List<Usuario>> fetchVendedores() async =>
-      _fetchVendedoresLogic(employee);
+    Future<List<Usuario>> fetchVendedores() async =>
+        _fetchVendedoresLogic(employee);
 
-  void toggleSelection(Usuario vendedor) {
-    final currentSelected = selectedVendedoresNotifier.value;
-    selectedVendedoresNotifier.value = currentSelected
-            .any((v) => v.codigo == vendedor.codigo)
-        ? currentSelected.where((v) => v.codigo != vendedor.codigo).toList()
-        : [...currentSelected, vendedor];
-  }
+    void toggleSelection(Usuario vendedor) {
+      final currentSelected = selectedVendedoresNotifier.value;
+      selectedVendedoresNotifier.value = currentSelected
+              .any((v) => v.codigo == vendedor.codigo)
+          ? currentSelected.where((v) => v.codigo != vendedor.codigo).toList()
+          : [...currentSelected, vendedor];
+    }
 
-  bool matchesSearchQuery(Usuario vendedor, String query) {
-    final fullName =
-        '${vendedor.nombres} ${vendedor.apellidos}'.toLowerCase();
-    final codigo = vendedor.codigo.toLowerCase();
-    query = query.toLowerCase().trim();
-    return fullName.contains(query) || codigo.contains(query);
-  }
+    bool matchesSearchQuery(Usuario vendedor, String query) {
+      final fullName =
+          '${vendedor.nombres} ${vendedor.apellidos}'.toLowerCase();
+      final codigo = vendedor.codigo.toLowerCase();
+      query = query.toLowerCase().trim();
+      return fullName.contains(query) || codigo.contains(query);
+    }
 
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final modalWidth = constraints.maxWidth > 1024
-                ? constraints.maxWidth * 0.5
-                : constraints.maxWidth > 768
-                    ? constraints.maxWidth * 0.7
-                    : constraints.maxWidth * 0.9;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final modalWidth = constraints.maxWidth > 1024
+                  ? constraints.maxWidth * 0.5
+                  : constraints.maxWidth > 768
+                      ? constraints.maxWidth * 0.7
+                      : constraints.maxWidth * 0.9;
 
-            return Container(
-              width: modalWidth,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    // Título del modal
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Editar Rol',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+              return Container(
+                width: modalWidth,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      // Título del modal
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Editar Rol',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close, color: Colors.black54),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    // Formulario
-                    Form(
-                      key: formKey,
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: isEditable,
-                        builder: (context, editable, _) {
-                          final isLargeScreen = constraints.maxWidth > 986;
-                          return Column(
-                            children: [
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(
-                                    _nombresController, 'Nombres'),
-                                _buildInputField(
-                                    _apellidosController, 'Apellidos'),
-                              ]),
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(_emailController, 'Email',
-                                    isEmail: true),
-                                _buildInputField(
-                                    _telefonoController, 'Teléfono'),
-                              ]),
-                              _buildResponsiveRow(isLargeScreen, [
-                                _buildDropdown(
-                                  selectedRole,
-                                  (String? newValue) {
-                                    setState(() {
-                                      selectedRole = newValue!;
-                                    });
-                                  },
-                                ),
-                                _buildDatePicker(
-                                    context,
-                                    _fechaIngresoController,
-                                    'Fecha de Ingreso'),
-                              ]),
-                            ],
-                          );
-                        },
+                          IconButton(
+                            icon:
+                                const Icon(Icons.close, color: Colors.black54),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Lista de vendedores para el rol Supervisor
-                    if (selectedRole == 'Supervisor') ...[
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text(
-                          "Lista de Vendedores",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                      const SizedBox(height: 24),
+                      // Formulario
+                      Form(
+                        key: formKey,
+                        child: ValueListenableBuilder<bool>(
+                          valueListenable: isEditable,
+                          builder: (context, editable, _) {
+                            final isLargeScreen = constraints.maxWidth > 986;
+                            return Column(
+                              children: [
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(
+                                      _nombresController, 'Nombres'),
+                                  _buildInputField(
+                                      _apellidosController, 'Apellidos'),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildInputField(_emailController, 'Email',
+                                      isEmail: true),
+                                  _buildInputField(
+                                      _telefonoController, 'Teléfono'),
+                                ]),
+                                _buildResponsiveRow(isLargeScreen, [
+                                  _buildDropdown(
+                                    selectedRole,
+                                    (String? newValue) {
+                                      setState(() {
+                                        selectedRole = newValue!;
+                                      });
+                                    },
+                                  ),
+                                  _buildDatePicker(
+                                      context,
+                                      _fechaIngresoController,
+                                      'Fecha de Ingreso'),
+                                ]),
+                              ],
+                            );
+                          },
                         ),
                       ),
-                      TextField(
-                        controller: searchController,
-                        onChanged: (value) => searchQuery.value = value,
-                        decoration: InputDecoration(
-                          labelText: 'Buscar vendedor',
-                          prefixIcon: const Icon(Icons.search),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              searchController.clear();
-                              searchQuery.value = '';
-                            },
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 24),
+                      // Lista de vendedores para el rol Supervisor
+                      if (selectedRole == 'Supervisor') ...[
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            "Lista de Vendedores",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      FutureBuilder<List<Usuario>>(
-                        future: fetchVendedores(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else if (!snapshot.hasData ||
-                              snapshot.data!.isEmpty) {
-                            return const Text(
-                                'No se encontraron vendedores.');
-                          } else {
-                            final vendedores = snapshot.data!;
-                            vendedores.sort(
-                                (a, b) => a.nombres.compareTo(b.nombres));
+                        TextField(
+                          controller: searchController,
+                          onChanged: (value) => searchQuery.value = value,
+                          decoration: InputDecoration(
+                            labelText: 'Buscar vendedor',
+                            prefixIcon: const Icon(Icons.search),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                searchController.clear();
+                                searchQuery.value = '';
+                              },
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        FutureBuilder<List<Usuario>>(
+                          future: fetchVendedores(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else if (!snapshot.hasData ||
+                                snapshot.data!.isEmpty) {
+                              return const Text(
+                                  'No se encontraron vendedores.');
+                            } else {
+                              final vendedores = snapshot.data!;
+                              vendedores.sort(
+                                  (a, b) => a.nombres.compareTo(b.nombres));
 
-                            return ValueListenableBuilder<String>(
-                              valueListenable: searchQuery,
-                              builder: (context, query, _) {
-                                final filteredVendedores = vendedores
-                                    .where((vendedor) =>
-                                        matchesSearchQuery(vendedor, query))
-                                    .toList();
+                              return ValueListenableBuilder<String>(
+                                valueListenable: searchQuery,
+                                builder: (context, query, _) {
+                                  final filteredVendedores = vendedores
+                                      .where((vendedor) =>
+                                          matchesSearchQuery(vendedor, query))
+                                      .toList();
 
-                                return ValueListenableBuilder<List<Usuario>>(
-                                  valueListenable: selectedVendedoresNotifier,
-                                  builder: (context, selectedVendedores, _) {
-                                    return SizedBox(
-                                      height: 200,
-                                      child: ListView.builder(
-                                        shrinkWrap: true,
-                                        itemCount: filteredVendedores.length,
-                                        itemBuilder: (context, index) {
-                                          final vendedor =
-                                              filteredVendedores[index];
+                                  return ValueListenableBuilder<List<Usuario>>(
+                                    valueListenable: selectedVendedoresNotifier,
+                                    builder: (context, selectedVendedores, _) {
+                                      return SizedBox(
+                                        height: 200,
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: filteredVendedores.length,
+                                          itemBuilder: (context, index) {
+                                            final vendedor =
+                                                filteredVendedores[index];
 
-                                          final isSelected =
-                                              selectedVendedores.any(
-                                            (v) =>
-                                                v.codigo == vendedor.codigo,
-                                          );
+                                            final isSelected =
+                                                selectedVendedores.any(
+                                              (v) =>
+                                                  v.codigo == vendedor.codigo,
+                                            );
 
-                                          return Container(
-                                            margin: const EdgeInsets.symmetric(
-                                                vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: Colors.grey[100],
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              border: Border.all(
-                                                  color:
-                                                      Colors.grey.shade300),
-                                            ),
-                                            child: ListTile(
-                                              leading: const Icon(
-                                                  Icons.person,
-                                                  color: Colors.indigo),
-                                              title: Text(
-                                                '${vendedor.nombres} ${vendedor.apellidos}',
-                                                style: const TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.w600),
+                                            return Container(
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 4),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[100],
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                border: Border.all(
+                                                    color:
+                                                        Colors.grey.shade300),
                                               ),
-                                              subtitle: constraints.maxWidth >
-                                                      375
-                                                  ? Text(vendedor.codigo)
-                                                  : null,
-                                              trailing: IconButton(
-                                                onPressed: () =>
-                                                    toggleSelection(vendedor),
-                                                icon: Icon(
-                                                  isSelected
-                                                      ? Icons.check_circle
-                                                      : Icons
-                                                          .circle_outlined,
-                                                  color: isSelected
-                                                      ? Colors.green
-                                                      : null,
+                                              child: ListTile(
+                                                leading: const Icon(
+                                                    Icons.person,
+                                                    color: Colors.indigo),
+                                                title: Text(
+                                                  '${vendedor.nombres} ${vendedor.apellidos}',
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600),
+                                                ),
+                                                subtitle:
+                                                    constraints.maxWidth > 375
+                                                        ? Text(vendedor.codigo)
+                                                        : null,
+                                                trailing: IconButton(
+                                                  onPressed: () =>
+                                                      toggleSelection(vendedor),
+                                                  icon: Icon(
+                                                    isSelected
+                                                        ? Icons.check_circle
+                                                        : Icons.circle_outlined,
+                                                    color: isSelected
+                                                        ? Colors.green
+                                                        : null,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            );
-                          }
-                        },
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    Row(
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Flexible(
@@ -561,16 +563,16 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
                           ),
                         ],
                       ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-      );
-    },
-  );
-}
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
 
   void _populateEmployeeData(Usuario employee,
       ValueNotifier<List<Usuario>> selectedVendedoresNotifier) {
@@ -767,19 +769,6 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al eliminar el empleado: $e')),
       );
-    }
-  }
-
-  Color _getRoleColor(String role) {
-    switch (role.toLowerCase()) {
-      case 'admin':
-        return Colors.black87;
-      case 'supervisor':
-        return Colors.green[400]!;
-      case 'vendedor':
-        return Colors.blue[300]!;
-      default:
-        return Colors.grey[400]!;
     }
   }
 
