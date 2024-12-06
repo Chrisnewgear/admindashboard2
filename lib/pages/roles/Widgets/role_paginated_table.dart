@@ -480,7 +480,14 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('Eliminar'),
+              //child: const Text('Eliminar', color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              child: const Text(
+                'Eliminar',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold),
+              ),
               onPressed: () {
                 widget.deleteUsuario(usuario);
                 Navigator.of(context).pop();
@@ -836,7 +843,13 @@ class UsuariosDataTableSource extends DataTableSource {
                 deleteUsuario(usuario);
                 Navigator.of(context).pop();
               },
-              child: const Text('Eliminar'),
+              child: const Text(
+                'Eliminar',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         );

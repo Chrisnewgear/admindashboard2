@@ -91,7 +91,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
     return code;
   }
 
-  /******************************************************************** */
+  /// ******************************************************************
   Future<void> _saveOrUpdateEmployee(
       Usuario? existingEmployee, List<Usuario> selectedUsers) async {
     try {
@@ -253,7 +253,6 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
     return uniqueUsers;
   }
 
-  /*********************************************************/
   Future<void> _showFormDialog(BuildContext context, Usuario? employee) async {
     final formKey = GlobalKey<FormState>();
     final ValueNotifier<bool> isEditable =
@@ -640,7 +639,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
     return snapshot.docs.map((doc) => Usuario.fromFirestore(doc)).toList();
   }
 
-  /*********************************************************/
+  /// ******************************************************
 
   Widget _buildResponsiveRow(bool isLargeScreen, List<Widget> children) {
     return isLargeScreen
@@ -736,25 +735,211 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
     );
   }
 
+  //ESTE ES EL DELETE ORIGINAL
+  // void _deleteEmployee(Usuario employee) async {
+  //   try {
+  //     // Find the user document by email
+  //     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+  //         .collection('Users')
+  //         .where('email', isEqualTo: employee.email)
+  //         .limit(1)
+  //         .get();
+
+  //     if (querySnapshot.docs.isNotEmpty) {
+  //       // Delete the document
+  //       await querySnapshot.docs.first.reference.delete();
+
+  //       // Update the employee list in the UI
+  //       setState(() {
+  //         employees.removeWhere((e) => e.email == employee.email);
+  //       });
+
+  //       // Reload users if necessary
+  //       await _loadUsers();
+
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('Empleado eliminado con éxito')),
+  //       );
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('No se encontró el empleado')),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error al eliminar el empleado: $e')),
+  //     );
+  //   }
+  // }
+
+  //ESTE ES EL METODO QUE FUNCIONA EL DIALOG PERO NO ACTUALIZA LOS DOCUMENTOS DE LOS VENDEDORES EN FIREBASE
+  // void _deleteEmployee(Usuario employee) async {
+  //   try {
+  //     // Buscar el documento del usuario en Firestore por 'Codigo'
+  //     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+  //         .collection('Users')
+  //         .where('Codigo', isEqualTo: employee.codigo)
+  //         .limit(1)
+  //         .get();
+
+  //     if (querySnapshot.docs.isNotEmpty) {
+  //       var userDoc = querySnapshot.docs.first;
+  //       var userData = userDoc.data() as Map<String, dynamic>;
+
+  //       // Verificar si el usuario es un Supervisor
+  //       if (userData['Role'] == 'Supervisor') {
+  //         List<dynamic> myTeam = userData['MyTeam'] ?? [];
+
+  //         if (myTeam.isNotEmpty) {
+  //           // Mostrar un diálogo de confirmación
+  //           bool proceed = await showDialog(
+  //             context: context,
+  //             builder: (BuildContext context) {
+  //               return AlertDialog(
+  //                 title: const Text('Advertencia'),
+  //                 content: Text(
+  //                     'El Supervisor tiene ${myTeam.length} vendedores asignados. ¿Estás seguro de que deseas eliminarlo?'),
+  //                 actions: [
+  //                   TextButton(
+  //                     onPressed: () => Navigator.of(context).pop(false),
+  //                     child: const Text('Cancelar'),
+  //                   ),
+  //                   // TextButton(
+  //                   //   onPressed: () => Navigator.of(context).pop(true),
+  //                   //   child: const Text('Eliminar', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+  //                   // ),
+  //                   ElevatedButton(
+  //                     style: ElevatedButton.styleFrom(
+  //                       backgroundColor: Colors.red,
+  //                     ),
+  //                     onPressed: () {
+  //                       Navigator.of(context).pop();
+  //                     },
+  //                     child: const Text(
+  //                       'Eliminar',
+  //                       style: TextStyle(
+  //                           color: Colors.white,
+  //                           fontSize: 13,
+  //                           fontWeight: FontWeight.bold),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               );
+  //             },
+  //           );
+
+  //           // Si el usuario cancela, salir del método
+  //           if (!proceed) return;
+  //         }
+  //       }
+
+  //       // Eliminar el documento
+  //       await userDoc.reference.delete();
+
+  //       // Actualizar la lista de empleados en la UI
+  //       setState(() {
+  //         employees.removeWhere((e) => e.codigo == employee.codigo);
+  //       });
+
+  //       // Recargar los usuarios si es necesario
+  //       await _loadUsers();
+
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('Empleado eliminado con éxito')),
+  //       );
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('No se encontró el empleado')),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error al eliminar el empleado: $e')),
+  //     );
+  //   }
+  // }
+
   void _deleteEmployee(Usuario employee) async {
     try {
-      // Find the user document by email
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+      // Buscar el documento del supervisor en Firestore por 'Codigo'
+      QuerySnapshot supervisorQuerySnapshot = await FirebaseFirestore.instance
           .collection('Users')
-          .where('email', isEqualTo: employee.email)
+          .where('Codigo', isEqualTo: employee.codigo)
           .limit(1)
           .get();
 
-      if (querySnapshot.docs.isNotEmpty) {
-        // Delete the document
-        await querySnapshot.docs.first.reference.delete();
+      if (supervisorQuerySnapshot.docs.isNotEmpty) {
+        var supervisorDoc = supervisorQuerySnapshot.docs.first;
+        var supervisorData = supervisorDoc.data() as Map<String, dynamic>;
 
-        // Update the employee list in the UI
+        // Verificar si el supervisor tiene un equipo asignado
+        List<dynamic> myTeam = supervisorData['MyTeam'] ?? [];
+
+        if (myTeam.isNotEmpty) {
+          // Mostrar un diálogo de confirmación
+          bool proceed = await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Advertencia'),
+                content: Text(
+                    'El Supervisor tiene ${myTeam.length} vendedores asignados. ¿Estás seguro de que deseas eliminarlo?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Cancelar'),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop(true); // Cambiado aquí: Usar true para proceder con la eliminación
+                    },
+                    child: const Text(
+                      'Eliminar',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+
+          // Si el usuario cancela, salir del método
+          if (!proceed) return;
+        }
+
+        // Actualizar los vendedores asignados
+        for (var vendedorId in myTeam) {
+          var vendedorDoc = await FirebaseFirestore.instance
+              .collection('Users')
+              .where('Codigo', isEqualTo: vendedorId)
+              .limit(1)
+              .get();
+
+          if (vendedorDoc.docs.isNotEmpty) {
+            var vendedorDocData = vendedorDoc.docs.first.reference;
+            // Actualizar los campos 'Asignado' y 'CodSupervisor' a valores por defecto
+            await vendedorDocData.update({
+              'Asignado': false,
+              'CodSupervisor': '',
+            });
+          }
+        }
+
+        // Eliminar el supervisor
+        await supervisorDoc.reference.delete();
+
+        // Actualizar la lista de empleados en la UI
         setState(() {
-          employees.removeWhere((e) => e.email == employee.email);
+          employees.removeWhere((e) => e.codigo == employee.codigo);
         });
 
-        // Reload users if necessary
+        // Recargar los usuarios si es necesario
         await _loadUsers();
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -770,7 +955,9 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
         SnackBar(content: Text('Error al eliminar el empleado: $e')),
       );
     }
-  }
+}
+
+
 
   Widget _buildDropdown(String currentValue, Function(String?) onChanged) {
     return Padding(
