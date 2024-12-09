@@ -138,22 +138,43 @@ class Usuario {
   }
 
   /// Método para crear un objeto Usuario a partir de un mapa
+  /// ESTES ES EL ORIGINAL NO BORRAR AUN
+  // factory Usuario.fromMap(Map<String, dynamic> map) {
+  //   return Usuario(
+  //     nombres: map['Nombre'] ?? '',
+  //     apellidos: map['Apellidos'] ?? '',
+  //     email: map['email'] ?? '',
+  //     telefono: map['Telefono'] ?? '',
+  //     role: map['Role'] ?? 'None',
+  //     codigo: map['Codigo'] ?? '',
+  //     codigoSupervisor: map['CodigoSupervisor'] ?? '',
+  //     fechaIngreso: map['createdAt'] != null
+  //         ? (map['createdAt'] is Timestamp
+  //             ? (map['createdAt'] as Timestamp).toDate()
+  //             : map['createdAt'] as DateTime)
+  //         : DateTime.now(),
+  //     asignado: map['asignado'] ?? false,
+  //     imageUrl: map['imageUrl'], // Obtener imageUrl del mapa
+  //   );
+  // }
+
+
   factory Usuario.fromMap(Map<String, dynamic> map) {
-    return Usuario(
-      nombres: map['Nombre'] ?? '',
-      apellidos: map['Apellidos'] ?? '',
-      email: map['email'] ?? '',
-      telefono: map['Telefono'] ?? '',
-      role: map['Role'] ?? 'None',
-      codigo: map['Codigo'] ?? '',
-      codigoSupervisor: map['CodigoSupervisor'] ?? '',
-      fechaIngreso: map['createdAt'] != null
-          ? (map['createdAt'] is Timestamp
-              ? (map['createdAt'] as Timestamp).toDate()
-              : map['createdAt'] as DateTime)
-          : DateTime.now(),
-      asignado: map['asignado'] ?? false,
-      imageUrl: map['imageUrl'], // Obtener imageUrl del mapa
-    );
-  }
+  return Usuario(
+    nombres: map['Nombre'] ?? map['nombres'] ?? '',
+    apellidos: map['Apellidos'] ?? map['apellidos'] ?? '',
+    email: map['email'] ?? '',
+    telefono: map['Telefono'] ?? map['telefono'] ?? '',
+    role: map['Role'] ?? map['role'] ?? 'None',
+    codigo: map['Codigo'] ?? map['codigo'] ?? '',
+    codigoSupervisor: map['CodigoSupervisor'] ?? map['codigoSupervisor'] ?? '',
+    fechaIngreso: map['createdAt'] != null
+        ? (map['createdAt'] is Timestamp
+            ? (map['createdAt'] as Timestamp).toDate()
+            : map['createdAt'] as DateTime)
+        : DateTime.now(),
+    asignado: map['Asignado'] ?? map['asignado'] ?? false,
+    imageUrl: map['imageUrl'], 
+  );
+}
 }
