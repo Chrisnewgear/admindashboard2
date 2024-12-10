@@ -742,7 +742,7 @@ import 'package:admindashboard/models/usuarios.dart';
 import 'package:admindashboard/pages/roles/Widgets/role_color_util.dart';
 import 'package:admindashboard/pages/roles/Widgets/table_shimmer.dart';
 import 'package:admindashboard/widgets/search_bar.dart';
-import 'package:admindashboard/pages/roles/Widgets/usuariosDataTableSource.dart';
+import 'package:admindashboard/pages/roles/Widgets/usuarios_data_table_source.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -1207,7 +1207,7 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              //child: const Text('Eliminar', color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+
               child: const Text(
                 'Eliminar',
                 style: TextStyle(
@@ -1292,6 +1292,7 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
       _buildColumn('Email', 'email', ColumnSize.L),
       _buildColumn('Teléfono', 'telefono', ColumnSize.M),
       _buildColumn('Role', 'role', ColumnSize.M),
+      _buildColumn('Asignado', 'asignado', ColumnSize.S),
       DataColumn2(
         label: const Text('Fecha',
             textAlign: TextAlign.center), // Center-aligned label

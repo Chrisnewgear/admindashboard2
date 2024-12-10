@@ -638,7 +638,6 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
     return snapshot.docs.map((doc) => Usuario.fromFirestore(doc)).toList();
   }
 
-
   Widget _buildResponsiveRow(bool isLargeScreen, List<Widget> children) {
     return isLargeScreen
         ? Row(
