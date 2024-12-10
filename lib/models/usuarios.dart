@@ -75,7 +75,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 //   }
 // }
 
-
 class Usuario {
   final String nombres;
   final String apellidos;
@@ -158,23 +157,23 @@ class Usuario {
   //   );
   // }
 
-
   factory Usuario.fromMap(Map<String, dynamic> map) {
-  return Usuario(
-    nombres: map['Nombre'] ?? map['nombres'] ?? '',
-    apellidos: map['Apellidos'] ?? map['apellidos'] ?? '',
-    email: map['email'] ?? '',
-    telefono: map['Telefono'] ?? map['telefono'] ?? '',
-    role: map['Role'] ?? map['role'] ?? 'None',
-    codigo: map['Codigo'] ?? map['codigo'] ?? '',
-    codigoSupervisor: map['CodigoSupervisor'] ?? map['codigoSupervisor'] ?? '',
-    fechaIngreso: map['createdAt'] != null
-        ? (map['createdAt'] is Timestamp
-            ? (map['createdAt'] as Timestamp).toDate()
-            : map['createdAt'] as DateTime)
-        : DateTime.now(),
-    asignado: map['Asignado'] ?? map['asignado'] ?? false,
-    imageUrl: map['imageUrl'], 
-  );
-}
+    return Usuario(
+      nombres: map['Nombre'] ?? map['nombres'] ?? '',
+      apellidos: map['Apellidos'] ?? map['apellidos'] ?? '',
+      email: map['email'] ?? '',
+      telefono: map['Telefono'] ?? map['telefono'] ?? '',
+      role: map['Role'] ?? map['role'] ?? 'None',
+      codigo: map['Codigo'] ?? map['codigo'] ?? '',
+      codigoSupervisor:
+          map['CodigoSupervisor'] ?? map['codigoSupervisor'] ?? '',
+      fechaIngreso: map['createdAt'] != null
+          ? (map['createdAt'] is Timestamp
+              ? (map['createdAt'] as Timestamp).toDate()
+              : map['createdAt'] as DateTime)
+          : DateTime.now(),
+      asignado: map['Asignado'] ?? map['asignado'] ?? false,
+      imageUrl: map['imageUrl'],
+    );
+  }
 }

@@ -957,7 +957,6 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
 //     }
 // }
 
-
 //ESTA ES LA VERSION QUE SI ACTUALIZA LOS DOCUMENTOS DE LOS VENDEDORES PERO NO ELIMINA EL SUPERVISOR
 //   Future<void> _deleteEmployee(Usuario employee) async {
 //     try {
@@ -1086,28 +1085,26 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
 //     );
 //   }
 
-
   Future<void> _deleteEmployee(Usuario employee) async {
     try {
-      final supervisorQuerySnapshot = await FirebaseFirestore.instance
+      // Realiza la consulta en un solo batch para mayor eficiencia
+      final batch = FirebaseFirestore.instance.batch();
+
+      // Obtener supervisor y vendedores asignados
+      final supervisorDoc = await FirebaseFirestore.instance
           .collection('Users')
           .where('Codigo', isEqualTo: employee.codigo)
           .limit(1)
-          .get();
+          .get()
+          .then(
+              (snapshot) => snapshot.docs.isEmpty ? null : snapshot.docs.first);
 
-      if (supervisorQuerySnapshot.docs.isEmpty) {
+      if (supervisorDoc == null) {
         _showErrorMessage('No se encontró el empleado');
         return;
       }
 
-      var supervisorDoc = supervisorQuerySnapshot.docs.first;
       var supervisorData = supervisorDoc.data();
-
-      // Añadir impresión de depuración
-      //print('Tipo de MyTeam: ${supervisorData['MyTeam'].runtimeType}');
-      //print('Contenido de MyTeam: ${supervisorData['MyTeam']}');
-
-      // Conversión explícita y segura
       List<Usuario> myTeam = [];
       if (supervisorData['MyTeam'] is List) {
         myTeam = (supervisorData['MyTeam'] as List)
@@ -1121,16 +1118,16 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
         if (!proceed) return;
       }
 
-      // Preparar batch para actualización
-      final batch = FirebaseFirestore.instance.batch();
-
-      // Actualizar vendedores asignados
+      // Actualizar vendedores en el batch
       await _updateAssignedVendedores(myTeam, batch);
 
-      // Eliminar al supervisor de la colección 'Users'
-      await supervisorDoc.reference.delete();
+      // Eliminar al supervisor
+      batch.delete(supervisorDoc.reference);
 
-      // Actualizar la lista de empleados en la UI
+      // Commitear las operaciones en un solo batch
+      await batch.commit();
+
+      // Actualizar la UI
       setState(() {
         employees.removeWhere((e) => e.codigo == employee.codigo);
       });
@@ -1140,13 +1137,11 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
 
       _showSuccessMessage('Empleado eliminado con éxito');
     } catch (e) {
-      //print('Error completo: $e');
       _showErrorMessage('Error al eliminar el empleado: $e');
     }
   }
 
-
-// Método para mostrar diálogo de confirmación
+  // Método para mostrar diálogo de confirmación
   Future<bool> _showDeleteConfirmationDialog(int teamSize) async {
     return await showDialog<bool>(
           context: context,
@@ -1185,17 +1180,10 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
       List<Usuario> myTeam, WriteBatch batch) async {
     if (myTeam.isEmpty) return;
 
-    //print('Número de miembros del equipo: ${myTeam.length}');
-    // print(
-    //     'Códigos de miembros del equipo: ${myTeam.map((u) => u.codigo).toList()}');
-
     final vendedoresQuerySnapshot = await FirebaseFirestore.instance
         .collection('Users')
         .where('Codigo', whereIn: myTeam.map((v) => v.codigo).toList())
         .get();
-
-    // print(
-    //     'Documentos de vendedores encontrados: ${vendedoresQuerySnapshot.docs.length}');
 
     for (final vendedorDoc in vendedoresQuerySnapshot.docs) {
       batch.update(vendedorDoc.reference, {
@@ -1207,7 +1195,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
     await batch.commit();
   }
 
-// Métodos de utilidad para mostrar mensajes
+  //Métodos de utilidad para mostrar mensajes
   void _showErrorMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
