@@ -4,6 +4,7 @@ import 'package:admindashboard/pages/roles/Widgets/role_paginated_table.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class RoleManagementWidget extends StatefulWidget {
@@ -653,12 +654,57 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
         : Column(children: children);
   }
 
+  // Widget _buildInputField(TextEditingController controller, String label,
+  //     {bool isEmail = false}) {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(bottom: 16),
+  //     child: TextFormField(
+  //       controller: controller,
+  //       decoration: InputDecoration(
+  //         labelText: label,
+  //         border: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(8),
+  //           borderSide: BorderSide(color: Colors.grey[300]!),
+  //         ),
+  //         enabledBorder: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(8),
+  //           borderSide: BorderSide(color: Colors.grey[300]!),
+  //         ),
+  //         focusedBorder: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(8),
+  //           borderSide: const BorderSide(color: Colors.indigo),
+  //         ),
+  //         filled: true,
+  //         fillColor: Colors.grey[50],
+  //       ),
+  //       validator: (value) {
+  //         if (value == null || value.isEmpty) {
+  //           return 'Por favor ingrese $label';
+  //         }
+  //         if (isEmail &&
+  //             !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+  //           return 'Por favor ingrese un email válido';
+  //         }
+  //         return null;
+  //       },
+  //     ),
+  //   );
+  // }
+
   Widget _buildInputField(TextEditingController controller, String label,
       {bool isEmail = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
+        keyboardType:
+            label == 'Teléfono' ? TextInputType.number : TextInputType.text,
+        inputFormatters: label == 'Teléfono'
+            ? [
+                FilteringTextInputFormatter.digitsOnly, // Permitir solo números
+                LengthLimitingTextInputFormatter(10), // Máximo de 10 caracteres
+              ]
+            : null,
         decoration: InputDecoration(
           labelText: label,
           border: OutlineInputBorder(
@@ -677,11 +723,19 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
           fillColor: Colors.grey[50],
         ),
         validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Por favor ingrese $label';
+          if (label == 'Teléfono') {
+            // Validar que el campo no esté vacío
+            if (value == null || value.isEmpty) {
+              return 'Por favor ingrese $label';
+            }
+            // Validar longitud mínima
+            if (value.length < 10) {
+              return 'No es un teléfono válido';
+            }
           }
+          // Validación para correo electrónico
           if (isEmail &&
-              !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+              !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value!)) {
             return 'Por favor ingrese un email válido';
           }
           return null;
@@ -731,62 +785,6 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
       ),
     );
   }
-
-  // Future<void> _deleteEmployee(Usuario employee) async {
-  //   try {
-  //     // Realiza la consulta en un solo batch para mayor eficiencia
-  //     final batch = FirebaseFirestore.instance.batch();
-
-  //     // Obtener supervisor y vendedores asignados
-  //     final supervisorDoc = await FirebaseFirestore.instance
-  //         .collection('Users')
-  //         .where('Codigo', isEqualTo: employee.codigo)
-  //         .limit(1)
-  //         .get()
-  //         .then(
-  //             (snapshot) => snapshot.docs.isEmpty ? null : snapshot.docs.first);
-
-  //     if (supervisorDoc == null) {
-  //       _showErrorMessage('No se encontró el empleado');
-  //       return;
-  //     }
-
-  //     var supervisorData = supervisorDoc.data();
-  //     List<Usuario> myTeam = [];
-  //     if (supervisorData['MyTeam'] is List) {
-  //       myTeam = (supervisorData['MyTeam'] as List)
-  //           .map((teamMember) => Usuario.fromMap(teamMember))
-  //           .toList();
-  //     }
-
-  //     // Mostrar diálogo de confirmación si hay vendedores asignados
-  //     if (myTeam.isNotEmpty) {
-  //       bool proceed = await _showDeleteConfirmationDialog(myTeam.length);
-  //       if (!proceed) return;
-  //     }
-
-  //     // Actualizar vendedores en el batch
-  //     await _updateAssignedVendedores(myTeam, batch);
-
-  //     // Eliminar al supervisor
-  //     batch.delete(supervisorDoc.reference);
-
-  //     // Commitear las operaciones en un solo batch
-  //     await batch.commit();
-
-  //     // Actualizar la UI
-  //     setState(() {
-  //       employees.removeWhere((e) => e.codigo == employee.codigo);
-  //     });
-
-  //     // Reload users
-  //     await _loadUsers();
-
-  //     _showSuccessMessage('Empleado eliminado con éxito');
-  //   } catch (e) {
-  //     _showErrorMessage('Error al eliminar el empleado: $e');
-  //   }
-  // }
 
   Future<void> _deleteEmployee(Usuario employee) async {
     try {
@@ -877,26 +875,6 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
         ) ??
         false;
   }
-
-// // Método para actualizar vendedores asignados
-//   Future<void> _updateAssignedVendedores(
-//       List<Usuario> myTeam, WriteBatch batch) async {
-//     if (myTeam.isEmpty) return;
-
-//     final vendedoresQuerySnapshot = await FirebaseFirestore.instance
-//         .collection('Users')
-//         .where('Codigo', whereIn: myTeam.map((v) => v.codigo).toList())
-//         .get();
-
-//     for (final vendedorDoc in vendedoresQuerySnapshot.docs) {
-//       batch.update(vendedorDoc.reference, {
-//         'Asignado': false,
-//         'CodSupervisor': '',
-//       });
-//     }
-
-//     await batch.commit();
-//   }
 
 // Método para actualizar vendedores asignados
   Future<void> _updateAssignedVendedores(

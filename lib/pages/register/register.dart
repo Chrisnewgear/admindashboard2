@@ -125,8 +125,8 @@ class _RegisterPageState extends State<RegisterPage> {
       enableSuggestions: !isPassword,
       autocorrect: !isPassword,
       keyboardType: keyboardType,
-      // Añadir inputFormatters para el campo de teléfono
-      inputFormatters: labelText == 'Teléfono'
+      // Añadir inputFormatters para el campo de Teléfono*
+      inputFormatters: labelText == 'Teléfono*'
           ? [FilteringTextInputFormatter.digitsOnly]
           : null,
       decoration: InputDecoration(
@@ -217,11 +217,23 @@ class _RegisterPageState extends State<RegisterPage> {
           // en el campo de texto directamente
         }
 
-        if (labelText == 'Teléfono') {
-          if (value != null && value.isNotEmpty) {
-            if (value.length > 10) {
-              return 'Ingrese máximo 10 dígitos';
-            }
+        // if (labelText == 'Teléfono*') {
+        //   if (!isOptional && (value != null && value.isNotEmpty)) {
+        //     if (value.length > 10) {
+        //       return 'Ingrese máximo 10 dígitos';
+        //     }
+        //   }
+        // }
+
+        if (labelText == 'Teléfono*') {
+          if (value == null || value.isEmpty) {
+            return 'Por favor ingrese $labelText';
+          }
+          if (value.length < 10) {
+            return 'No es un teléfono válido';
+          }
+          if (value.length > 10) {
+            return 'Ingrese máximo 10 dígitos';
           }
         }
 
@@ -322,8 +334,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                               'Nombre*', 'Apellido*'),
                                           const SizedBox(height: 15),
                                           _buildRowFields(_email, _phone,
-                                              'Email*', 'Teléfono',
-                                              isPhoneOptional: true),
+                                              'Email*', 'Teléfono*',
+                                              isPhoneOptional: false),
                                           const SizedBox(height: 15),
                                           _buildRowFields(
                                               _password,
@@ -366,9 +378,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                           const SizedBox(height: 15),
                                           _buildTextField(
                                             controller: _phone,
-                                            labelText: 'Teléfono',
+                                            labelText: 'Teléfono*',
                                             hintText:
-                                                'Ingrese su número de teléfono (opcional)',
+                                                'Ingrese su número de Teléfono*',
                                             keyboardType: TextInputType.phone,
                                           ),
                                           const SizedBox(height: 15),
@@ -545,7 +557,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 value!.isEmpty ? 'Por favor ingrese su $label1' : null,
             keyboardType: label1 == 'Email'
                 ? TextInputType.emailAddress
-                : label1 == 'Teléfono'
+                : label1 == 'Teléfono*'
                     ? TextInputType.phone
                     : null,
           ),
@@ -560,7 +572,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 : 'Ingrese su $label2${isPhoneOptional ? ' (opcional)' : ''}',
             isPassword: isSecondFieldPassword,
             validator: (value) {
-              if (isPhoneOptional && label2 == 'Teléfono') {
+              if (isPhoneOptional && label2 == 'Teléfono*') {
                 return null; // No validation for optional phone field
               }
               if (value!.isEmpty) {
@@ -571,7 +583,7 @@ class _RegisterPageState extends State<RegisterPage> {
               }
               return null;
             },
-            keyboardType: label2 == 'Teléfono' ? TextInputType.phone : null,
+            keyboardType: label2 == 'Teléfono*' ? TextInputType.phone : null,
           ),
         ),
       ],
