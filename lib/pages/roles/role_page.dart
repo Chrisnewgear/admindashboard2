@@ -732,12 +732,68 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
     );
   }
 
+  // Future<void> _deleteEmployee(Usuario employee) async {
+  //   try {
+  //     // Realiza la consulta en un solo batch para mayor eficiencia
+  //     final batch = FirebaseFirestore.instance.batch();
+
+  //     // Obtener supervisor y vendedores asignados
+  //     final supervisorDoc = await FirebaseFirestore.instance
+  //         .collection('Users')
+  //         .where('Codigo', isEqualTo: employee.codigo)
+  //         .limit(1)
+  //         .get()
+  //         .then(
+  //             (snapshot) => snapshot.docs.isEmpty ? null : snapshot.docs.first);
+
+  //     if (supervisorDoc == null) {
+  //       _showErrorMessage('No se encontró el empleado');
+  //       return;
+  //     }
+
+  //     var supervisorData = supervisorDoc.data();
+  //     List<Usuario> myTeam = [];
+  //     if (supervisorData['MyTeam'] is List) {
+  //       myTeam = (supervisorData['MyTeam'] as List)
+  //           .map((teamMember) => Usuario.fromMap(teamMember))
+  //           .toList();
+  //     }
+
+  //     // Mostrar diálogo de confirmación si hay vendedores asignados
+  //     if (myTeam.isNotEmpty) {
+  //       bool proceed = await _showDeleteConfirmationDialog(myTeam.length);
+  //       if (!proceed) return;
+  //     }
+
+  //     // Actualizar vendedores en el batch
+  //     await _updateAssignedVendedores(myTeam, batch);
+
+  //     // Eliminar al supervisor
+  //     batch.delete(supervisorDoc.reference);
+
+  //     // Commitear las operaciones en un solo batch
+  //     await batch.commit();
+
+  //     // Actualizar la UI
+  //     setState(() {
+  //       employees.removeWhere((e) => e.codigo == employee.codigo);
+  //     });
+
+  //     // Reload users
+  //     await _loadUsers();
+
+  //     _showSuccessMessage('Empleado eliminado con éxito');
+  //   } catch (e) {
+  //     _showErrorMessage('Error al eliminar el empleado: $e');
+  //   }
+  // }
+
   Future<void> _deleteEmployee(Usuario employee) async {
     try {
-      // Realiza la consulta en un solo batch para mayor eficiencia
+      // Crear un batch para operaciones
       final batch = FirebaseFirestore.instance.batch();
 
-      // Obtener supervisor y vendedores asignados
+      // Obtener el documento del supervisor
       final supervisorDoc = await FirebaseFirestore.instance
           .collection('Users')
           .where('Codigo', isEqualTo: employee.codigo)
@@ -759,7 +815,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
             .toList();
       }
 
-      // Mostrar diálogo de confirmación si hay vendedores asignados
+      // Mostrar confirmación si hay vendedores asignados
       if (myTeam.isNotEmpty) {
         bool proceed = await _showDeleteConfirmationDialog(myTeam.length);
         if (!proceed) return;
@@ -771,7 +827,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
       // Eliminar al supervisor
       batch.delete(supervisorDoc.reference);
 
-      // Commitear las operaciones en un solo batch
+      // Commitear todas las operaciones
       await batch.commit();
 
       // Actualizar la UI
@@ -779,7 +835,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
         employees.removeWhere((e) => e.codigo == employee.codigo);
       });
 
-      // Reload users
+      // Recargar usuarios
       await _loadUsers();
 
       _showSuccessMessage('Empleado eliminado con éxito');
@@ -822,6 +878,26 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
         false;
   }
 
+// // Método para actualizar vendedores asignados
+//   Future<void> _updateAssignedVendedores(
+//       List<Usuario> myTeam, WriteBatch batch) async {
+//     if (myTeam.isEmpty) return;
+
+//     final vendedoresQuerySnapshot = await FirebaseFirestore.instance
+//         .collection('Users')
+//         .where('Codigo', whereIn: myTeam.map((v) => v.codigo).toList())
+//         .get();
+
+//     for (final vendedorDoc in vendedoresQuerySnapshot.docs) {
+//       batch.update(vendedorDoc.reference, {
+//         'Asignado': false,
+//         'CodSupervisor': '',
+//       });
+//     }
+
+//     await batch.commit();
+//   }
+
 // Método para actualizar vendedores asignados
   Future<void> _updateAssignedVendedores(
       List<Usuario> myTeam, WriteBatch batch) async {
@@ -838,8 +914,6 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
         'CodSupervisor': '',
       });
     }
-
-    await batch.commit();
   }
 
   //Métodos de utilidad para mostrar mensajes
