@@ -8,6 +8,7 @@ class Usuario {
   final String role;
   final String codigo;
   String codigoSupervisor;
+  String nombreSupervisor;
   final DateTime fechaIngreso;
   bool asignado;
   final List<Usuario> myTeam = [];
@@ -21,6 +22,7 @@ class Usuario {
     required this.role,
     this.codigo = '',
     this.codigoSupervisor = '',
+    this.nombreSupervisor = '',
     required this.fechaIngreso,
     this.asignado = false,
     this.imageUrl, // Se agrega como parámetro opcional en el constructor
@@ -37,6 +39,7 @@ class Usuario {
       role: data['Role'] ?? 'None',
       codigo: data['Codigo'] ?? '',
       codigoSupervisor: data['CodigoSupervisor'] ?? '',
+      nombreSupervisor: data['NombreSupervisor'] ?? '',
       fechaIngreso: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
@@ -55,6 +58,7 @@ class Usuario {
       'Role': role,
       'Codigo': codigo,
       'CodigoSupervisor': codigoSupervisor,
+      'NombreSupervisor': nombreSupervisor,
       'createdAt': fechaIngreso,
       'Asignado': asignado,
       'imageUrl': imageUrl, // Agregar la propiedad imageUrl al mapa
@@ -69,8 +73,8 @@ class Usuario {
       telefono: map['Telefono'] ?? map['telefono'] ?? '',
       role: map['Role'] ?? map['role'] ?? 'None',
       codigo: map['Codigo'] ?? map['codigo'] ?? '',
-      codigoSupervisor:
-          map['CodigoSupervisor'] ?? map['codigoSupervisor'] ?? '',
+      codigoSupervisor: map['CodigoSupervisor'] ?? map['codigoSupervisor'] ?? '',
+      nombreSupervisor: map['NombreSupervisor'] ?? map['nombreSupervisor'] ?? '',
       fechaIngreso: map['createdAt'] != null
           ? (map['createdAt'] is Timestamp
               ? (map['createdAt'] as Timestamp).toDate()

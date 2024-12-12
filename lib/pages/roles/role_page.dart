@@ -92,8 +92,8 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
     return code;
   }
 
-  Future<void> _saveOrUpdateEmployee(
-      Usuario? existingEmployee, List<Usuario> selectedUsers) async {
+  Future<void> _saveOrUpdateEmployee(Usuario? existingEmployee,
+      List<Usuario> selectedUsers, String nombreSupervisor) async {
     try {
       // Early validation to prevent unnecessary processing
       if (_nombresController.text.isEmpty ||
@@ -141,7 +141,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
 
       // Batch processing of user team updates
       await Future.wait([
-        _updateUserTeam(selectedUsers),
+        _updateUserTeam(selectedUsers, nombreSupervisor),
         _updateRemovedUsers(selectedUsers, _codigoController.text)
       ]);
 
@@ -174,7 +174,8 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
     }
   }
 
-  Future<void> _updateUserTeam(List<Usuario> selectedUsers) async {
+  Future<void> _updateUserTeam(
+      List<Usuario> selectedUsers, String nombreSupervisor) async {
     if (selectedUsers.isEmpty) return;
 
     final supervisorCode = _codigoController.text;
@@ -195,11 +196,13 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
         batch.update(doc.reference, {
           'Asignado': true,
           'CodSupervisor': supervisorCode,
+          'NombreSupervisor': nombreSupervisor
         });
 
         // Actualizamos la propiedad local del usuario
         user.asignado = true;
         user.codigoSupervisor = supervisorCode;
+        user.nombreSupervisor = nombreSupervisor;
       }
 
       // Ejecutamos todas las actualizaciones en un solo batch
@@ -224,10 +227,8 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
       for (final doc in previouslyAssignedSnapshot.docs) {
         // Verificamos si este usuario no está en los usuarios seleccionados
         if (!selectedUsers.any((user) => user.codigo == doc['Codigo'])) {
-          batch.update(doc.reference, {
-            'Asignado': false,
-            'CodSupervisor': '',
-          });
+          batch.update(doc.reference,
+              {'Asignado': false, 'CodSupervisor': '', 'NombreSupervisor': ''});
         }
       }
 
@@ -253,6 +254,916 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
     return uniqueUsers;
   }
 
+  //ESTE ES EL METODO ORIGINAL NO BORRAR AUN
+  // Future<void> _showFormDialog(BuildContext context, Usuario? employee) async {
+  //   final formKey = GlobalKey<FormState>();
+  //   final ValueNotifier<bool> isEditable =
+  //       ValueNotifier<bool>(employee == null);
+  //   final TextEditingController searchController = TextEditingController();
+  //   final ValueNotifier<String> searchQuery = ValueNotifier<String>('');
+  //   final ValueNotifier<List<Usuario>> selectedVendedoresNotifier =
+  //       ValueNotifier<List<Usuario>>([]);
+
+  //   // Preparar controladores y datos iniciales
+  //   if (employee != null) {
+  //     final userDoc = await FirebaseFirestore.instance
+  //         .collection('Users')
+  //         .where('Codigo', isEqualTo: employee.codigo)
+  //         .limit(1)
+  //         .get()
+  //         .then((snapshot) => snapshot.docs.first);
+
+  //     final myTeam = (userDoc.data()['MyTeam'] as List<dynamic>?)
+  //             ?.map((item) => Usuario.fromMap(item as Map<String, dynamic>))
+  //             .toList() ??
+  //         [];
+
+  //     selectedVendedoresNotifier.value = myTeam;
+
+  //     _populateEmployeeData(employee, selectedVendedoresNotifier);
+  //   } else {
+  //     _clearEmployeeData();
+  //   }
+
+  //   Future<List<Usuario>> fetchVendedores() async =>
+  //       _fetchVendedoresLogic(employee);
+
+  //   void toggleSelection(Usuario vendedor) {
+  //     final currentSelected = selectedVendedoresNotifier.value;
+  //     selectedVendedoresNotifier.value = currentSelected
+  //             .any((v) => v.codigo == vendedor.codigo)
+  //         ? currentSelected.where((v) => v.codigo != vendedor.codigo).toList()
+  //         : [...currentSelected, vendedor];
+  //   }
+
+  //   bool matchesSearchQuery(Usuario vendedor, String query) {
+  //     final fullName =
+  //         '${vendedor.nombres} ${vendedor.apellidos}'.toLowerCase();
+  //     final codigo = vendedor.codigo.toLowerCase();
+  //     query = query.toLowerCase().trim();
+  //     return fullName.contains(query) || codigo.contains(query);
+  //   }
+
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return Dialog(
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(16),
+  //         ),
+  //         elevation: 0,
+  //         backgroundColor: Colors.transparent,
+  //         child: LayoutBuilder(
+  //           builder: (context, constraints) {
+  //             final modalWidth = constraints.maxWidth > 1024
+  //                 ? constraints.maxWidth * 0.5
+  //                 : constraints.maxWidth > 768
+  //                     ? constraints.maxWidth * 0.7
+  //                     : constraints.maxWidth * 0.9;
+
+  //             return Container(
+  //               width: modalWidth,
+  //               padding: const EdgeInsets.all(24),
+  //               decoration: BoxDecoration(
+  //                 color: Colors.white,
+  //                 borderRadius: BorderRadius.circular(16),
+  //               ),
+  //               child: SingleChildScrollView(
+  //                 child: Column(
+  //                   mainAxisSize: MainAxisSize.min,
+  //                   crossAxisAlignment: CrossAxisAlignment.start,
+  //                   children: <Widget>[
+  //                     // Título del modal
+  //                     Row(
+  //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                       children: [
+  //                         const Text(
+  //                           'Editar Rol',
+  //                           style: TextStyle(
+  //                             fontSize: 24,
+  //                             fontWeight: FontWeight.bold,
+  //                             color: Colors.black87,
+  //                           ),
+  //                         ),
+  //                         IconButton(
+  //                           icon:
+  //                               const Icon(Icons.close, color: Colors.black54),
+  //                           onPressed: () => Navigator.of(context).pop(),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                     const SizedBox(height: 24),
+  //                     // Formulario
+  //                     Form(
+  //                       key: formKey,
+  //                       child: ValueListenableBuilder<bool>(
+  //                         valueListenable: isEditable,
+  //                         builder: (context, editable, _) {
+  //                           final isLargeScreen = constraints.maxWidth > 986;
+  //                           return Column(
+  //                             children: [
+  //                               _buildResponsiveRow(isLargeScreen, [
+  //                                 _buildInputField(
+  //                                     _nombresController, 'Nombres'),
+  //                                 _buildInputField(
+  //                                     _apellidosController, 'Apellidos'),
+  //                               ]),
+  //                               _buildResponsiveRow(isLargeScreen, [
+  //                                 _buildInputField(_emailController, 'Email',
+  //                                     isEmail: true),
+  //                                 _buildInputField(
+  //                                     _telefonoController, 'Teléfono'),
+  //                               ]),
+  //                               _buildResponsiveRow(isLargeScreen, [
+  //                                 _buildDropdown(
+  //                                   selectedRole,
+  //                                   (String? newValue) {
+  //                                     setState(() {
+  //                                       selectedRole = newValue!;
+  //                                     });
+  //                                   },
+  //                                 ),
+  //                                 _buildDatePicker(
+  //                                     context,
+  //                                     _fechaIngresoController,
+  //                                     'Fecha de Ingreso'),
+  //                               ]),
+  //                             ],
+  //                           );
+  //                         },
+  //                       ),
+  //                     ),
+  //                     const SizedBox(height: 24),
+  //                     // Lista de vendedores para el rol Supervisor
+  //                     if (selectedRole == 'Supervisor') ...[
+  //                       const Padding(
+  //                         padding: EdgeInsets.symmetric(vertical: 8.0),
+  //                         child: Text(
+  //                           "Lista de Vendedores",
+  //                           style: TextStyle(
+  //                               fontSize: 18, fontWeight: FontWeight.bold),
+  //                         ),
+  //                       ),
+  //                       TextField(
+  //                         controller: searchController,
+  //                         onChanged: (value) => searchQuery.value = value,
+  //                         decoration: InputDecoration(
+  //                           labelText: 'Buscar vendedor',
+  //                           prefixIcon: const Icon(Icons.search),
+  //                           suffixIcon: IconButton(
+  //                             icon: const Icon(Icons.clear),
+  //                             onPressed: () {
+  //                               searchController.clear();
+  //                               searchQuery.value = '';
+  //                             },
+  //                           ),
+  //                           border: OutlineInputBorder(
+  //                             borderRadius: BorderRadius.circular(8),
+  //                           ),
+  //                         ),
+  //                       ),
+  //                       const SizedBox(height: 12),
+  //                       FutureBuilder<List<Usuario>>(
+  //                         future: fetchVendedores(),
+  //                         builder: (context, snapshot) {
+  //                           if (snapshot.connectionState ==
+  //                               ConnectionState.waiting) {
+  //                             return const Center(
+  //                                 child: CircularProgressIndicator());
+  //                           } else if (snapshot.hasError) {
+  //                             return Text('Error: ${snapshot.error}');
+  //                           } else if (!snapshot.hasData ||
+  //                               snapshot.data!.isEmpty) {
+  //                             return const Text(
+  //                                 'No se encontraron vendedores.');
+  //                           } else {
+  //                             final vendedores = snapshot.data!;
+  //                             vendedores.sort(
+  //                                 (a, b) => a.nombres.compareTo(b.nombres));
+
+  //                             return ValueListenableBuilder<String>(
+  //                               valueListenable: searchQuery,
+  //                               builder: (context, query, _) {
+  //                                 final filteredVendedores = vendedores
+  //                                     .where((vendedor) =>
+  //                                         matchesSearchQuery(vendedor, query))
+  //                                     .toList();
+
+  //                                 return ValueListenableBuilder<List<Usuario>>(
+  //                                   valueListenable: selectedVendedoresNotifier,
+  //                                   builder: (context, selectedVendedores, _) {
+  //                                     return SizedBox(
+  //                                       height: 200,
+  //                                       child: ListView.builder(
+  //                                         shrinkWrap: true,
+  //                                         itemCount: filteredVendedores.length,
+  //                                         itemBuilder: (context, index) {
+  //                                           final vendedor =
+  //                                               filteredVendedores[index];
+
+  //                                           final isSelected =
+  //                                               selectedVendedores.any(
+  //                                             (v) =>
+  //                                                 v.codigo == vendedor.codigo,
+  //                                           );
+
+  //                                           return Container(
+  //                                             margin:
+  //                                                 const EdgeInsets.symmetric(
+  //                                                     vertical: 4),
+  //                                             decoration: BoxDecoration(
+  //                                               color: Colors.grey[100],
+  //                                               borderRadius:
+  //                                                   BorderRadius.circular(8),
+  //                                               border: Border.all(
+  //                                                   color:
+  //                                                       Colors.grey.shade300),
+  //                                             ),
+  //                                             child: ListTile(
+  //                                               leading: const Icon(
+  //                                                   Icons.person,
+  //                                                   color: Colors.indigo),
+  //                                               title: Text(
+  //                                                 '${vendedor.nombres} ${vendedor.apellidos}',
+  //                                                 style: const TextStyle(
+  //                                                     fontWeight:
+  //                                                         FontWeight.w600),
+  //                                               ),
+  //                                               subtitle:
+  //                                                   constraints.maxWidth > 375
+  //                                                       ? Text(vendedor.codigo)
+  //                                                       : null,
+  //                                               trailing: IconButton(
+  //                                                 onPressed: () =>
+  //                                                     toggleSelection(vendedor),
+  //                                                 icon: Icon(
+  //                                                   isSelected
+  //                                                       ? Icons.check_circle
+  //                                                       : Icons.circle_outlined,
+  //                                                   color: isSelected
+  //                                                       ? Colors.green
+  //                                                       : null,
+  //                                                 ),
+  //                                               ),
+  //                                             ),
+  //                                           );
+  //                                         },
+  //                                       ),
+  //                                     );
+  //                                   },
+  //                                 );
+  //                               },
+  //                             );
+  //                           }
+  //                         },
+  //                       ),
+  //                     ],
+  //                     const SizedBox(height: 24),
+  //                     Row(
+  //                       mainAxisAlignment: MainAxisAlignment.end,
+  //                       children: [
+  //                         Flexible(
+  //                           child: ValueListenableBuilder<bool>(
+  //                             valueListenable: ValueNotifier<bool>(
+  //                                 constraints.maxWidth >
+  //                                     375), // iPhone SE tiene 375px de ancho
+  //                             builder: (context, showText, _) {
+  //                               return TextButton.icon(
+  //                                 onPressed: () => Navigator.of(context).pop(),
+  //                                 icon: const Icon(Icons.cancel),
+  //                                 label: showText
+  //                                     ? const Text('Cancelar')
+  //                                     : const SizedBox.shrink(),
+  //                               );
+  //                             },
+  //                           ),
+  //                         ),
+  //                         const SizedBox(width: 8),
+  //                         Flexible(
+  //                           child: ValueListenableBuilder<bool>(
+  //                             valueListenable: ValueNotifier<bool>(
+  //                                 constraints.maxWidth > 375),
+  //                             builder: (context, showText, _) {
+  //                               return ElevatedButton.icon(
+  //                                 onPressed: () {
+  //                                   if (formKey.currentState!.validate()) {
+  //                                     _saveOrUpdateEmployee(
+  //                                       employee!,
+  //                                       selectedVendedoresNotifier.value,
+  //                                     );
+  //                                     Navigator.of(context).pop();
+  //                                   }
+  //                                 },
+  //                                 icon: const Icon(Icons.save),
+  //                                 label: showText
+  //                                     ? const Text('Guardar')
+  //                                     : const SizedBox.shrink(),
+  //                               );
+  //                             },
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
+  // Future<void> _showFormDialog(BuildContext context, Usuario? employee) async {
+  //   final formKey = GlobalKey<FormState>();
+  //   final ValueNotifier<bool> isEditable = ValueNotifier<bool>(employee == null);
+  //   final TextEditingController searchController = TextEditingController();
+  //   final ValueNotifier<String> searchQuery = ValueNotifier<String>('');
+  //   final ValueNotifier<List<Usuario>> selectedVendedoresNotifier = ValueNotifier<List<Usuario>>([]);
+  //   final bool isVendedor = employee?.role == 'Vendedor'; // Nuevo: Verificar rol
+  //   final String nombreSupervisor = '${employee?.nombres} ${employee?.apellidos}';
+
+  //   // Preparar controladores y datos iniciales
+  //   if (employee != null) {
+  //     final userDoc = await FirebaseFirestore.instance
+  //         .collection('Users')
+  //         .where('Codigo', isEqualTo: employee.codigo)
+  //         .limit(1)
+  //         .get()
+  //         .then((snapshot) => snapshot.docs.first);
+
+  //     final myTeam = (userDoc.data()['MyTeam'] as List<dynamic>?)
+  //             ?.map((item) => Usuario.fromMap(item as Map<String, dynamic>))
+  //             .toList() ??
+  //         [];
+
+  //     selectedVendedoresNotifier.value = myTeam;
+
+  //     _populateEmployeeData(employee, selectedVendedoresNotifier);
+  //   } else {
+  //     _clearEmployeeData();
+  //   }
+
+  //   Future<List<Usuario>> fetchVendedores() async =>
+  //       _fetchVendedoresLogic(employee);
+
+  //   void toggleSelection(Usuario vendedor) {
+  //     final currentSelected = selectedVendedoresNotifier.value;
+  //     selectedVendedoresNotifier.value = currentSelected
+  //             .any((v) => v.codigo == vendedor.codigo)
+  //         ? currentSelected.where((v) => v.codigo != vendedor.codigo).toList()
+  //         : [...currentSelected, vendedor];
+  //   }
+
+  //   bool matchesSearchQuery(Usuario vendedor, String query) {
+  //     final fullName =
+  //         '${vendedor.nombres} ${vendedor.apellidos}'.toLowerCase();
+  //     final codigo = vendedor.codigo.toLowerCase();
+  //     query = query.toLowerCase().trim();
+  //     return fullName.contains(query) || codigo.contains(query);
+  //   }
+
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return Dialog(
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(16),
+  //         ),
+  //         elevation: 0,
+  //         backgroundColor: Colors.transparent,
+  //         child: LayoutBuilder(
+  //           builder: (context, constraints) {
+  //             final modalWidth = constraints.maxWidth > 1024
+  //                 ? constraints.maxWidth * 0.5
+  //                 : constraints.maxWidth > 768
+  //                     ? constraints.maxWidth * 0.7
+  //                     : constraints.maxWidth * 0.9;
+
+  //             return Container(
+  //               width: modalWidth,
+  //               padding: const EdgeInsets.all(24),
+  //               decoration: BoxDecoration(
+  //                 color: Colors.white,
+  //                 borderRadius: BorderRadius.circular(16),
+  //               ),
+  //               child: SingleChildScrollView(
+  //                 child: Column(
+  //                   mainAxisSize: MainAxisSize.min,
+  //                   crossAxisAlignment: CrossAxisAlignment.start,
+  //                   children: <Widget>[
+  //                     // Título del modal
+  //                     Row(
+  //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                       children: [
+  //                         const Text(
+  //                           'Editar Rol',
+  //                           style: TextStyle(
+  //                             fontSize: 24,
+  //                             fontWeight: FontWeight.bold,
+  //                             color: Colors.black87,
+  //                           ),
+  //                         ),
+  //                         IconButton(
+  //                           icon:
+  //                               const Icon(Icons.close, color: Colors.black54),
+  //                           onPressed: () => Navigator.of(context).pop(),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                     const SizedBox(height: 24),
+  //                     // Mostrar título condicional si el rol es "Vendedor"
+  //                     if (isVendedor) ...[
+  //                       Center(
+  //                         child: Padding(
+  //                           padding: const EdgeInsets.symmetric(vertical: 8.0),
+  //                           child: Text(
+  //                             employee!.codigoSupervisor == ""
+  //                                 ? "Este vendedor no tiene un supervisor asignado"
+  //                                 : "Este vendedor está asignado a: ${employee.codigoSupervisor}",
+  //                             style: const TextStyle(
+  //                               fontSize: 18,
+  //                               fontWeight: FontWeight.bold,
+  //                               color: Colors.indigo,
+  //                             ),
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ],
+
+  //                     // Formulario
+  //                     Form(
+  //                       key: formKey,
+  //                       child: ValueListenableBuilder<bool>(
+  //                         valueListenable: isEditable,
+  //                         builder: (context, editable, _) {
+  //                           final isLargeScreen = constraints.maxWidth > 986;
+  //                           return Column(
+  //                             children: [
+  //                               _buildResponsiveRow(isLargeScreen, [
+  //                                 _buildInputField(
+  //                                     _nombresController, 'Nombres'),
+  //                                 _buildInputField(
+  //                                     _apellidosController, 'Apellidos'),
+  //                               ]),
+  //                               _buildResponsiveRow(isLargeScreen, [
+  //                                 _buildInputField(_emailController, 'Email',
+  //                                     isEmail: true),
+  //                                 _buildInputField(
+  //                                     _telefonoController, 'Teléfono'),
+  //                               ]),
+  //                               _buildResponsiveRow(isLargeScreen, [
+  //                                 _buildDropdown(
+  //                                   selectedRole,
+  //                                   (String? newValue) {
+  //                                     setState(() {
+  //                                       selectedRole = newValue!;
+  //                                     });
+  //                                   },
+  //                                 ),
+  //                                 _buildDatePicker(
+  //                                     context,
+  //                                     _fechaIngresoController,
+  //                                     'Fecha de Ingreso'),
+  //                               ]),
+  //                             ],
+  //                           );
+  //                         },
+  //                       ),
+  //                     ),
+  //                     const SizedBox(height: 24),
+  //                     // Otros contenidos...
+  //                     if (selectedRole == 'Supervisor') ...[
+  //                       const Padding(
+  //                         padding: EdgeInsets.symmetric(vertical: 8.0),
+  //                         child: Text(
+  //                           "Lista de Vendedores",
+  //                           style: TextStyle(
+  //                               fontSize: 18, fontWeight: FontWeight.bold),
+  //                         ),
+  //                       ),
+  //                       TextField(
+  //                         controller: searchController,
+  //                         onChanged: (value) => searchQuery.value = value,
+  //                         decoration: InputDecoration(
+  //                           labelText: 'Buscar vendedor',
+  //                           prefixIcon: const Icon(Icons.search),
+  //                           suffixIcon: IconButton(
+  //                             icon: const Icon(Icons.clear),
+  //                             onPressed: () {
+  //                               searchController.clear();
+  //                               searchQuery.value = '';
+  //                             },
+  //                           ),
+  //                           border: OutlineInputBorder(
+  //                             borderRadius: BorderRadius.circular(8),
+  //                           ),
+  //                         ),
+  //                       ),
+  //                       const SizedBox(height: 12),
+  //                       FutureBuilder<List<Usuario>>(
+  //                         future: fetchVendedores(),
+  //                         builder: (context, snapshot) {
+  //                           if (snapshot.connectionState ==
+  //                               ConnectionState.waiting) {
+  //                             return const Center(
+  //                                 child: CircularProgressIndicator());
+  //                           } else if (snapshot.hasError) {
+  //                             return Text('Error: ${snapshot.error}');
+  //                           } else if (!snapshot.hasData ||
+  //                               snapshot.data!.isEmpty) {
+  //                             return const Text(
+  //                                 'No se encontraron vendedores.');
+  //                           } else {
+  //                             final vendedores = snapshot.data!;
+  //                             vendedores.sort(
+  //                                 (a, b) => a.nombres.compareTo(b.nombres));
+
+  //                             return ValueListenableBuilder<String>(
+  //                               valueListenable: searchQuery,
+  //                               builder: (context, query, _) {
+  //                                 final filteredVendedores = vendedores
+  //                                     .where((vendedor) =>
+  //                                         matchesSearchQuery(vendedor, query))
+  //                                     .toList();
+
+  //                                 return ValueListenableBuilder<List<Usuario>>(
+  //                                   valueListenable: selectedVendedoresNotifier,
+  //                                   builder: (context, selectedVendedores, _) {
+  //                                     return SizedBox(
+  //                                       height: 200,
+  //                                       child: ListView.builder(
+  //                                         shrinkWrap: true,
+  //                                         itemCount: filteredVendedores.length,
+  //                                         itemBuilder: (context, index) {
+  //                                           final vendedor =
+  //                                               filteredVendedores[index];
+
+  //                                           final isSelected =
+  //                                               selectedVendedores.any(
+  //                                             (v) =>
+  //                                                 v.codigo == vendedor.codigo,
+  //                                           );
+
+  //                                           return Container(
+  //                                             margin:
+  //                                                 const EdgeInsets.symmetric(
+  //                                                     vertical: 4),
+  //                                             decoration: BoxDecoration(
+  //                                               color: Colors.grey[100],
+  //                                               borderRadius:
+  //                                                   BorderRadius.circular(8),
+  //                                               border: Border.all(
+  //                                                   color:
+  //                                                       Colors.grey.shade300),
+  //                                             ),
+  //                                             child: ListTile(
+  //                                               leading: const Icon(
+  //                                                   Icons.person,
+  //                                                   color: Colors.indigo),
+  //                                               title: Text(
+  //                                                 '${vendedor.nombres} ${vendedor.apellidos}',
+  //                                                 style: const TextStyle(
+  //                                                     fontWeight:
+  //                                                         FontWeight.w600),
+  //                                               ),
+  //                                               subtitle:
+  //                                                   constraints.maxWidth > 375
+  //                                                       ? Text(vendedor.codigo)
+  //                                                       : null,
+  //                                               trailing: IconButton(
+  //                                                 onPressed: () =>
+  //                                                     toggleSelection(vendedor),
+  //                                                 icon: Icon(
+  //                                                   isSelected
+  //                                                       ? Icons.check_circle
+  //                                                       : Icons.circle_outlined,
+  //                                                   color: isSelected
+  //                                                       ? Colors.green
+  //                                                       : null,
+  //                                                 ),
+  //                                               ),
+  //                                             ),
+  //                                           );
+  //                                         },
+  //                                       ),
+  //                                     );
+  //                                   },
+  //                                 );
+  //                               },
+  //                             );
+  //                           }
+  //                         },
+  //                       ),
+  //                     ],
+  //                     const SizedBox(height: 24),
+  //                     Row(
+  //                       mainAxisAlignment: MainAxisAlignment.end,
+  //                       children: [
+  //                         Flexible(
+  //                           child: ValueListenableBuilder<bool>(
+  //                             valueListenable: ValueNotifier<bool>(
+  //                                 constraints.maxWidth > 375),
+  //                             builder: (context, showText, _) {
+  //                               return TextButton.icon(
+  //                                 onPressed: () => Navigator.of(context).pop(),
+  //                                 icon: const Icon(Icons.cancel),
+  //                                 label: showText
+  //                                     ? const Text('Cancelar')
+  //                                     : const SizedBox.shrink(),
+  //                               );
+  //                             },
+  //                           ),
+  //                         ),
+  //                         const SizedBox(width: 8),
+  //                         Flexible(
+  //                           child: ValueListenableBuilder<bool>(
+  //                             valueListenable: ValueNotifier<bool>(
+  //                                 constraints.maxWidth > 375),
+  //                             builder: (context, showText, _) {
+  //                               return ElevatedButton.icon(
+  //                                 onPressed: () {
+  //                                   if (formKey.currentState!.validate()) {
+  //                                     _saveOrUpdateEmployee(
+  //                                       employee!,
+  //                                       selectedVendedoresNotifier.value,nombreSupervisor
+  //                                     );
+  //                                     Navigator.of(context).pop();
+  //                                   }
+  //                                 },
+  //                                 icon: const Icon(Icons.save),
+  //                                 label: showText
+  //                                     ? const Text('Guardar')
+  //                                     : const SizedBox.shrink(),
+  //                               );
+  //                             },
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
+  // Future<void> _showFormDialog(BuildContext context, Usuario? employee) async {
+  //   final formKey = GlobalKey<FormState>();
+  //   final ValueNotifier<bool> isEditable =
+  //       ValueNotifier<bool>(employee == null);
+  //   final TextEditingController searchController = TextEditingController();
+  //   final ValueNotifier<String> searchQuery = ValueNotifier<String>('');
+  //   final ValueNotifier<List<Usuario>> selectedVendedoresNotifier =  ValueNotifier<List<Usuario>>([]);
+  //   final String nombreSupervisor = '${employee?.nombres} ${employee?.apellidos}';
+
+  //   // Preparar controladores y datos iniciales
+  //   if (employee != null) {
+  //     final userDoc = await FirebaseFirestore.instance
+  //         .collection('Users')
+  //         .where('Codigo', isEqualTo: employee.codigo)
+  //         .limit(1)
+  //         .get()
+  //         .then((snapshot) => snapshot.docs.first);
+
+  //     final myTeam = (userDoc.data()['MyTeam'] as List<dynamic>?)
+  //             ?.map((item) => Usuario.fromMap(item as Map<String, dynamic>))
+  //             .toList() ??
+  //         [];
+
+  //     selectedVendedoresNotifier.value = myTeam;
+
+  //     _populateEmployeeData(employee, selectedVendedoresNotifier);
+  //   } else {
+  //     _clearEmployeeData();
+  //   }
+
+  //   Future<List<Usuario>> fetchVendedores() async =>
+  //       _fetchVendedoresLogic(employee);
+
+  //   void toggleSelection(Usuario vendedor) {
+  //     final currentSelected = selectedVendedoresNotifier.value;
+  //     selectedVendedoresNotifier.value = currentSelected
+  //             .any((v) => v.codigo == vendedor.codigo)
+  //         ? currentSelected.where((v) => v.codigo != vendedor.codigo).toList()
+  //         : [...currentSelected, vendedor];
+  //   }
+
+  //   bool matchesSearchQuery(Usuario vendedor, String query) {
+  //     final fullName =
+  //         '${vendedor.nombres} ${vendedor.apellidos}'.toLowerCase();
+  //     final codigo = vendedor.codigo.toLowerCase();
+  //     query = query.toLowerCase().trim();
+  //     return fullName.contains(query) || codigo.contains(query);
+  //   }
+
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return Dialog(
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(16),
+  //         ),
+  //         elevation: 0,
+  //         backgroundColor: Colors.transparent,
+  //         child: LayoutBuilder(
+  //           builder: (context, constraints) {
+  //             final modalWidth = constraints.maxWidth > 1024
+  //                 ? constraints.maxWidth * 0.5
+  //                 : constraints.maxWidth > 768
+  //                     ? constraints.maxWidth * 0.7
+  //                     : constraints.maxWidth * 0.9;
+
+  //             return Container(
+  //               width: modalWidth,
+  //               padding: const EdgeInsets.all(24),
+  //               decoration: BoxDecoration(
+  //                 color: Colors.white,
+  //                 borderRadius: BorderRadius.circular(16),
+  //               ),
+  //               child: SingleChildScrollView(
+  //                 child: Column(
+  //                   mainAxisSize: MainAxisSize.min,
+  //                   crossAxisAlignment: CrossAxisAlignment.start,
+  //                   children: <Widget>[
+  //                     // Título del modal
+  //                     Row(
+  //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                       children: [
+  //                         const Text(
+  //                           'Editar Rol',
+  //                           style: TextStyle(
+  //                             fontSize: 24,
+  //                             fontWeight: FontWeight.bold,
+  //                             color: Colors.black87,
+  //                           ),
+  //                         ),
+  //                         IconButton(
+  //                           icon:
+  //                               const Icon(Icons.close, color: Colors.black54),
+  //                           onPressed: () => Navigator.of(context).pop(),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                     const SizedBox(height: 24),
+  //                     // Formulario
+  //                     Form(
+  //                       key: formKey,
+  //                       child: ValueListenableBuilder<bool>(
+  //                         valueListenable: isEditable,
+  //                         builder: (context, editable, _) {
+  //                           final isLargeScreen = constraints.maxWidth > 986;
+  //                           return Column(
+  //                             children: [
+  //                               // Nueva sección para mostrar información del supervisor
+  //                               if (selectedRole == 'Vendedor')
+  //                                 FutureBuilder<DocumentSnapshot>(
+  //                                   future: FirebaseFirestore.instance
+  //                                       .collection('Users')
+  //                                       .where('Codigo',
+  //                                           isEqualTo: employee?.codigo)
+  //                                       .limit(1)
+  //                                       .get()
+  //                                       .then(
+  //                                           (snapshot) => snapshot.docs.first),
+  //                                   builder: (context, snapshot) {
+  //                                     if (snapshot.connectionState ==
+  //                                         ConnectionState.waiting) {
+  //                                       return CircularProgressIndicator();
+  //                                     }
+
+  //                                     if (snapshot.hasData) {
+  //                                       final data = snapshot.data!.data()
+  //                                           as Map<String, dynamic>?;
+  //                                       final codSupervisor =
+  //                                           data?['CodSupervisor']
+  //                                                   ?.toString() ??
+  //                                               '';
+  //                                       final nombreSupervisor =
+  //                                           data?['NombreSupervisor']
+  //                                                   ?.toString() ??
+  //                                               '';
+
+  //                                       return Padding(
+  //                                         padding: const EdgeInsets.only(
+  //                                             bottom: 16.0),
+  //                                         child: Text(
+  //                                           codSupervisor.isEmpty
+  //                                               ? "El vendedor no está asignado a un supervisor"
+  //                                               : "El vendedor está asignado al supervisor $nombreSupervisor con Codigo $codSupervisor",
+  //                                           style: TextStyle(
+  //                                             color: codSupervisor.isEmpty
+  //                                                 ? Colors.red
+  //                                                 : Colors.green,
+  //                                             fontWeight: FontWeight.bold,
+  //                                             fontSize: 16,
+  //                                           ),
+  //                                         ),
+  //                                       );
+  //                                     }
+
+  //                                     return SizedBox.shrink();
+  //                                   },
+  //                                 ),
+
+  //                               _buildResponsiveRow(isLargeScreen, [
+  //                                 _buildInputField(
+  //                                     _nombresController, 'Nombres'),
+  //                                 _buildInputField(
+  //                                     _apellidosController, 'Apellidos'),
+  //                               ]),
+  //                               _buildResponsiveRow(isLargeScreen, [
+  //                                 _buildInputField(_emailController, 'Email',
+  //                                     isEmail: true),
+  //                                 _buildInputField(
+  //                                     _telefonoController, 'Teléfono'),
+  //                               ]),
+  //                               _buildResponsiveRow(isLargeScreen, [
+  //                                 _buildDropdown(
+  //                                   selectedRole,
+  //                                   (String? newValue) {
+  //                                     setState(() {
+  //                                       selectedRole = newValue!;
+  //                                     });
+  //                                   },
+  //                                 ),
+  //                                 _buildDatePicker(
+  //                                     context,
+  //                                     _fechaIngresoController,
+  //                                     'Fecha de Ingreso'),
+  //                               ]),
+  //                             ],
+  //                           );
+  //                         },
+  //                       ),
+  //                     ),
+  //                     const SizedBox(height: 24),
+  //                     // Resto del código permanece igual...
+  //                     // (El código de la sección de vendedores para Supervisor)
+
+  //                     const SizedBox(height: 24),
+  //                     Row(
+  //                       mainAxisAlignment: MainAxisAlignment.end,
+  //                       children: [
+  //                         Flexible(
+  //                           child: ValueListenableBuilder<bool>(
+  //                             valueListenable: ValueNotifier<bool>(
+  //                                 constraints.maxWidth >
+  //                                     375), // iPhone SE tiene 375px de ancho
+  //                             builder: (context, showText, _) {
+  //                               return TextButton.icon(
+  //                                 onPressed: () => Navigator.of(context).pop(),
+  //                                 icon: const Icon(Icons.cancel),
+  //                                 label: showText
+  //                                     ? const Text('Cancelar')
+  //                                     : const SizedBox.shrink(),
+  //                               );
+  //                             },
+  //                           ),
+  //                         ),
+  //                         const SizedBox(width: 8),
+  //                         Flexible(
+  //                           child: ValueListenableBuilder<bool>(
+  //                             valueListenable: ValueNotifier<bool>(
+  //                                 constraints.maxWidth > 375),
+  //                             builder: (context, showText, _) {
+  //                               return ElevatedButton.icon(
+  //                                 onPressed: () {
+  //                                   if (formKey.currentState!.validate()) {
+  //                                     _saveOrUpdateEmployee(
+  //                                       employee!,
+  //                                       selectedVendedoresNotifier.value,nombreSupervisor
+  //                                     );
+  //                                     Navigator.of(context).pop();
+  //                                   }
+  //                                 },
+  //                                 icon: const Icon(Icons.save),
+  //                                 label: showText
+  //                                     ? const Text('Guardar')
+  //                                     : const SizedBox.shrink(),
+  //                               );
+  //                             },
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
+  //ESTE FUNCIONA PERO HACE MUCHAS CONSULTAS A LA BASE Y NO ES OPTIMO
   Future<void> _showFormDialog(BuildContext context, Usuario? employee) async {
     final formKey = GlobalKey<FormState>();
     final ValueNotifier<bool> isEditable =
@@ -261,6 +1172,8 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
     final ValueNotifier<String> searchQuery = ValueNotifier<String>('');
     final ValueNotifier<List<Usuario>> selectedVendedoresNotifier =
         ValueNotifier<List<Usuario>>([]);
+    final String nombreSupervisor =
+        '${employee?.nombres} ${employee?.apellidos}';
 
     // Preparar controladores y datos iniciales
     if (employee != null) {
@@ -360,6 +1273,134 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
                             final isLargeScreen = constraints.maxWidth > 986;
                             return Column(
                               children: [
+                                // if (selectedRole == 'Vendedor')
+                                //   FutureBuilder<dynamic>(
+                                //     future: () async {
+                                //       // First, get the user document
+                                //       final userDoc = await FirebaseFirestore
+                                //           .instance
+                                //           .collection('Users')
+                                //           .where('Codigo',
+                                //               isEqualTo: employee?.codigo)
+                                //           .limit(1)
+                                //           .get()
+                                //           .then((snapshot) =>
+                                //               snapshot.docs.first);
+
+                                //       final data = userDoc.data()
+                                //           as Map<String, dynamic>?;
+                                //       final codSupervisor =
+                                //           data?['CodSupervisor']?.toString() ??
+                                //               '';
+
+                                //       // If there's a CodSupervisor, fetch the supervisor's details
+                                //       if (codSupervisor.isNotEmpty) {
+                                //         final supervisorDoc =
+                                //             await FirebaseFirestore.instance
+                                //                 .collection('Users')
+                                //                 .where('Codigo',
+                                //                     isEqualTo: codSupervisor)
+                                //                 .limit(1)
+                                //                 .get()
+                                //                 .then((snapshot) =>
+                                //                     snapshot.docs.first);
+
+                                //         return {
+                                //           'codSupervisor': codSupervisor,
+                                //           'supervisorData': supervisorDoc.data()
+                                //         };
+                                //       }
+
+                                //       return {'codSupervisor': codSupervisor};
+                                //     }(),
+                                //     builder: (context, snapshot) {
+                                //       if (snapshot.connectionState ==
+                                //           ConnectionState.waiting) {
+                                //         return const CircularProgressIndicator();
+                                //       }
+
+                                //       if (snapshot.hasData) {
+                                //         final data = snapshot.data
+                                //             as Map<String, dynamic>;
+                                //         final codSupervisor =
+                                //             data['codSupervisor'] as String;
+                                //         final supervisorData =
+                                //             data['supervisorData']
+                                //                 as Map<String, dynamic>?;
+
+                                //         return Padding(
+                                //           padding: const EdgeInsets.only(
+                                //               bottom: 16.0),
+                                //           child: Text(
+                                //             codSupervisor.isEmpty
+                                //                 ? "El vendedor no está asignado a un supervisor"
+                                //                 : "El vendedor está asignado al supervisor ${supervisorData?['Nombre'] ?? ''} ${supervisorData?['Apellidos'] ?? ''} con código ${supervisorData?['Codigo'] ?? ''}",
+                                //             style: TextStyle(
+                                //               color: codSupervisor.isEmpty
+                                //                   ? Colors.red
+                                //                   : Colors.green,
+                                //               fontWeight: FontWeight.bold,
+                                //               fontSize: 16,
+                                //             ),
+                                //           ),
+                                //         );
+                                //       }
+
+                                //       return const SizedBox.shrink();
+                                //     },
+                                //   ),
+
+                                if (selectedRole == 'Vendedor')
+                                  FutureBuilder<DocumentSnapshot>(
+                                    future: FirebaseFirestore.instance
+                                        .collection('Users')
+                                        .where('Codigo',
+                                            isEqualTo: employee?.codigo)
+                                        .limit(1)
+                                        .get()
+                                        .then(
+                                            (snapshot) => snapshot.docs.first),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return CircularProgressIndicator();
+                                      }
+
+                                      if (snapshot.hasData) {
+                                        final data = snapshot.data!.data()
+                                            as Map<String, dynamic>?;
+                                        final codSupervisor =
+                                            data?['CodSupervisor']
+                                                    ?.toString() ??
+                                                '';
+
+                                        final nombreSupervisor =
+                                            data?['NombreSupervisor']
+                                                    ?.toString() ??
+                                                '';
+
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                              bottom: 16.0),
+                                          child: Text(
+                                            codSupervisor.isEmpty
+                                                ? "El vendedor no está asignado a un supervisor"
+                                                : "El vendedor está asignado al supervisor $nombreSupervisor con código $codSupervisor",
+                                            style: TextStyle(
+                                              color: codSupervisor.isEmpty
+                                                  ? Colors.red
+                                                  : Colors.green,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        );
+                                      }
+
+                                      return SizedBox.shrink();
+                                    },
+                                  ),
+
                                 _buildResponsiveRow(isLargeScreen, [
                                   _buildInputField(
                                       _nombresController, 'Nombres'),
@@ -392,7 +1433,6 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      // Lista de vendedores para el rol Supervisor
                       if (selectedRole == 'Supervisor') ...[
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -546,9 +1586,9 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
                                   onPressed: () {
                                     if (formKey.currentState!.validate()) {
                                       _saveOrUpdateEmployee(
-                                        employee!,
-                                        selectedVendedoresNotifier.value,
-                                      );
+                                          employee!,
+                                          selectedVendedoresNotifier.value,
+                                          nombreSupervisor);
                                       Navigator.of(context).pop();
                                     }
                                   },
@@ -653,43 +1693,6 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
           )
         : Column(children: children);
   }
-
-  // Widget _buildInputField(TextEditingController controller, String label,
-  //     {bool isEmail = false}) {
-  //   return Padding(
-  //     padding: const EdgeInsets.only(bottom: 16),
-  //     child: TextFormField(
-  //       controller: controller,
-  //       decoration: InputDecoration(
-  //         labelText: label,
-  //         border: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: BorderSide(color: Colors.grey[300]!),
-  //         ),
-  //         enabledBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: BorderSide(color: Colors.grey[300]!),
-  //         ),
-  //         focusedBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: const BorderSide(color: Colors.indigo),
-  //         ),
-  //         filled: true,
-  //         fillColor: Colors.grey[50],
-  //       ),
-  //       validator: (value) {
-  //         if (value == null || value.isEmpty) {
-  //           return 'Por favor ingrese $label';
-  //         }
-  //         if (isEmail &&
-  //             !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-  //           return 'Por favor ingrese un email válido';
-  //         }
-  //         return null;
-  //       },
-  //     ),
-  //   );
-  // }
 
   Widget _buildInputField(TextEditingController controller, String label,
       {bool isEmail = false}) {
@@ -887,10 +1890,8 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
         .get();
 
     for (final vendedorDoc in vendedoresQuerySnapshot.docs) {
-      batch.update(vendedorDoc.reference, {
-        'Asignado': false,
-        'CodSupervisor': '',
-      });
+      batch.update(vendedorDoc.reference,
+          {'Asignado': false, 'CodSupervisor': '', 'NombreSupervisor': ''});
     }
   }
 
