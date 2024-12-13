@@ -441,34 +441,83 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
                                 //       'Fecha de Ingreso'),
                                 // ]),
 
+                                // _buildResponsiveRow(isLargeScreen, [
+                                //   // Si el employee es null o nombreSupervisor está vacío, muestra el dropdown
+                                //   if (employee == null ||
+                                //       employee.nombreSupervisor.isEmpty ||
+                                //       (employee.role == 'Supervisor' && employee.myTeam.isEmpty))
+                                //     _buildDropdown(
+                                //       selectedRole,
+                                //       (String? newValue) {
+                                //         setState(() {
+                                //           selectedRole = newValue!;
+                                //         });
+                                //       },
+                                //     ),
+                                //     _buildDatePicker(
+                                //           context,
+                                //           _fechaIngresoController,
+                                //           'Fecha de Ingreso')
+                                //   else
+                                //     // Expandir el DatePicker para ocupar todo el espacio cuando no hay dropdown
+                                //     Expanded(
+                                //       child: _buildDatePicker(
+                                //           context,
+                                //           _fechaIngresoController,
+                                //           'Fecha de Ingreso'),
+                                //     ),
+
+                                //   // Si hay dropdown, mantener el DatePicker normal
+                                //   // if (employee == null ||
+                                //   //     employee.nombreSupervisor.isEmpty)
+                                //   //   _buildDatePicker(
+                                //   //       context,
+                                //   //       _fechaIngresoController,
+                                //   //       'Fecha de Ingreso'),
+                                // ]),
+
                                 _buildResponsiveRow(isLargeScreen, [
-                                  // Si el employee es null o nombreSupervisor está vacío, muestra el dropdown
-                                  if (employee == null ||
-                                      employee.nombreSupervisor.isEmpty)
+                                  // Cambié las condiciones para asegurar que todas se evalúen correctamente
+                                  if ((employee!.role == 'Supervisor' && selectedVendedoresNotifier.value.isEmpty)) ...[
                                     _buildDropdown(
                                       selectedRole,
                                       (String? newValue) {
                                         setState(() {
+                                          // Mantengo el setState dentro del Dropdown
                                           selectedRole = newValue!;
                                         });
                                       },
-                                    )
-                                  else
-                                    // Expandir el DatePicker para ocupar todo el espacio cuando no hay dropdown
-                                    Expanded(
-                                      child: _buildDatePicker(
-                                          context,
-                                          _fechaIngresoController,
-                                          'Fecha de Ingreso'),
                                     ),
-
-                                  // Si hay dropdown, mantener el DatePicker normal
-                                  if (employee == null ||
-                                      employee.nombreSupervisor.isEmpty)
                                     _buildDatePicker(
-                                        context,
-                                        _fechaIngresoController,
-                                        'Fecha de Ingreso'),
+                                      context,
+                                      _fechaIngresoController,
+                                      'Fecha de Ingreso',
+                                    ),
+                                  ] else if ((employee.role == 'Vendedor' && employee.nombreSupervisor.isEmpty)) ...[
+                                    // Evaluación de todas las condiciones antes de decidir mostrar widgets
+                                    _buildDropdown(
+                                      selectedRole,
+                                      (String? newValue) {
+                                        setState(() {
+                                          // Mantengo el setState dentro del Dropdown
+                                          selectedRole = newValue!;
+                                        });
+                                      },
+                                    ),
+                                    _buildDatePicker(
+                                      // Mostrando el DatePicker en conjunto si las condiciones se cumplen
+                                      context,
+                                      _fechaIngresoController,
+                                      'Fecha de Ingreso',
+                                    ),
+                                  ] else ...[
+                                    _buildDatePicker(
+                                      // Mostrando el DatePicker en conjunto si las condiciones se cumplen
+                                      context,
+                                      _fechaIngresoController,
+                                      'Fecha de Ingreso',
+                                    ),
+                                  ]
                                 ]),
 
                                 // _buildResponsiveRow(isLargeScreen, [
