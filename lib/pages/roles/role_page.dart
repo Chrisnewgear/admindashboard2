@@ -409,7 +409,6 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
                                           ),
                                         );
                                       }
-
                                       return const SizedBox.shrink();
                                     },
                                   ),
@@ -425,57 +424,6 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
                                   _buildInputField(
                                       _telefonoController, 'Teléfono'),
                                 ]),
-                                // _buildResponsiveRow(isLargeScreen, [
-                                //   _buildDropdown(
-                                //     selectedRole,
-                                //     (String? newValue) {
-                                //       setState(() {
-                                //         selectedRole = newValue!;
-                                //       });
-                                //     },
-                                //     mostrar: employee!.asignado, // Forzar que no sea nulo (cuidado con esto)
-                                //   ),
-                                //   _buildDatePicker(
-                                //       context,
-                                //       _fechaIngresoController,
-                                //       'Fecha de Ingreso'),
-                                // ]),
-
-                                // _buildResponsiveRow(isLargeScreen, [
-                                //   // Si el employee es null o nombreSupervisor está vacío, muestra el dropdown
-                                //   if (employee == null ||
-                                //       employee.nombreSupervisor.isEmpty ||
-                                //       (employee.role == 'Supervisor' && employee.myTeam.isEmpty))
-                                //     _buildDropdown(
-                                //       selectedRole,
-                                //       (String? newValue) {
-                                //         setState(() {
-                                //           selectedRole = newValue!;
-                                //         });
-                                //       },
-                                //     ),
-                                //     _buildDatePicker(
-                                //           context,
-                                //           _fechaIngresoController,
-                                //           'Fecha de Ingreso')
-                                //   else
-                                //     // Expandir el DatePicker para ocupar todo el espacio cuando no hay dropdown
-                                //     Expanded(
-                                //       child: _buildDatePicker(
-                                //           context,
-                                //           _fechaIngresoController,
-                                //           'Fecha de Ingreso'),
-                                //     ),
-
-                                //   // Si hay dropdown, mantener el DatePicker normal
-                                //   // if (employee == null ||
-                                //   //     employee.nombreSupervisor.isEmpty)
-                                //   //   _buildDatePicker(
-                                //   //       context,
-                                //   //       _fechaIngresoController,
-                                //   //       'Fecha de Ingreso'),
-                                // ]),
-
                                 _buildResponsiveRow(isLargeScreen, [
                                   // Cambié las condiciones para asegurar que todas se evalúen correctamente
                                   if ((employee!.role == 'Supervisor' && selectedVendedoresNotifier.value.isEmpty)) ...[
@@ -519,47 +467,6 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
                                     ),
                                   ]
                                 ]),
-
-                                // _buildResponsiveRow(isLargeScreen, [
-                                //   if (employee == null ||
-                                //       employee.nombreSupervisor.isEmpty)
-                                //     _buildDropdown(
-                                //       selectedRole,
-                                //       (String? newValue) {
-                                //         setState(() {
-                                //           selectedRole = newValue!;
-                                //         });
-                                //       },
-                                //     )
-                                //   else
-                                //     // Mantener un ancho fijo para el DatePicker
-                                //     SizedBox(
-                                //       width:
-                                //           200, // Ajusta el ancho fijo según tus necesidades
-                                //       child: _buildDatePicker(
-                                //         context,
-                                //         _fechaIngresoController,
-                                //         'Fecha de Ingreso',
-                                //       ),
-                                //     ),
-
-                                //   // Si hay dropdown, mantener el DatePicker en tamaño fijo
-                                //   if (employee == null ||
-                                //       employee.nombreSupervisor.isEmpty)
-                                //     Padding(
-                                //       padding: const EdgeInsets.symmetric(
-                                //           horizontal: 8.0),
-                                //       child: SizedBox(
-                                //         width:
-                                //             200, // Ajusta el ancho fijo según tus necesidades
-                                //         child: _buildDatePicker(
-                                //           context,
-                                //           _fechaIngresoController,
-                                //           'Fecha de Ingreso',
-                                //         ),
-                                //       ),
-                                //     ),
-                                // ]),
                               ],
                             );
                           },
