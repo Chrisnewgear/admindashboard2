@@ -1,18 +1,17 @@
 import 'package:admindashboard/models/visits.dart';
-//import 'package:admindashboard/widgets/enhanced_search_bar.dart';
 import 'package:admindashboard/widgets/search_bar.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ResponsiveVisitasTable extends StatefulWidget {
+class ResponsiveMyTeamTable extends StatefulWidget {
   final List<Visita> visitas;
   final Function(Visita) deleteVisit;
   final Function(BuildContext, dynamic, bool) showVisitFormDialog;
   final bool isLoading;
   final Future<bool> Function() hasRole;
 
-  const ResponsiveVisitasTable({
+  const ResponsiveMyTeamTable({
     super.key,
     required this.visitas,
     required this.deleteVisit,
@@ -22,10 +21,10 @@ class ResponsiveVisitasTable extends StatefulWidget {
   });
 
   @override
-  State<ResponsiveVisitasTable> createState() => _ResponsiveVisitasTableState();
+  State<ResponsiveMyTeamTable> createState() => _ResponsiveMyTeamTableState();
 }
 
-class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
+class _ResponsiveMyTeamTableState extends State<ResponsiveMyTeamTable> {
   List<Visita> filteredVisitas = [];
   final TextEditingController _searchController = TextEditingController();
   bool isSearchExpanded = false;
@@ -136,7 +135,7 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
   }
 
   @override
-  void didUpdateWidget(ResponsiveVisitasTable oldWidget) {
+  void didUpdateWidget(ResponsiveMyTeamTable oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.visitas != widget.visitas) {
       _filterVisitas();
@@ -148,93 +147,6 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
     _searchController.dispose();
     super.dispose();
   }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return LayoutBuilder(
-  //     builder: (context, constraints) {
-  //       final bool isSmallScreen = constraints.maxWidth <= 430;
-
-  //       return SizedBox(
-  //         height: 200,
-  //         child: Card(
-  //           elevation: 4,
-  //           color: Colors.white,
-  //           shape:
-  //               RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-  //           child: Padding(
-  //             padding: const EdgeInsets.all(16),
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Row(
-  //                   children: [
-  //                     Expanded(
-  //                       child: EnhancedSearchBar(
-  //                         controller: _searchController,
-  //                         onClear: _clearSearch,
-  //                         hintText: 'Buscar visitas...',
-  //                         accentColor: Theme.of(context).primaryColor,
-  //                         onSearchStateChanged: (isExpanded) {
-  //                           setState(() {
-  //                             isSearchExpanded = isExpanded;
-  //                           });
-  //                         },
-  //                       ),
-  //                     ),
-  //                     const SizedBox(width: 8),
-  //                     AnimatedContainer(
-  //                       duration: const Duration(milliseconds: 300),
-  //                       curve: Curves.easeInOut,
-  //                       child: ElevatedButton(
-  //                         onPressed: (widget.isLoading || !hasRol)
-  //                             ? null
-  //                             : () => widget.showClientVisitFormDialog(
-  //                                 context, null, true),
-  //                         style: ElevatedButton.styleFrom(
-  //                           foregroundColor: Colors.blue,
-  //                           backgroundColor: Colors.white,
-  //                           shape: RoundedRectangleBorder(
-  //                             borderRadius: BorderRadius.circular(8),
-  //                           ),
-  //                           padding: (isSmallScreen && isSearchExpanded)
-  //                               ? const EdgeInsets.all(8)
-  //                               : const EdgeInsets.symmetric(
-  //                                   horizontal: 16, vertical: 8),
-  //                         ),
-  //                         child: Row(
-  //                           mainAxisSize: MainAxisSize.min,
-  //                           children: [
-  //                             const Icon(Icons.add_circle_outline, size: 20),
-  //                             AnimatedSize(
-  //                               duration: const Duration(milliseconds: 300),
-  //                               child: (isSmallScreen && isSearchExpanded)
-  //                                   ? const SizedBox.shrink()
-  //                                   : const Row(
-  //                                       children: [
-  //                                         SizedBox(width: 8),
-  //                                         Text('Nueva Visita'),
-  //                                       ],
-  //                                     ),
-  //                             ),
-  //                           ],
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //                 const SizedBox(height: 16),
-  //                 Expanded(
-  //                   child: _buildTableContent(context, constraints),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {

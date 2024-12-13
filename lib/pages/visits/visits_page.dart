@@ -7,14 +7,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 
-class VisitsManagementWidget extends StatefulWidget {
-  const VisitsManagementWidget({super.key});
+class VisitsPage extends StatefulWidget {
+  const VisitsPage({super.key});
 
   @override
-  _VisitsManagementWidgetState createState() => _VisitsManagementWidgetState();
+  State<VisitsPage> createState() => _VisitsPageState();
 }
 
-class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
+class _VisitsPageState extends State<VisitsPage> {
   bool isLoading = false;
   String selectedPurpose = 'Venta';
   List<String> purpose = ['Venta', 'Seguimiento', 'Renovación', 'Resolución'];
@@ -235,15 +235,6 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       Navigator.of(context).pop();
     }
   }
-  // void _showErrorMessage(BuildContext context, String errorMessage) {
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text('Error: $errorMessage'),
-  //       backgroundColor: Colors.red,
-  //     ),
-  //   );
-  // }
-
   Future<GeoPoint?> _getCurrentLocation(BuildContext context) async {
     try {
       // Verificar permisos
@@ -763,41 +754,6 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       ),
     );
   }
-  // //ESTE ES EL ORIGINAL
-  // Widget _buildNotesField(TextEditingController controller, String label,
-  //     {required bool enabled}) {
-  //   return Padding(
-  //     padding: const EdgeInsets.only(bottom: 16),
-  //     child: Container(
-
-  //       child: TextFormField(
-  //         enabled: enabled,
-  //         controller: controller,
-  //         maxLines: null, // Permite múltiples líneas
-  //         keyboardType: TextInputType
-  //             .multiline, // Configura el teclado para entrada de texto largo
-  //         decoration: InputDecoration(
-  //           labelText: label,
-  //           border: OutlineInputBorder(
-  //             borderRadius: BorderRadius.circular(8),
-  //             borderSide: BorderSide(color: Colors.grey[300]!),
-  //           ),
-  //           enabledBorder: OutlineInputBorder(
-  //             borderRadius: BorderRadius.circular(8),
-  //             borderSide: BorderSide(color: Colors.grey[300]!),
-  //           ),
-  //           focusedBorder: OutlineInputBorder(
-  //             borderRadius: BorderRadius.circular(8),
-  //             borderSide: const BorderSide(color: Colors.indigo),
-  //           ),
-  //           filled: true,
-  //           fillColor: Colors.grey[50],
-  //         ),
-  //         // Sin validación porque no es un campo obligatorio
-  //       ),
-  //     ),
-  //   );
-  // }//<-- HASTA AQUI
 
   Widget _buildNotesField(TextEditingController controller, String label,
       {required bool enabled}) {
@@ -856,16 +812,6 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       ),
     );
   }
-
-  // Widget _buildTextField(TextEditingController controller, String label,
-  //     {int maxLines = 1}) {
-  //   return TextFormField(
-  //     controller: controller,
-  //     decoration: InputDecoration(labelText: label),
-  //     maxLines: maxLines,
-  //     validator: (value) => value!.isEmpty ? 'Este campo es requerido' : null,
-  //   );
-  // }
 
   @override
   void dispose() {

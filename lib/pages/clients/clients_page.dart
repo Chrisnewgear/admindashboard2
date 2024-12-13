@@ -12,7 +12,7 @@ class ClientsPage extends StatefulWidget {
   const ClientsPage({super.key});
 
   @override
-  _ClientsPageState createState() => _ClientsPageState();
+  State<ClientsPage> createState() => _ClientsPageState();
 }
 
 class _ClientsPageState extends State<ClientsPage> {

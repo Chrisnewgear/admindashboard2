@@ -313,14 +313,6 @@ class _MyTeamPageState extends State<MyTeamPage> {
           backgroundColor: Colors.transparent,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              // double modalWidth;
-              // if (constraints.maxWidth > 1024) {
-              //   modalWidth = constraints.maxWidth * 0.5;
-              // } else if (constraints.maxWidth > 768) {
-              //   modalWidth = constraints.maxWidth * 0.7;
-              // } else {
-              //   modalWidth = constraints.maxWidth * 0.9;
-
               double modalWidth;
               if (constraints.maxWidth > 1024) {
                 // iPad Pro y pantallas grandes

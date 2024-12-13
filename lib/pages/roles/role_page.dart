@@ -426,7 +426,9 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
                                 ]),
                                 _buildResponsiveRow(isLargeScreen, [
                                   // Cambié las condiciones para asegurar que todas se evalúen correctamente
-                                  if ((employee!.role == 'Supervisor' && selectedVendedoresNotifier.value.isEmpty)) ...[
+                                  if ((employee!.role == 'Supervisor' &&
+                                      selectedVendedoresNotifier
+                                          .value.isEmpty)) ...[
                                     _buildDropdown(
                                       selectedRole,
                                       (String? newValue) {
@@ -441,7 +443,25 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
                                       _fechaIngresoController,
                                       'Fecha de Ingreso',
                                     ),
-                                  ] else if ((employee.role == 'Vendedor' && employee.nombreSupervisor.isEmpty)) ...[
+                                  ] else if ((employee.role == 'Vendedor' &&
+                                      employee.nombreSupervisor.isEmpty)) ...[
+                                    // Evaluación de todas las condiciones antes de decidir mostrar widgets
+                                    _buildDropdown(
+                                      selectedRole,
+                                      (String? newValue) {
+                                        setState(() {
+                                          // Mantengo el setState dentro del Dropdown
+                                          selectedRole = newValue!;
+                                        });
+                                      },
+                                    ),
+                                    _buildDatePicker(
+                                      // Mostrando el DatePicker en conjunto si las condiciones se cumplen
+                                      context,
+                                      _fechaIngresoController,
+                                      'Fecha de Ingreso',
+                                    ),
+                                  ] else if ((employee.role == 'None')) ...[
                                     // Evaluación de todas las condiciones antes de decidir mostrar widgets
                                     _buildDropdown(
                                       selectedRole,
@@ -550,7 +570,10 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
                                                   const EdgeInsets.symmetric(
                                                       vertical: 4),
                                               decoration: BoxDecoration(
-                                                color: Colors.grey[100],
+                                                color: isSelected
+                                                    ? Colors.blue.shade100
+                                                    : Colors.grey[
+                                                        100], // Color azul tenue cuando está seleccionado
                                                 borderRadius:
                                                     BorderRadius.circular(8),
                                                 border: Border.all(
@@ -995,8 +1018,9 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
 
   Widget _buildDropdown(String currentValue, Function(String?) onChanged,
       {bool mostrar = true}) {
-    if (!mostrar)
+    if (!mostrar) {
       return const SizedBox.shrink(); // No muestra nada si mostrar es false
+    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
