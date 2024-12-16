@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:admindashboard/models/clients.dart';
 import 'package:admindashboard/pages/clients/widgets/clients_paginated_table.dart';
+import 'package:admindashboard/pages/myteam/widgets/myteam_paginated_table.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,7 +13,7 @@ class MyTeamPage extends StatefulWidget {
   const MyTeamPage({super.key});
 
   @override
-  _MyTeamPageState createState() => _MyTeamPageState();
+  State<MyTeamPage> createState() => _MyTeamPageState();
 }
 
 class _MyTeamPageState extends State<MyTeamPage> {
@@ -684,39 +685,26 @@ class _MyTeamPageState extends State<MyTeamPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Administrar Clientes'),
-      // ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Mis Clientes',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            // UserTable( clients: clients,
-            //   onDelete: _deleteClient,
-            //   onLoadUsers: _loadUsers,),
-            //_buildUserTable(context) // Llama al widget desde el archivo externo
-            Expanded(
-              child: ResponsiveClientsTable(
-                clientes: clientes,
-                deleteClient: (cliente) => _deleteClient(cliente),
-                showClientVisitFormDialog: (context, cliente, editModeOn) =>
-                    _showFormDialog(context, cliente, editModeOn),
-                isLoading: isLoading,
-                hasRole: _getRole,
-              ),
-            ),
-          ],
-        ),
+  return const Scaffold(
+    body: Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'My Team',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 24),
+          Expanded(
+            child: ResponsiveMyTeamTable(), // Corrección aquí
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   void _deleteClient(Cliente client) async {
       try {
