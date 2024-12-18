@@ -233,8 +233,10 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: isSearchExpanded
-              ? const EdgeInsets.all(0) // Shrink button size when search is expanded
-              : const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // Normal size
+              ? const EdgeInsets.all(
+                  0) // Shrink button size when search is expanded
+              : const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 12), // Normal size
           child: ElevatedButton(
             onPressed: (widget.isLoading || !hasRol)
                 ? null
@@ -321,120 +323,120 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
   }
 
   Widget _buildListView() {
+    final Map<String, Color> letterColors = {
+      'A': Colors.red,
+      'B': Colors.orange,
+      'C': Colors.yellow,
+      'D': Colors.green,
+      'E': Colors.blue,
+      'F': Colors.purple,
+      'G': Colors.pink,
+      'H': Colors.brown,
+      'I': Colors.grey,
+      'J': Colors.blueGrey,
+      'K': Colors.deepPurple,
+      'L': Colors.deepOrange,
+      'M': Colors.deepPurpleAccent,
+      'N': Colors.indigo,
+      'O': Colors.indigoAccent,
+      'P': Colors.pinkAccent,
+      'Q': Colors.purpleAccent,
+      'R': Colors.redAccent,
+      'S': Colors.teal,
+      'T': Colors.tealAccent,
+      'U': Colors.greenAccent,
+      'V': Colors.lightGreen,
+      'W': Colors.lightGreenAccent,
+      'X': Colors.amber,
+      'Y': Colors.amberAccent,
+      'Z': Colors.purple,
+    };
 
-  final Map<String, Color> letterColors = {
-    'A': Colors.red,
-    'B': Colors.orange,
-    'C': Colors.yellow,
-    'D': Colors.green,
-    'E': Colors.blue,
-    'F': Colors.purple,
-    'G': Colors.pink,
-    'H': Colors.brown,
-    'I': Colors.grey,
-    'J': Colors.blueGrey,
-    'K': Colors.deepPurple,
-    'L': Colors.deepOrange,
-    'M': Colors.deepPurpleAccent,
-    'N': Colors.indigo,
-    'O': Colors.indigoAccent,
-    'P': Colors.pinkAccent,
-    'Q': Colors.purpleAccent,
-    'R': Colors.redAccent,
-    'S': Colors.teal,
-    'T': Colors.tealAccent,
-    'U': Colors.greenAccent,
-    'V': Colors.lightGreen,
-    'W': Colors.lightGreenAccent,
-    'X': Colors.amber,
-    'Y': Colors.amberAccent,
-    'Z': Colors.purple,
-  };
+    return ListView.builder(
+      itemCount: filteredClientes.length,
+      itemBuilder: (context, index) {
+        final item = filteredClientes[index];
+        final firstLetter = item.nombre[0].toUpperCase();
+        final backgroundColor = letterColors[firstLetter] ??
+            Colors.grey; // Default color if not found
 
-
-  return ListView.builder(
-    itemCount: filteredClientes.length,
-    itemBuilder: (context, index) {
-      final item = filteredClientes[index];
-      final firstLetter = item.nombre[0].toUpperCase();
-      final backgroundColor = letterColors[firstLetter] ?? Colors.grey; // Default color if not found
-
-      return AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        child: Card(
-          elevation: 3,  // Slightly higher elevation for a more defined shadow
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          color: const Color( 0xFFFFFFFF),  // Light pastel beige color
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),  // Slightly more rounded corners
-            onTap: () => widget.showClientVisitFormDialog(context, item, false),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: backgroundColor,
-                        child: Text(
-                          firstLetter,
-                          style: const TextStyle(color: Colors.white),
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          child: Card(
+            elevation: 3, // Slightly higher elevation for a more defined shadow
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            color: const Color(0xFFFFFFFF), // Light pastel beige color
+            child: InkWell(
+              borderRadius:
+                  BorderRadius.circular(12), // Slightly more rounded corners
+              onTap: () =>
+                  widget.showClientVisitFormDialog(context, item, false),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: backgroundColor,
+                          child: Text(
+                            firstLetter,
+                            style: const TextStyle(color: Colors.white),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${item.nombre} ${item.apellido}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${item.nombre} ${item.apellido}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              item.email,
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
+                              const SizedBox(height: 4),
+                              Text(
+                                item.email,
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              item.empresa,
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
+                              const SizedBox(height: 4),
+                              Text(
+                                item.empresa,
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              item.telefono,
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
+                              const SizedBox(height: 4),
+                              Text(
+                                item.telefono,
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      _buildPopupMenu(item),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                ],
+                        _buildPopupMenu(item),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
-
+        );
+      },
+    );
+  }
 
   Widget _buildPopupMenu(Cliente cliente) {
     return PopupMenuButton<String>(
