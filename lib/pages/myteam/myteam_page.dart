@@ -70,10 +70,8 @@ class _MyTeamPageState extends State<MyTeamPage> {
               });
             }
           }
-
         }
       }
-
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -85,39 +83,7 @@ class _MyTeamPageState extends State<MyTeamPage> {
       );
     }
   }
-
-  // Future<bool> _getRole() async {
-  //   bool hasRole = false;
-
-  //   try {
-  //     // Get the current user
-  //     User? currentUser = FirebaseAuth.instance.currentUser;
-  //     if (currentUser != null) {
-  //       // Fetch the user document from Firestore
-  //       DocumentSnapshot userDoc = await FirebaseFirestore.instance
-  //           .collection('Users')
-  //           .doc(currentUser.uid)
-  //           .get();
-
-  //       if (userDoc.exists) {
-  //         hasRole = userDoc.get('Role') == 'Supervisor' ? false : true;
-  //       }
-  //     }
-
-  //     return hasRole;
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content:
-  //             Text('Error al cargar información del usuario y visitas: $e'),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //   }
-
-  //   return hasRole;
-  // }
-
+  
   Future<void> _loadUsers() async {
     setState(() {
       isLoading = true; // Activar loading al inicio de la carga
@@ -156,114 +122,6 @@ class _MyTeamPageState extends State<MyTeamPage> {
       );
     }
   }
-
-  // Future<String> _getNextClientCode() async {
-  //   Random random = Random();
-  //   String code = '';
-  //   bool isUnique = false;
-
-  //   while (!isUnique) {
-  //     // Generar un número aleatorio de 6 dígitos
-  //     int randomNumber = random.nextInt(900000) + 100000; // Asegura 6 dígitos
-  //     code = 'USR$randomNumber';
-
-  //     // Verificar si el código ya existe en Firebase
-  //     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-  //         .collection('Clients')
-  //         .where('Codigo', isEqualTo: code)
-  //         .limit(1)
-  //         .get();
-
-  //     if (querySnapshot.docs.isEmpty) {
-  //       isUnique = true; // El código es único
-  //     }
-  //   }
-
-  //   return code;
-  // }
-
-  // Future<void> _saveOrUpdateClient(
-  //     BuildContext context, Cliente? existingClient) async {
-  //   final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-  //   // Mostrar el diálogo de carga al iniciar la operación
-  //   showLoadingDialog(context);
-
-  //   try {
-  //     // Mostrar el loading
-  //     showDialog(
-  //       context: context,
-  //       barrierDismissible: false,
-  //       builder: (BuildContext context) {
-  //         return const Center(
-  //           child: SpinKitFadingCircle(
-  //             color: Colors.blue,
-  //             size: 50.0,
-  //           ),
-  //         );
-  //       },
-  //     );
-
-  //     final user = FirebaseAuth.instance.currentUser;
-  //     if (user == null) {
-  //       throw Exception('No hay ningún usuario logeado.');
-  //     }
-
-  //     final clientData = {
-  //       'Nombre': _nombresController.text,
-  //       'Apellidos': _apellidosController.text,
-  //       'email': _emailController.text,
-  //       'Telefono': _telefonoController.text,
-  //       'Direccion': _direccionController.text,
-  //       'Empresa': _empresaController.text,
-  //       'CodVendedor': currentVendorCode,
-  //       'UserId': user.uid,
-  //       'updatedAt': Timestamp.now(),
-  //     };
-
-  //     if (existingClient == null) {
-  //       clientData['Codigo'] = await _getNextClientCode();
-  //       clientData['createdAt'] = Timestamp.now();
-  //       await FirebaseFirestore.instance.collection('Clients').add(clientData);
-  //     } else {
-  //       await FirebaseFirestore.instance
-  //           .collection('Clients')
-  //           .where('Codigo', isEqualTo: existingClient.codigo)
-  //           .limit(1)
-  //           .get()
-  //           .then((querySnapshot) {
-  //         if (querySnapshot.docs.isNotEmpty) {
-  //           return querySnapshot.docs.first.reference.update(clientData);
-  //         } else {
-  //           throw Exception('No se encontró el cliente a actualizar');
-  //         }
-  //       });
-  //     }
-
-  //     await _loadUsers();
-  //     _clearFormFields();
-
-  //     Navigator.of(context, rootNavigator: true).pop();
-  //     scaffoldMessenger.showSnackBar(
-  //       SnackBar(
-  //         content: Text(existingClient == null
-  //             ? 'Cliente creado exitosamente'
-  //             : 'Cliente actualizado exitosamente'),
-  //         backgroundColor: Colors.green,
-  //       ),
-  //     );
-  //   } catch (e) {
-  //     Navigator.of(context, rootNavigator: true).pop();
-  //     scaffoldMessenger.showSnackBar(
-  //       SnackBar(
-  //         content: Text('Error: ${e.toString()}'),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //   } finally {
-  //     Navigator.of(context, rootNavigator: true).pop();
-  //   }
-  // }
 
   void _clearFormFields() {
     _nombresController.clear();
@@ -527,148 +385,6 @@ class _MyTeamPageState extends State<MyTeamPage> {
   //   );
   // }
 
-  // Widget _buildResponsiveRow(bool isLargeScreen, List<Widget> children) {
-  //   return isLargeScreen
-  //       ? Row(
-  //           children: children
-  //               .map((child) => Expanded(
-  //                     child: Padding(
-  //                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-  //                       child: child,
-  //                     ),
-  //                   ))
-  //               .toList(),
-  //         )
-  //       : Column(children: children);
-  // }
-
-  // Widget _buildInputField(TextEditingController controller, String label,
-  //     {bool isEmail = false, required bool enabled}) {
-  //   // Check if the field requires validation
-  //   bool requiresValidation =
-  //       label == 'Nombres*' || label == 'Apellidos*' || label == 'Teléfono*';
-
-  //   return Padding(
-  //     padding: const EdgeInsets.only(bottom: 16),
-  //     child: TextFormField(
-  //       enabled: enabled,
-  //       controller: controller,
-  //       decoration: InputDecoration(
-  //         labelText: requiresValidation ? label : label.replaceAll('*', ''),
-  //         border: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: BorderSide(color: Colors.grey[300]!),
-  //         ),
-  //         enabledBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: BorderSide(color: Colors.grey[300]!),
-  //         ),
-  //         focusedBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: const BorderSide(color: Colors.indigo),
-  //         ),
-  //         filled: true,
-  //         fillColor: Colors.grey[50],
-  //       ),
-  //       validator: (value) {
-  //         // Only validate required fields
-  //         if (requiresValidation) {
-  //           if (value == null || value.isEmpty) {
-  //             return 'Por favor ingrese ${label.replaceAll('*', '')}';
-  //           }
-  //           // Validate phone number field
-  //           if (label == 'Teléfono*' && value.length > 10) {
-  //             return 'El número de teléfono debe tener 10 dígitos o menos';
-  //           }
-  //         }
-  //         // Email validation is optional now
-  //         if (isEmail &&
-  //             value!.isNotEmpty &&
-  //             !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-  //           return 'Por favor ingrese un email válido';
-  //         }
-  //         return null;
-  //       },
-  //       inputFormatters: label == 'Teléfono*'
-  //           ? [
-  //               FilteringTextInputFormatter.digitsOnly,
-  //               LengthLimitingTextInputFormatter(10),
-  //             ]
-  //           : [], // Limita a 10 dígitos y solo números
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildDatePicker(
-  //     BuildContext context, TextEditingController controller, String label,
-  //     {required bool enabled}) {
-  //   return Padding(
-  //     padding: const EdgeInsets.only(bottom: 16),
-  //     child: TextFormField(
-  //       enabled: enabled,
-  //       controller: controller,
-  //       decoration: InputDecoration(
-  //         labelText: label,
-  //         labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
-  //         border: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: BorderSide(color: Colors.grey[300]!),
-  //         ),
-  //         enabledBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: BorderSide(color: Colors.grey[300]!),
-  //         ),
-  //         focusedBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(8),
-  //           borderSide: const BorderSide(color: Colors.indigo),
-  //         ),
-  //         filled: true,
-  //         fillColor: Colors.grey[50],
-  //         suffixIcon: const Icon(
-  //           Icons.calendar_today_outlined,
-  //           color: Colors.indigo,
-  //         ),
-  //       ),
-  //       readOnly: true,
-  //       onTap: enabled
-  //           ? () async {
-  //               DateTime? pickedDate = await showDatePicker(
-  //                 context: context,
-  //                 initialDate: DateTime.now(),
-  //                 firstDate: DateTime(2000),
-  //                 lastDate: DateTime(2101),
-  //                 builder: (BuildContext context, Widget? child) {
-  //                   return Theme(
-  //                     data: ThemeData.light().copyWith(
-  //                       colorScheme: const ColorScheme.light(
-  //                         primary: Colors.indigo,
-  //                         onPrimary: Colors.white,
-  //                         onSurface: Colors.indigo,
-  //                       ),
-  //                       textButtonTheme: TextButtonThemeData(
-  //                         style: TextButton.styleFrom(
-  //                           foregroundColor: Colors.indigo,
-  //                           backgroundColor: Colors.transparent,
-  //                         ),
-  //                       ),
-  //                     ),
-  //                     child: child!,
-  //                   );
-  //                 },
-  //               );
-  //               if (pickedDate != null) {
-  //                 String formattedDate =
-  //                     DateFormat('dd/MM/yyyy').format(pickedDate);
-  //                 controller.text = formattedDate;
-  //               }
-  //             }
-  //           : null,
-  //       // Remove validation for date picker
-  //       validator: null,
-  //     ),
-  //   );
-  // }
-
   @override
   void dispose() {
     _nombresController.dispose();
@@ -685,61 +401,25 @@ class _MyTeamPageState extends State<MyTeamPage> {
 
   @override
   Widget build(BuildContext context) {
-  return const Scaffold(
-    body: Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'My Team',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 24),
-          Expanded(
-            child: ResponsiveMyTeamTable(isLoading: true), // Corrección aquí
-          ),
-        ],
+    return const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'My Team',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 24),
+            Expanded(
+              child: ResponsiveMyTeamTable(isLoading: true), // Corrección aquí
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
-
-  // void _deleteClient(Cliente client) async {
-  //     try {
-  //       // Buscar el documento por el email del empleado
-  //       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-  //           .collection('Clients')
-  //           .where('Codigo', isEqualTo: client.codigo)
-  //           .limit(1)
-  //           .get();
-
-  //       if (querySnapshot.docs.isNotEmpty) {
-  //         // Eliminar el documento
-  //         await querySnapshot.docs.first.reference.delete();
-
-  //         // Actualizar la lista de empleados
-  //         setState(() {
-  //           clientes.removeWhere((e) => e.codigo == client.codigo);
-  //         });
-
-  //         await _loadUsers();
-
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           const SnackBar(content: Text('Cliente eliminado con éxito')),
-  //         );
-  //       } else {
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           const SnackBar(content: Text('No se encontró el cliente')),
-  //         );
-  //       }
-  //     } catch (e) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Error al eliminar el cliente: $e')),
-  //       );
-  //     }
-  // }
+    );
+  }
 }
 
 void showLoadingDialog(BuildContext context) {

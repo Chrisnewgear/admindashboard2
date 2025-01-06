@@ -9,36 +9,36 @@ class OverViewCardSmallScreen extends StatelessWidget {
     double width = MediaQuery.of(context).size.width;
 
     return SizedBox(
-      height: 400,
+      height: 350,
       child: Column(children: [
         InfoCardSmall(
-          title: "Rides in progress",
-          value: "7",
+          title: "Visitas",
+          value: "8",
           onTap: () {},
           isActive: true,
         ),
         SizedBox(
-          height: width / 64
+          height: width / 1024
         ),
 
         InfoCardSmall(
-          title: "Packages delivered",
+          title: "Clientes",
           value: "17",
           onTap: () {},
           isActive: true,
         ),
         SizedBox(
-          height: width / 64
+          height: width / 1024
         ),
 
         InfoCardSmall(
-          title: "Cancelled delivery",
+          title: "Ventas",
           value: "3",
           onTap: () {},
           isActive: true,
         ),
         SizedBox(
-          height: width / 64
+          height: width / 1024
         ),
 
         InfoCardSmall(
@@ -48,7 +48,7 @@ class OverViewCardSmallScreen extends StatelessWidget {
           isActive: true,
         ),
         SizedBox(
-          height: width / 64
+          height: width / 1024
         ),
       ]),
     );

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class RoleColorUtil {
   /// Devuelve un Color basado en el rol proporcionado
-  /// 
+  ///
   /// [role] es el rol del usuario en minúsculas
   /// Retorna un Color predefinido según el rol
   static Color getRoleColor(String role) {
