@@ -41,8 +41,6 @@ class InfoCard extends StatelessWidget {
         break;
     }
 
-
-
     return Expanded(
       child: InkWell(
         onTap: onTap,
@@ -50,7 +48,7 @@ class InfoCard extends StatelessWidget {
           height: 150,
           margin: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color: roleColor.withOpacity(0.1),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
