@@ -1,56 +1,140 @@
+// import 'package:admindashboard/pages/overview/widgets/info_card_small.dart';
+// import 'package:flutter/material.dart';
+
+// class OverViewCardSmallScreen extends StatelessWidget {
+//   const OverViewCardSmallScreen({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     double width = MediaQuery.of(context).size.width;
+
+//     return SizedBox(
+//       height: 350,
+//       child: Column(children: [
+//         InfoCardSmall(
+//           title: "Visitas",
+//           value: "8",
+//           onTap: () {},
+//           isActive: true,
+//         ),
+//         SizedBox(
+//           height: width / 1024
+//         ),
+
+//         InfoCardSmall(
+//           title: "Clientes",
+//           value: "17",
+//           onTap: () {},
+//           isActive: true,
+//         ),
+//         SizedBox(
+//           height: width / 1024
+//         ),
+
+//         InfoCardSmall(
+//           title: "Ventas",
+//           value: "3",
+//           onTap: () {},
+//           isActive: true,
+//         ),
+//         SizedBox(
+//           height: width / 1024
+//         ),
+
+//         InfoCardSmall(
+//           title: "Scheduled deliveries",
+//           value: "32",
+//           onTap: () {},
+//           isActive: true,
+//         ),
+//         SizedBox(
+//           height: width / 1024
+//         ),
+//       ]),
+//     );
+//   }
+// }
+
 import 'package:admindashboard/pages/overview/widgets/info_card_small.dart';
+import 'package:admindashboard/pages/roles/Widgets/role_color_util.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class OverViewCardSmallScreen extends StatelessWidget {
-  const OverViewCardSmallScreen({super.key});
+  OverViewCardSmallScreen({super.key});
+
+  final List<String> roles = ['Admin', 'Supervisor', 'Vendedor', 'None'];
+  late final Future<Map<String, int?>> _roleCountsFuture = _fetchRoleCounts();
+
+  Future<Map<String, int?>> _fetchRoleCounts() async {
+    final usersCollection = FirebaseFirestore.instance.collection('Users');
+    Map<String, int?> roleCounts = {for (var role in roles) role: 0};
+
+    try {
+      final querySnapshot = await usersCollection.get();
+      for (var doc in querySnapshot.docs) {
+        String role = doc['Role'] ?? 'None';
+        if (roleCounts.containsKey(role)) {
+          roleCounts[role] = (roleCounts[role] ?? 0) + 1;
+        }
+      }
+    } catch (e) {
+      // Manejo de errores
+      throw Exception("Error al obtener conteos de roles");
+    }
+
+    return roleCounts;
+  }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
 
-    return SizedBox(
-      height: 350,
-      child: Column(children: [
-        InfoCardSmall(
-          title: "Visitas",
-          value: "8",
-          onTap: () {},
-          isActive: true,
-        ),
-        SizedBox(
-          height: width / 1024
-        ),
+    return FutureBuilder<Map<String, int?>>(
+      future: _roleCountsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Mostrar CircularProgressIndicator mientras se cargan los datos
+          return Column(
+            children: [
+              for (int i = 0; i < roles.length; i++)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: InfoCardSmall(
+                    title: roles[i],
+                    value: "",
+                    topColor: RoleColorUtil.getRoleColor(roles[i]),
+                    onTap: () {},
+                    isLoading: true,
+                  ),
+                ),
+            ],
+          );
+        }
 
-        InfoCardSmall(
-          title: "Clientes",
-          value: "17",
-          onTap: () {},
-          isActive: true,
-        ),
-        SizedBox(
-          height: width / 1024
-        ),
+        if (snapshot.hasError) {
+          return Center(
+            child: Text("Error al cargar datos: ${snapshot.error}"),
+          );
+        }
 
-        InfoCardSmall(
-          title: "Ventas",
-          value: "3",
-          onTap: () {},
-          isActive: true,
-        ),
-        SizedBox(
-          height: width / 1024
-        ),
+        final roleCounts = snapshot.data ?? {};
 
-        InfoCardSmall(
-          title: "Scheduled deliveries",
-          value: "32",
-          onTap: () {},
-          isActive: true,
-        ),
-        SizedBox(
-          height: width / 1024
-        ),
-      ]),
+        return Column(
+          children: [
+            for (int i = 0; i < roles.length; i++)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: InfoCardSmall(
+                  title: roles[i],
+                  value: "${roleCounts[roles[i]] ?? 0}",
+                  topColor: RoleColorUtil.getRoleColor(roles[i]),
+                  onTap: () {},
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

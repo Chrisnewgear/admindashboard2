@@ -1,73 +1,5 @@
-import 'package:admindashboard/constants/style.dart';
+import 'package:admindashboard/pages/roles/Widgets/role_color_util.dart';
 import 'package:flutter/material.dart';
-
-// class InfoCard extends StatelessWidget {
-//   final String title;
-//   final String value;
-//   final Color? topColor;
-//   final bool isActive;
-//   final Function() onTap;
-//   const InfoCard(
-//       {super.key,
-//       required this.title,
-//       required this.value,
-//       this.isActive = false,
-//       required this.onTap,
-//       this.topColor});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Expanded(
-//       child: InkWell(
-//         onTap: onTap,
-//         child: Container(
-//           height: 136,
-//           alignment: Alignment.center,
-//           decoration: BoxDecoration(
-//             color: Colors.white,
-//             boxShadow: [
-//               BoxShadow(
-//                 offset: const Offset(0, 6),
-//                 color: lightGrey.withOpacity(.1),
-//                 blurRadius: 12,
-//               )
-//             ],
-//             borderRadius: BorderRadius.circular(8),
-//           ),
-//           child: Column(
-//             children: [
-//               Row(
-//                 children: [
-//                   Expanded(
-//                       child: Container(
-//                     color: topColor ?? active,
-//                     height: 5,
-//                   ))
-//                 ],
-//               ),
-//               Expanded(child: Container()),
-//               RichText(
-//                   textAlign: TextAlign.center,
-//                   text: TextSpan(children: [
-//                     TextSpan(
-//                         text: "$title\n",
-//                         style: TextStyle(
-//                             fontSize: 16,
-//                             color: isActive ? active : lightGrey)),
-//                     TextSpan(
-//                         text: value,
-//                         style: TextStyle(
-//                             fontSize: 40,
-//                             color: isActive ? active : dark)),
-//                   ])),
-//               Expanded(child: Container()),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 
 class InfoCard extends StatelessWidget {
@@ -77,6 +9,7 @@ class InfoCard extends StatelessWidget {
   final bool isActive;
   final Function() onTap;
   final bool isLoading; // New parameter for loading state
+
   const InfoCard({
     super.key,
     required this.title,
@@ -89,62 +22,85 @@ class InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color roleColor = RoleColorUtil.getRoleColor(title.toLowerCase());
+
+    String displayTitle;
+    switch (title) {
+      case 'Admin':
+        displayTitle = 'Administradores';
+        break;
+      case 'Supervisor':
+        displayTitle = 'Supervisores';
+        break;
+      case 'Vendedor':
+        displayTitle = 'Vendedores';
+        break;
+      case 'None':
+      default:
+        displayTitle = 'Vendedores sin Asignar';
+        break;
+    }
+
+
+
     return Expanded(
       child: InkWell(
         onTap: onTap,
         child: Container(
-          height: 136,
-          alignment: Alignment.center,
+          height: 150,
+          margin: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: roleColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                offset: const Offset(0, 6),
-                color: lightGrey.withOpacity(.1),
-                blurRadius: 12,
-              )
+                color: roleColor.withOpacity(0.4),
+                blurRadius: 1,
+                offset: const Offset(0, 2),
+              ),
             ],
-            borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      color: topColor ?? active,
-                      height: 5,
-                    ),
-                  )
-                ],
+              Container(
+                height: 5,
+                decoration: BoxDecoration(
+                  color: roleColor,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
+                ),
               ),
-              Expanded(child: Container()),
+              const SizedBox(height: 16),
               isLoading
                   ? CircularProgressIndicator(
-                      color: isActive ? active : lightGrey,
+                      color: roleColor,
                     )
                   : RichText(
                       textAlign: TextAlign.center,
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: "$title\n",
+                            text: "$displayTitle\n",
                             style: TextStyle(
-                              fontSize: 16,
-                              color: isActive ? active : lightGrey,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: roleColor,
                             ),
                           ),
                           TextSpan(
                             text: value,
-                            style: TextStyle(
-                              fontSize: 40,
-                              color: isActive ? active : dark,
+                            style: const TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
                           ),
                         ],
                       ),
                     ),
-              Expanded(child: Container()),
+              const SizedBox(height: 16),
             ],
           ),
         ),
