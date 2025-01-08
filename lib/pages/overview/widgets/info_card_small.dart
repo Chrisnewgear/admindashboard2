@@ -37,7 +37,7 @@ class InfoCardSmall extends StatelessWidget {
         break;
       case 'None':
       default:
-        displayTitle = 'Vendedores sin Asignar';
+        displayTitle = 'Usuarios sin rol asignado';
         break;
     }
 

@@ -32,7 +32,7 @@ class RevenueSectionSmall extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 CustomText(
-                  text: "Revenue Chart",
+                  text: "Resumen de Visitas",
                   size: 20,
                   weight: FontWeight.bold,
                   color: lightGrey,

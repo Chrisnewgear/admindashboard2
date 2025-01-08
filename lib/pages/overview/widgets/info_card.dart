@@ -8,7 +8,8 @@ class InfoCard extends StatelessWidget {
   final Color? topColor;
   final bool isActive;
   final Function() onTap;
-  final bool isLoading; // New parameter for loading state
+  final bool isLoading;
+   // New parameter for loading state
 
   const InfoCard({
     super.key,
@@ -17,7 +18,7 @@ class InfoCard extends StatelessWidget {
     this.isActive = false,
     required this.onTap,
     this.topColor,
-    this.isLoading = false, // Default value is false
+    this.isLoading = false,// Default value is false
   });
 
   @override
@@ -37,7 +38,7 @@ class InfoCard extends StatelessWidget {
         break;
       case 'None':
       default:
-        displayTitle = 'Vendedores sin Asignar';
+        displayTitle = 'Usuarios sin Rol Asignado';
         break;
     }
 

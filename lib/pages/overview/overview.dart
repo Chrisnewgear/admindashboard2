@@ -34,8 +34,7 @@ class OverviewPage extends StatelessWidget {
         Expanded(
           child: ListView(
             children: [
-              if(ResponsiveWidget.isLargeScreen(context) ||
-                ResponsiveWidget.isMediumScreen(context))
+              if(ResponsiveWidget.isLargeScreen(context) || ResponsiveWidget.isMediumScreen(context))
                   if(ResponsiveWidget.isCustomScreen(context))
                     OverviewCardMediumScreen()
                   else
