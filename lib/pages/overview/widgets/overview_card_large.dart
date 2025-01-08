@@ -1,12 +1,11 @@
 // import 'package:admindashboard/pages/overview/widgets/info_card.dart';
 // import 'package:admindashboard/pages/roles/Widgets/role_color_util.dart';
+// import 'package:admindashboard/pages/overview/widgets/overview_shimmer.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
-// //import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:flutter/material.dart';
 
-
 // class OverviewCardsLargeScreen extends StatelessWidget {
-//   OverviewCardsLargeScreen({super.key, });
+//   OverviewCardsLargeScreen({super.key});
 
 //   final List<String> roles = ['Admin', 'Supervisor', 'Vendedor', 'None'];
 
@@ -14,36 +13,26 @@
 //     final usersCollection = FirebaseFirestore.instance.collection('Users');
 //     Map<String, int?> roleCounts = {};
 
-//     for (String role in roles) {
-//       final countSnapshot =
-//           await usersCollection.where('Role', isEqualTo: role).count().get();
-//       roleCounts[role] = countSnapshot.count;
+//     try {
+//       for (String role in roles) {
+//         final countSnapshot =
+//             await usersCollection.where('Role', isEqualTo: role).count().get();
+//         roleCounts[role] = countSnapshot.count;
+//       }
+//     } catch (e) {
+//       throw Exception('Error al obtener conteos de roles');
 //     }
 
 //     return roleCounts;
 //   }
 
-
 //   @override
 //   Widget build(BuildContext context) {
-//     double width = MediaQuery.of(context).size.width;
-
 //     return FutureBuilder<Map<String, int?>>(
 //       future: _fetchRoleCounts(),
 //       builder: (context, snapshot) {
 //         if (snapshot.connectionState == ConnectionState.waiting) {
-//           // Mostrar CircularProgressIndicator mientras se cargan los datos
-//           return Row(
-//             children: roles.map((role) {
-//               return InfoCard(
-//                 title: role,
-//                 value: "",
-//                 topColor: RoleColorUtil.getRoleColor(role),
-//                 onTap: () {},
-//                 isLoading: true, // Aquí indicamos que queremos mostrar el loading
-//               );
-//             }).toList(),
-//           );
+//           return const OverviewShimmer();
 //         }
 
 //         if (snapshot.hasError) {
@@ -75,23 +64,42 @@ import 'package:admindashboard/pages/overview/widgets/overview_shimmer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class OverviewCardsLargeScreen extends StatelessWidget {
-  OverviewCardsLargeScreen({super.key});
+class OverviewCardsLargeScreen extends StatefulWidget {
+  const OverviewCardsLargeScreen({super.key});
 
-  final List<String> roles = ['Admin', 'Supervisor', 'Vendedor', 'None'];
+  @override
+  State<OverviewCardsLargeScreen> createState() => _OverviewCardsLargeScreenState();
+}
+
+class _OverviewCardsLargeScreenState extends State<OverviewCardsLargeScreen> {
+  final List<String> roles = const ['Admin', 'Supervisor', 'Vendedor', 'None'];
+  late final Future<Map<String, int?>> _roleCountsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _roleCountsFuture = _fetchRoleCounts();
+  }
 
   Future<Map<String, int?>> _fetchRoleCounts() async {
     final usersCollection = FirebaseFirestore.instance.collection('Users');
-    Map<String, int?> roleCounts = {};
+    Map<String, int?> roleCounts = {for (var role in roles) role: 0};
 
     try {
-      for (String role in roles) {
-        final countSnapshot =
-            await usersCollection.where('Role', isEqualTo: role).count().get();
-        roleCounts[role] = countSnapshot.count;
+      final querySnapshot = await usersCollection
+          .get(const GetOptions(source: Source.server));
+
+      if (!mounted) return roleCounts;
+
+      for (var doc in querySnapshot.docs) {
+        String role = doc.data()['Role'] as String? ?? 'None';
+        if (roleCounts.containsKey(role)) {
+          roleCounts[role] = (roleCounts[role] ?? 0) + 1;
+        }
       }
     } catch (e) {
-      throw Exception('Error al obtener conteos de roles');
+      debugPrint('Error fetching role counts: $e');
+      throw Exception("Error al obtener conteos de roles: ${e.toString()}");
     }
 
     return roleCounts;
@@ -100,7 +108,7 @@ class OverviewCardsLargeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, int?>>(
-      future: _fetchRoleCounts(),
+      future: _roleCountsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const OverviewShimmer();
@@ -108,7 +116,17 @@ class OverviewCardsLargeScreen extends StatelessWidget {
 
         if (snapshot.hasError) {
           return Center(
-            child: Text("Error al cargar datos: ${snapshot.error}"),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                const SizedBox(height: 16),
+                Text(
+                  "Error al cargar datos: ${snapshot.error}",
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           );
         }
 
@@ -116,11 +134,13 @@ class OverviewCardsLargeScreen extends StatelessWidget {
 
         return Row(
           children: roles.map((role) {
-            return InfoCard(
-              title: role,
-              value: "${roleCounts[role] ?? 0}",
-              topColor: RoleColorUtil.getRoleColor(role),
-              onTap: () {},
+            return Expanded(
+              child: InfoCard(
+                title: role,
+                value: "${roleCounts[role] ?? 0}",
+                topColor: RoleColorUtil.getRoleColor(role),
+                onTap: () {},
+              ),
             );
           }).toList(),
         );
