@@ -258,7 +258,7 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.add_circle_outline, size: 20),
+                const Icon(Icons.add_circle_outline, size: 11),
                 if (!isSearchExpanded) const SizedBox(width: 8),
                 if (!isSearchExpanded) const Text('Nuevo Cliente'),
               ],
@@ -297,27 +297,69 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
     return isSmallScreen ? _buildListView() : _buildDataTable(context);
   }
 
+  // Widget _buildEmptyState() {
+  //   return Center(
+  //     child: Column(
+  //       mainAxisAlignment: MainAxisAlignment.center,
+  //       children: [
+  //         Icon(
+  //           Icons.person_search,
+  //           size: 64,
+  //           color: Colors.grey[400],
+  //         ),
+  //         const SizedBox(height: 16),
+  //         Text(
+  //           _searchController.text.isEmpty
+  //               ? "No hay clientes para mostrar"
+  //               : "No se encontraron resultados para '${_searchController.text}'",
+  //           style: TextStyle(
+  //             fontSize: 18,
+  //             color: Colors.grey[600],
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.person_search,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _searchController.text.isEmpty
-                ? "No hay clientes para mostrar"
-                : "No se encontraron resultados para '${_searchController.text}'",
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
+    return SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height * 0.5,
+        ),
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+              top: 16,
+              left: 16,
+              right: 16,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.person_search,
+                  size: 64,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _searchController.text.isEmpty
+                      ? "No hay visitas para mostrar"
+                      : "No se encontraron resultados para '${_searchController.text}'",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[600],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

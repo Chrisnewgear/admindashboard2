@@ -128,7 +128,7 @@ class _AuthenticationPageState extends State<AuthenticationPage>
                   Row(
                     children: [
                       CustomText(
-                          text: "Bienvenido, te hemos extrañado!",
+                          text: "Bienvenido",
                           color: lightGrey)
                     ],
                   ),
@@ -243,7 +243,7 @@ class _AuthenticationPageState extends State<AuthenticationPage>
                             ),
                           );
                         },
-                        child: const Text("Olvidaste tu password?"),
+                        child: const Text("Reset password?"),
                       )
                     ],
                   ),
