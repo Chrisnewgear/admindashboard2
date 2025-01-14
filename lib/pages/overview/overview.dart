@@ -36,11 +36,11 @@ class OverviewPage extends StatelessWidget {
             children: [
               if(ResponsiveWidget.isLargeScreen(context) || ResponsiveWidget.isMediumScreen(context))
                   if(ResponsiveWidget.isCustomScreen(context))
-                    OverviewCardMediumScreen()
+                    const OverviewCardMediumScreen()
                   else
-                    OverviewCardsLargeScreen()
+                    const OverviewCardsLargeScreen()
               else
-                    OverViewCardSmallScreen(),
+                    const OverViewCardSmallScreen(),
 
                 if(!ResponsiveWidget.isSmallScreen(context))
                   const RevenueSectionLarge()

@@ -297,31 +297,6 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
     return isSmallScreen ? _buildListView() : _buildDataTable(context);
   }
 
-  // Widget _buildEmptyState() {
-  //   return Center(
-  //     child: Column(
-  //       mainAxisAlignment: MainAxisAlignment.center,
-  //       children: [
-  //         Icon(
-  //           Icons.person_search,
-  //           size: 64,
-  //           color: Colors.grey[400],
-  //         ),
-  //         const SizedBox(height: 16),
-  //         Text(
-  //           _searchController.text.isEmpty
-  //               ? "No hay clientes para mostrar"
-  //               : "No se encontraron resultados para '${_searchController.text}'",
-  //           style: TextStyle(
-  //             fontSize: 18,
-  //             color: Colors.grey[600],
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Widget _buildEmptyState() {
     return SingleChildScrollView(
       child: ConstrainedBox(
