@@ -1,3 +1,4 @@
+import 'package:admindashboard/pages/overview/widgets/visits_shimmer_small.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:admindashboard/widgets/bar_charts.dart';
@@ -81,7 +82,8 @@ class _VisitsSectionSmallState extends State<VisitsSectionSmall> {
         future: _visitsCounts,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            //return const Center(child: CircularProgressIndicator());
+            return const VisitsShimmerSmall();
           }
 
           if (snapshot.hasError) {
