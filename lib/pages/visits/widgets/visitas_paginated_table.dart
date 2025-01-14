@@ -175,46 +175,6 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
     );
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return LayoutBuilder(
-  //     builder: (context, constraints) {
-  //       final bool isSmallScreen = constraints.maxWidth <= 430;
-
-  //       return Card(
-  //         elevation: 2,
-  //         shape:
-  //             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  //         child: Padding(
-  //           padding: const EdgeInsets.all(16),
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.stretch,
-  //             children: [
-  //               _buildHeader(context, isSmallScreen),
-  //               const SizedBox(height: 16),
-  //               Flexible(
-  //                 child: SingleChildScrollView(
-  //                   child: Container(
-  //                     constraints: BoxConstraints(
-  //                       minHeight: 0,
-  //                       maxHeight: constraints.maxHeight -
-  //                           150, // Account for header and padding
-  //                     ),
-  //                     child: SingleChildScrollView(
-  //                       scrollDirection: Axis.horizontal,
-  //                       child: _buildTableContent(context, constraints),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   Widget _buildHeader(BuildContext context, bool isSmallScreen) {
     return Row(
       children: [
@@ -371,31 +331,6 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
       ),
     );
   }
-
-  // Widget _buildEmptyState() {
-  //   return Center(
-  //     child: Column(
-  //       mainAxisAlignment: MainAxisAlignment.center,
-  //       children: [
-  //         Icon(
-  //           Icons.person_search,
-  //           size: 64,
-  //           color: Colors.grey[400],
-  //         ),
-  //         const SizedBox(height: 16),
-  //         Text(
-  //           _searchController.text.isEmpty
-  //               ? "No hay clientes para mostrar"
-  //               : "No se encontraron resultados para '${_searchController.text}'",
-  //           style: TextStyle(
-  //             fontSize: 18,
-  //             color: Colors.grey[600],
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildListView() {
     final Map<String, Color> letterColors = {
