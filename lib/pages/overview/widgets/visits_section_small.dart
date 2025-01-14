@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:admindashboard/widgets/bar_charts.dart';
 import 'package:admindashboard/constants/style.dart';
 
-class RevenueSectionMedium extends StatefulWidget {
-  const RevenueSectionMedium({super.key});
+class VisitsSectionSmall extends StatefulWidget {
+  const VisitsSectionSmall({super.key});
 
   @override
-  State<RevenueSectionMedium> createState() => _RevenueSectionMediumState();
+  State<VisitsSectionSmall> createState() => _VisitsSectionSmallState();
 }
 
-class _RevenueSectionMediumState extends State<RevenueSectionMedium> {
+class _VisitsSectionSmallState extends State<VisitsSectionSmall> {
   late Future<Map<String, int>> _visitsCounts;
 
   @override
@@ -34,20 +34,17 @@ class _RevenueSectionMediumState extends State<RevenueSectionMedium> {
           .get();
 
       final weekVisits = await visitsRef
-          .where('Fecha',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfWeek))
+          .where('Fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfWeek))
           .count()
           .get();
 
       final monthVisits = await visitsRef
-          .where('Fecha',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
+          .where('Fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
           .count()
           .get();
 
       final yearVisits = await visitsRef
-          .where('Fecha',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
+          .where('Fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
           .count()
           .get();
 
@@ -80,86 +77,68 @@ class _RevenueSectionMediumState extends State<RevenueSectionMedium> {
         ],
         border: Border.all(color: lightGrey, width: .5),
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final cardWidth = (constraints.maxWidth - 80) / 2; // Adjusted spacing
+      child: FutureBuilder<Map<String, int>>(
+        future: _visitsCounts,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-          return FutureBuilder<Map<String, int>>(
-            future: _visitsCounts,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
+          if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          }
 
-              if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              }
+          final counts = snapshot.data!;
 
-              final counts = snapshot.data!;
-
-              return Column(
+          return Column(
+            children: [
+              const Text(
+                'Resumen de Visitas',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Wrap(
+                spacing: 20,
+                runSpacing: 20,
+                alignment: WrapAlignment.center,
                 children: [
-                  const Text(
-                    'Resumen de Visitas',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  _buildCard(
+                    'Visitas Hoy',
+                    counts['today']?.toString() ?? '0',
+                    Colors.blue,
+                    Icons.today,
                   ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: _buildCard(
-                          'Visitas Hoy',
-                          counts['today']?.toString() ?? '0',
-                          Colors.blue,
-                          Icons.today,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildCard(
-                          'Visitas Semana',
-                          counts['week']?.toString() ?? '0',
-                          Colors.green,
-                          Icons.calendar_view_week,
-                        ),
-                      ),
-                    ],
+                  _buildCard(
+                    'Visitas Semana',
+                    counts['week']?.toString() ?? '0',
+                    Colors.green,
+                    Icons.calendar_view_week,
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: _buildCard(
-                          'Visitas Mes',
-                          counts['month']?.toString() ?? '0',
-                          Colors.orange,
-                          Icons.calendar_month,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildCard(
-                          'Visitas Año',
-                          counts['year']?.toString() ?? '0',
-                          Colors.purple,
-                          Icons.calendar_today,
-                        ),
-                      ),
-                    ],
+                  _buildCard(
+                    'Visitas Mes',
+                    counts['month']?.toString() ?? '0',
+                    Colors.orange,
+                    Icons.calendar_month,
                   ),
-                  const SizedBox(height: 30),
-                  const SizedBox(
-                    height: 300,
-                    child: SimpleBarChart(),
+                  _buildCard(
+                    'Visitas Año',
+                    counts['year']?.toString() ?? '0',
+                    Colors.purple,
+                    Icons.calendar_today,
                   ),
                 ],
-              );
-            },
+              ),
+              const SizedBox(height: 30),
+              const SizedBox(
+                height: 200,
+                child: SimpleBarChart(),
+              ),
+            ],
           );
         },
       ),
@@ -168,6 +147,7 @@ class _RevenueSectionMediumState extends State<RevenueSectionMedium> {
 
   Widget _buildCard(String title, String count, Color color, IconData icon) {
     return Container(
+      width: 250,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,

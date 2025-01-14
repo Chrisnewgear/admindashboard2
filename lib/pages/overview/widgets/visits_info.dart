@@ -1,10 +1,10 @@
 import 'package:admindashboard/constants/style.dart';
 import 'package:flutter/material.dart';
 
-class RevenueInfo extends StatelessWidget {
+class VisitsInfo extends StatelessWidget {
   final String title;
   final String amount;
-  const RevenueInfo({super.key, required this.title, required this.amount});
+  const VisitsInfo({super.key, required this.title, required this.amount});
 
   @override
   Widget build(BuildContext context) {

@@ -4,9 +4,9 @@ import 'package:admindashboard/pages/overview/widgets/available_drivers.dart';
 import 'package:admindashboard/pages/overview/widgets/overview_card_large.dart';
 import 'package:admindashboard/pages/overview/widgets/overview_card_medium.dart';
 import 'package:admindashboard/pages/overview/widgets/overview_card_small.dart';
-import 'package:admindashboard/pages/overview/widgets/revenue_section_large.dart';
-import 'package:admindashboard/pages/overview/widgets/revenue_section_medium.dart';
-import 'package:admindashboard/pages/overview/widgets/revenue_section_small.dart';
+import 'package:admindashboard/pages/overview/widgets/visits_section_large.dart';
+import 'package:admindashboard/pages/overview/widgets/visits_section_medium.dart';
+import 'package:admindashboard/pages/overview/widgets/visits_section_small.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -64,11 +64,11 @@ class OverviewPage extends StatelessWidget {
             else
               const OverViewCardSmallScreen(),
             if (ResponsiveWidget.isLargeScreen(context))
-              const RevenueSectionLarge()
+              const VisitsSectionLarge()
             else if (ResponsiveWidget.isMediumScreen(context))
-              const RevenueSectionMedium()
+              const VisitsSectionMedium()
             else
-              const RevenueSectionSmall(),
+              const VisitsSectionSmall(),
             const AvailableDriversTable()
           ],
         ))

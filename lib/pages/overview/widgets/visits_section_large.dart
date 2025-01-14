@@ -1,101 +1,16 @@
-// import 'package:admindashboard/constants/style.dart';
-// import 'package:admindashboard/pages/overview/widgets/revenue_info.dart';
-// import 'package:admindashboard/widgets/bar_charts.dart';
-// import 'package:admindashboard/widgets/custom_text.dart';
+import 'package:admindashboard/pages/overview/widgets/visits_shimmer_large.dart';
 import 'package:admindashboard/widgets/bar_charts.dart';
 import 'package:flutter/material.dart';
-
-// class RevenueSectionLarge extends StatelessWidget {
-//   const RevenueSectionLarge({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       padding: const EdgeInsets.all(24),
-//       margin: const EdgeInsets.symmetric(vertical: 30),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(8),
-//         boxShadow: [
-//           BoxShadow(
-//             offset: const Offset(0, 6),
-//             color: lightGrey.withOpacity(.1),
-//             blurRadius: 12
-//           ),
-//         ],
-//         border: Border.all(color: lightGrey, width: .5)),
-//         child: Row(
-//           children: [
-//             Expanded(child: Column(
-//               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//               children: [
-//                 CustomText(
-//                   text: "Resumen de Visitas",
-//                   size: 20,
-//                   weight: FontWeight.bold,
-//                   color: lightGrey,),
-
-//                   const SizedBox(
-//                     width: 600,
-//                     height: 200,
-//                     child: SimpleBarChart(),
-//                   )
-//               ]
-//             )),
-//             Container(
-//               width: 1,
-//               height: 120,
-//               color: lightGrey,
-//             ),
-
-//             const Expanded(
-//               child: Column(
-//                 children: [
-//                   Row(
-//                     children: [
-//                       RevenueInfo(
-//                         title: "Visitas de hoy",
-//                         amount: "23",
-//                       ),
-//                       RevenueInfo(
-//                         title: "'Ultimos 7 dias",
-//                         amount: "150",
-//                       ),
-//                     ],
-//                   ),
-//                   SizedBox(height: 30,),
-
-//                   Row(
-//                     children: [
-//                       RevenueInfo(
-//                         title: "Últimos 30 días",
-//                         amount: "1,203",
-//                       ),
-//                       RevenueInfo(
-//                         title: "Últimos 12 meses",
-//                         amount: "3,230",
-//                       ),
-//                     ],
-//                   ),
-//                 ],
-//               ))
-//           ]
-//         ),
-//     );
-//   }
-// }
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-//import 'package:flutter/material.dart';
 
-class RevenueSectionLarge extends StatefulWidget {
-  const RevenueSectionLarge({Key? key}) : super(key: key);
+class VisitsSectionLarge extends StatefulWidget {
+  const VisitsSectionLarge({super.key});
 
   @override
-  State<RevenueSectionLarge> createState() => _RevenueSectionLargeState();
+  State<VisitsSectionLarge> createState() => _VisitsSectionLargeState();
 }
 
-class _RevenueSectionLargeState extends State<RevenueSectionLarge> {
+class _VisitsSectionLargeState extends State<VisitsSectionLarge> {
   late Future<Map<String, int>> _visitsCounts;
 
   @override
@@ -167,7 +82,8 @@ class _RevenueSectionLargeState extends State<RevenueSectionLarge> {
         future: _visitsCounts,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            //return const Center(child: CircularProgressIndicator());
+            return const VisitsShimmerLarge();
           }
 
           if (snapshot.hasError) {
