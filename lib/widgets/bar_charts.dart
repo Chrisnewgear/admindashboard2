@@ -82,6 +82,107 @@ class _SimpleBarChartState extends State<SimpleBarChart> {
     return barGroups;
   }
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   final size = MediaQuery.of(context).size;
+
+  //   return Container(
+  //     height: size.height * 0.6,
+  //     width: size.width * 0.8,
+  //     padding: const EdgeInsets.all(16),
+  //     child: FutureBuilder<List<BarChartGroupData>>(
+  //       future: _visitsFuture,
+  //       builder: (context, snapshot) {
+  //         // if (snapshot.connectionState == ConnectionState.waiting) {
+  //         //   return const Center(child: CircularProgressIndicator());
+  //         // }
+
+  //         if (snapshot.hasError) {
+  //           _showErrorSnackBar('Error: ${snapshot.error}');
+  //           return const Center(
+  //             child: Icon(Icons.error_outline, color: Colors.red, size: 60),
+  //           );
+  //         }
+
+  //         if (!snapshot.hasData || snapshot.data!.isEmpty) {
+  //           return const Center(
+  //             child: Text(
+  //               'No ha tenido visitas en los últimos 3 meses',
+  //               style: TextStyle(fontSize: 16),
+  //             ),
+  //           );
+  //         }
+
+  //         return BarChart(
+  //           BarChartData(
+  //             barGroups: snapshot.data!,
+  //             alignment: BarChartAlignment.spaceEvenly,
+  //             maxY: 50,
+  //             barTouchData: BarTouchData(enabled: true),
+  //             gridData: const FlGridData(
+  //               show: true,
+  //               drawVerticalLine: false,
+  //               horizontalInterval: 10,
+  //             ),
+  //             borderData: FlBorderData(
+  //               show: true,
+  //               border: Border.all(color: Colors.grey.shade300),
+  //             ),
+  //             titlesData: FlTitlesData(
+  //               show: true,
+  //               bottomTitles: AxisTitles(
+  //                 sideTitles: SideTitles(
+  //                   showTitles: true,
+  //                   reservedSize: 30,
+  //                   getTitlesWidget: (double value, TitleMeta meta) {
+  //                     final List<String> months = [
+  //                       'Ene',
+  //                       'Feb',
+  //                       'Mar',
+  //                       'Abr',
+  //                       'May',
+  //                       'Jun',
+  //                       'Jul',
+  //                       'Ago',
+  //                       'Sep',
+  //                       'Oct',
+  //                       'Nov',
+  //                       'Dic'
+  //                     ];
+  //                     final currentMonth = DateTime.now().month;
+  //                     final monthIndex =
+  //                         (currentMonth - 3 + value.toInt()) % 12;
+  //                     return Text(months[monthIndex]);
+  //                   },
+  //                 ),
+  //                 axisNameWidget: const Padding(
+  //                   padding: EdgeInsets.only(top: 1.0),
+  //                   child: Text('Últimos 3 meses'),
+  //                 ),
+  //               ),
+  //               leftTitles: const AxisTitles(
+  //                 sideTitles: SideTitles(
+  //                   showTitles: true,
+  //                   reservedSize: 44,
+  //                   interval: 10,
+  //                 ),
+  //                 axisNameWidget: Padding(
+  //                   padding: EdgeInsets.only(bottom: 1.0),
+  //                   child: Text('Visitas'),
+  //                 ),
+  //               ),
+  //               topTitles:
+  //                   const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+  //               rightTitles:
+  //                   const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+  //             ),
+  //           ),
+  //         );
+  //       },
+  //     ),
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -90,9 +191,22 @@ class _SimpleBarChartState extends State<SimpleBarChart> {
       height: size.height * 0.6,
       width: size.width * 0.8,
       padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: FutureBuilder<List<BarChartGroupData>>(
         future: _visitsFuture,
         builder: (context, snapshot) {
+          // ...existing loading and error states...
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -118,16 +232,6 @@ class _SimpleBarChartState extends State<SimpleBarChart> {
               barGroups: snapshot.data!,
               alignment: BarChartAlignment.spaceEvenly,
               maxY: 50,
-              barTouchData: BarTouchData(enabled: true),
-              gridData: const FlGridData(
-                show: true,
-                drawVerticalLine: false,
-                horizontalInterval: 10,
-              ),
-              borderData: FlBorderData(
-                show: true,
-                border: Border.all(color: Colors.grey.shade300),
-              ),
               titlesData: FlTitlesData(
                 show: true,
                 bottomTitles: AxisTitles(
@@ -157,18 +261,41 @@ class _SimpleBarChartState extends State<SimpleBarChart> {
                   ),
                   axisNameWidget: const Padding(
                     padding: EdgeInsets.only(top: 1.0),
-                    child: Text('Últimos 3 meses'),
+                    child: Text(
+                      'Últimos 3 meses',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54,
+                      ),
+                    ),
                   ),
                 ),
-                leftTitles: const AxisTitles(
+                leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
                     reservedSize: 44,
-                    interval: 10,
+                    getTitlesWidget: (value, meta) {
+                      return Text(
+                        value.toInt().toString(),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54,
+                        ),
+                      );
+                    },
                   ),
-                  axisNameWidget: Padding(
+                  axisNameWidget: const Padding(
                     padding: EdgeInsets.only(bottom: 1.0),
-                    child: Text('Visitas'),
+                    child: Text(
+                      'Visitas',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54,
+                      ),
+                    ),
                   ),
                 ),
                 topTitles:
@@ -176,7 +303,26 @@ class _SimpleBarChartState extends State<SimpleBarChart> {
                 rightTitles:
                     const AxisTitles(sideTitles: SideTitles(showTitles: false)),
               ),
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: false,
+                horizontalInterval: 10,
+                getDrawingHorizontalLine: (value) {
+                  return FlLine(
+                    color: Colors.grey.withOpacity(0.2),
+                    strokeWidth: 1,
+                    dashArray: [5, 5],
+                  );
+                },
+              ),
+              borderData: FlBorderData(
+                show: true,
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              backgroundColor: Colors.white,
             ),
+            swapAnimationDuration: const Duration(milliseconds: 500),
+            swapAnimationCurve: Curves.easeInOutCubic,
           );
         },
       ),

@@ -1,5 +1,6 @@
 import 'package:admindashboard/pages/overview/widgets/visits_shimmer_large.dart';
 import 'package:admindashboard/widgets/bar_charts.dart';
+import 'package:admindashboard/widgets/pie_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -146,19 +147,42 @@ class _VisitsSectionLargeState extends State<VisitsSectionLarge> {
                 ],
               ),
               const SizedBox(height: 30),
-              Container(
-                height: 400, // Altura fija para el gráfico
-                width: double.infinity,
-                child: Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 400, // Altura fija para el gráfico
+                      width: double.infinity,
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: SimpleBarChart(),
+                        ),
+                      ),
+                    ),
                   ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: SimpleBarChart(),
-                  ),
-                ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: SizedBox(
+                      height: 400,
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: VisitsPieChart(),
+                        ),
+                      ),
+                    ),
+
+                  )
+                ],
               ),
             ],
           );

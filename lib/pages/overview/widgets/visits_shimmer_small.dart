@@ -31,7 +31,7 @@ class VisitsShimmerSmall extends StatelessWidget {
             children: List.generate(
               4,
               (index) => SizedBox(
-                width: (MediaQuery.of(context).size.width - 64) / 2,
+                width: (MediaQuery.of(context).size.width - 4) / 1.4,
                 child: _buildShimmerCard(),
               ),
             ),
