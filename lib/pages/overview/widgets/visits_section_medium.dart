@@ -1,4 +1,5 @@
 import 'package:admindashboard/pages/overview/widgets/visits_shimmer_medium.dart';
+import 'package:admindashboard/widgets/pie_chart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:admindashboard/widgets/bar_charts.dart';
@@ -163,9 +164,32 @@ class _VisitsSectionMediumState extends State<VisitsSectionMedium> {
                 ],
               ),
               const SizedBox(height: 30),
-              const SizedBox(
-                height: 300,
-                child: SimpleBarChart(),
+              SizedBox(
+                height: 400,
+                width: double.infinity,
+                child: Card(
+                  elevation:4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: SimpleBarChart(),
+                  )),
+              ),
+              const SizedBox(height: 30),
+              SizedBox(
+                height: 400,
+                width: double.infinity,
+                child: Card(
+                  elevation:4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: VisitsPieChart(),
+                  )),
               ),
             ],
           );

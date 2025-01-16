@@ -180,7 +180,6 @@ class _VisitsSectionLargeState extends State<VisitsSectionLarge> {
                         ),
                       ),
                     ),
-
                   )
                 ],
               ),

@@ -1,4 +1,6 @@
 import 'package:admindashboard/pages/overview/widgets/visits_shimmer_small.dart';
+import 'package:admindashboard/widgets/pie_chart.dart';
+import 'package:admindashboard/widgets/pie_chart_small.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:admindashboard/widgets/bar_charts.dart';
@@ -138,7 +140,30 @@ class _VisitsSectionSmallState extends State<VisitsSectionSmall> {
               const SizedBox(height: 30),
               const SizedBox(
                 height: 200,
-                child: SimpleBarChart(),
+                width: double.infinity,
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12))),
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: SimpleBarChart(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              const SizedBox(
+                height: 300,
+                width: double.infinity,
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12))),
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: SmallVisitsPieChart(),
+                  ),
+                ),
               ),
             ],
           );

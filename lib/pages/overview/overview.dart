@@ -1,9 +1,9 @@
 import 'package:admindashboard/constants/controllers.dart';
 import 'package:admindashboard/helpers/responsiveness.dart';
 import 'package:admindashboard/pages/overview/widgets/available_drivers.dart';
-import 'package:admindashboard/pages/overview/widgets/overview_card_large.dart';
-import 'package:admindashboard/pages/overview/widgets/overview_card_medium.dart';
-import 'package:admindashboard/pages/overview/widgets/overview_card_small.dart';
+import 'package:admindashboard/pages/overview/widgets/role_card_large.dart';
+import 'package:admindashboard/pages/overview/widgets/role_card_medium.dart';
+import 'package:admindashboard/pages/overview/widgets/role_card_small.dart';
 import 'package:admindashboard/pages/overview/widgets/visits_section_large.dart';
 import 'package:admindashboard/pages/overview/widgets/visits_section_medium.dart';
 import 'package:admindashboard/pages/overview/widgets/visits_section_small.dart';

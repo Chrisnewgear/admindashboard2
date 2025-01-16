@@ -48,15 +48,27 @@ class VisitsShimmerLarge extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 30),
-          // Chart shimmer
-          Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Container(
-              height: 300,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
+          // Charts shimmer
+          Row(
+            children: List.generate(
+              2,
+              (index) => Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      left: index == 1 ? 12.0 : 0,
+                      right: index == 0 ? 12.0 : 0),
+                  child: Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      height: 350,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
