@@ -61,8 +61,8 @@ class _SmallVisitsPieChartState extends State<SmallVisitsPieChart> {
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
-            badgeWidget: type.length > 10 
-                ? null 
+            badgeWidget: type.length > 10
+                ? null
                 : _SmallBadge(
                     type,
                     size: 30,

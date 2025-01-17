@@ -49,6 +49,19 @@ class VisitsShimmerSmall extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 30),
+          //Pie Chart shimmer
+          Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              height: 300,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
         ],
       ),
     );

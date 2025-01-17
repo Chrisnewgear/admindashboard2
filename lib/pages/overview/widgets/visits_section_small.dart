@@ -1,5 +1,4 @@
-import 'package:admindashboard/pages/overview/widgets/visits_shimmer_small.dart';
-import 'package:admindashboard/widgets/pie_chart.dart';
+import 'package:admindashboard/Shimmers/visits_shimmer_small.dart';
 import 'package:admindashboard/widgets/pie_chart_small.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -37,17 +36,20 @@ class _VisitsSectionSmallState extends State<VisitsSectionSmall> {
           .get();
 
       final weekVisits = await visitsRef
-          .where('Fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfWeek))
+          .where('Fecha',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfWeek))
           .count()
           .get();
 
       final monthVisits = await visitsRef
-          .where('Fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
+          .where('Fecha',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
           .count()
           .get();
 
       final yearVisits = await visitsRef
-          .where('Fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
+          .where('Fecha',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
           .count()
           .get();
 
@@ -105,7 +107,7 @@ class _VisitsSectionSmallState extends State<VisitsSectionSmall> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               Wrap(
                 spacing: 20,
                 runSpacing: 20,
@@ -137,7 +139,7 @@ class _VisitsSectionSmallState extends State<VisitsSectionSmall> {
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 10),
               const SizedBox(
                 height: 200,
                 width: double.infinity,
@@ -151,7 +153,7 @@ class _VisitsSectionSmallState extends State<VisitsSectionSmall> {
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 10),
               const SizedBox(
                 height: 300,
                 width: double.infinity,
@@ -174,7 +176,7 @@ class _VisitsSectionSmallState extends State<VisitsSectionSmall> {
 
   Widget _buildCard(String title, String count, Color color, IconData icon) {
     return Container(
-      width: 250,
+      width: 280,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,

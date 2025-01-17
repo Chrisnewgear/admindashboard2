@@ -1,4 +1,4 @@
-import 'package:admindashboard/pages/overview/widgets/visits_shimmer_medium.dart';
+import 'package:admindashboard/Shimmers/visits_shimmer_medium.dart';
 import 'package:admindashboard/widgets/pie_chart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';

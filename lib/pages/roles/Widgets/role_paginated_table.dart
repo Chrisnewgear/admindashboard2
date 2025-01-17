@@ -1,6 +1,7 @@
+import 'package:admindashboard/Shimmers/listView_shimmer.dart';
+import 'package:admindashboard/Shimmers/table_shimmer.dart';
 import 'package:admindashboard/models/usuarios.dart';
 import 'package:admindashboard/pages/roles/Widgets/role_color_util.dart';
-import 'package:admindashboard/pages/roles/Widgets/table_shimmer.dart';
 import 'package:admindashboard/widgets/search_bar.dart';
 import 'package:admindashboard/pages/roles/Widgets/usuarios_data_table_source.dart';
 import 'package:data_table_2/data_table_2.dart';
@@ -226,15 +227,18 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
   }
 
   Widget _buildTableContent(BuildContext context, BoxConstraints constraints) {
+    final isSmallScreen = constraints.maxWidth < 800;
+
     if (widget.isLoading) {
-      return const TableShimmer(itemCount: 7);
+      return isSmallScreen
+        ? const ListViewShimmer(itemCount: 7)
+        : const TableShimmer(itemCount: 7);
     }
 
     if (filteredUsuarios.isEmpty) {
       return _buildEmptyState();
     }
 
-    final isSmallScreen = constraints.maxWidth < 800;
     return isSmallScreen ? _buildListView() : _buildDataTable(context);
   }
 

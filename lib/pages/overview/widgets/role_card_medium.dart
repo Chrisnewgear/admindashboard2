@@ -1,5 +1,5 @@
 import 'package:admindashboard/pages/overview/widgets/info_card.dart';
-import 'package:admindashboard/pages/overview/widgets/role_card_shimmer_medium.dart';
+import 'package:admindashboard/Shimmers/role_card_shimmer_medium.dart';
 import 'package:admindashboard/pages/roles/Widgets/role_color_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
