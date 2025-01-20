@@ -265,20 +265,10 @@ class TableShimmer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header with search and add button
-          Padding(
-            padding: const EdgeInsets.all(16),
+          const Padding(
+            padding: EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildShimmerBox(150, 40), // Title
-                Row(
-                  children: [
-                    _buildShimmerBox(200, 40, isSearchBar: true), // Search bar
-                    const SizedBox(width: 16),
-                    _buildShimmerBox(100, 40), // Add button
-                  ],
-                ),
-              ],
             ),
           ),
           Padding(
@@ -286,11 +276,17 @@ class TableShimmer extends StatelessWidget {
             child: Row(
               children: [
                 // Column headers
-                Expanded(flex: 2, child: _buildShimmerBox(100, 20)),
-                const SizedBox(width: 16),
-                Expanded(flex: 2, child: _buildShimmerBox(100, 20)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildShimmerBox(100, 20)),
+                _buildShimmerBox(160, 20),
+                const SizedBox(width: 100),
+                _buildShimmerBox(160, 20),
+                const SizedBox(width: 100),
+                _buildShimmerBox(160, 20),
+                const SizedBox(width: 100),
+                _buildShimmerBox(160, 20),
+                const SizedBox(width: 100),
+                _buildShimmerBox(160, 20),
+                const SizedBox(width: 100),
+                _buildShimmerBox(160, 20),
               ],
             ),
           ),
@@ -306,20 +302,26 @@ class TableShimmer extends StatelessWidget {
                   child: Row(
                     children: [
                       Expanded(
-                        flex: 2,
+                        flex: 8,
                         child: Row(
                           children: [
                             _buildShimmerBox(40, 40, isCircle: true),
-                            const SizedBox(width: 12),
-                            Expanded(child: _buildShimmerBox(100, 20)),
+                            const SizedBox(width: 220),
+                            _buildShimmerBox(160, 20),
+                            const SizedBox(width: 100),
+                            _buildShimmerBox(160, 20),
+                            const SizedBox(width: 100),
+                            _buildShimmerBox(160, 20),
+                            const SizedBox(width: 100),
+                            _buildShimmerBox(160, 20),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 2,
-                        child: _buildShimmerBox(150, 20),
-                      ),
+                      // const SizedBox(width: 16),
+                      // Expanded(
+                      //   flex: 2,
+                      //   child: _buildShimmerBox(150, 20),
+                      // ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Row(
