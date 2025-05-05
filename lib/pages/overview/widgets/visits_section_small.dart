@@ -110,7 +110,7 @@ class _VisitsSectionSmallState extends State<VisitsSectionSmall> {
               const SizedBox(height: 10),
               Wrap(
                 spacing: 20,
-                runSpacing: 20,
+                runSpacing: 10,
                 alignment: WrapAlignment.center,
                 children: [
                   _buildCard(
@@ -139,7 +139,7 @@ class _VisitsSectionSmallState extends State<VisitsSectionSmall> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 5),
               const SizedBox(
                 height: 200,
                 width: double.infinity,
@@ -153,7 +153,7 @@ class _VisitsSectionSmallState extends State<VisitsSectionSmall> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 5),
               const SizedBox(
                 height: 300,
                 width: double.infinity,
@@ -176,7 +176,7 @@ class _VisitsSectionSmallState extends State<VisitsSectionSmall> {
 
   Widget _buildCard(String title, String count, Color color, IconData icon) {
     return Container(
-      width: 280,
+      width: 340,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,

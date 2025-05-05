@@ -1,13 +1,8 @@
-import 'dart:math';
 import 'package:admindashboard/models/clients.dart';
-import 'package:admindashboard/pages/clients/widgets/clients_paginated_table.dart';
 import 'package:admindashboard/pages/myteam/widgets/myteam_paginated_table.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:intl/intl.dart';
 
 class MyTeamPage extends StatefulWidget {
   const MyTeamPage({super.key});

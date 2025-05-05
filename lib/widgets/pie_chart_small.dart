@@ -61,14 +61,14 @@ class _SmallVisitsPieChartState extends State<SmallVisitsPieChart> {
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
-            badgeWidget: type.length > 10
-                ? null
-                : _SmallBadge(
-                    type,
-                    size: 30,
-                    borderColor: sectionColors[colorIndex % sectionColors.length],
-                  ),
-            badgePositionPercentageOffset: .95,
+            // badgeWidget: type.length > 10
+            //     ? null
+            //     : _SmallBadge(
+            //         type,
+            //         size: 30,
+            //         borderColor: sectionColors[colorIndex % sectionColors.length],
+            //       ),
+            // badgePositionPercentageOffset: .95,
           ),
         );
         colorIndex++;
@@ -138,44 +138,44 @@ class _SmallVisitsPieChartState extends State<SmallVisitsPieChart> {
   }
 }
 
-class _SmallBadge extends StatelessWidget {
-  final String text;
-  final double size;
-  final Color borderColor;
+// class _SmallBadge extends StatelessWidget {
+//   final String text;
+//   final double size;
+//   final Color borderColor;
 
-  const _SmallBadge(this.text, {
-    required this.size,
-    required this.borderColor,
-  });
+//   const _SmallBadge(this.text, {
+//     required this.size,
+//     required this.borderColor,
+//   });
 
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: PieChart.defaultDuration,
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.2),
-            offset: const Offset(1, 1),
-            blurRadius: 2,
-          ),
-        ],
-      ),
-      padding: EdgeInsets.all(size * .15),
-      child: FittedBox(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: borderColor,
-          ),
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return AnimatedContainer(
+//       duration: PieChart.defaultDuration,
+//       width: size,
+//       height: size,
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         shape: BoxShape.circle,
+//         border: Border.all(color: borderColor),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(.2),
+//             offset: const Offset(1, 1),
+//             blurRadius: 2,
+//           ),
+//         ],
+//       ),
+//       padding: EdgeInsets.all(size * .15),
+//       child: FittedBox(
+//         child: Text(
+//           text,
+//           style: TextStyle(
+//             fontWeight: FontWeight.bold,
+//             color: borderColor,
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

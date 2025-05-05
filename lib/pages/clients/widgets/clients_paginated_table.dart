@@ -1,15 +1,11 @@
 import 'package:admindashboard/Shimmers/listView_shimmer.dart';
 import 'package:admindashboard/Shimmers/table_shimmer.dart';
 import 'package:admindashboard/models/clients.dart';
-// import 'package:admindashboard/pages/roles/Widgets/listView_shimmer.dart';
-// import 'package:admindashboard/pages/roles/Widgets/table_shimmer.dart';
-//import 'package:admindashboard/pages/roles/Widgets/table_shimmer.dart';
 import 'package:admindashboard/widgets/search_bar.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-//import 'package:shimmer/shimmer.dart';
-
 
 class ResponsiveClientsTable extends StatefulWidget {
   final List<Cliente> clientes;
@@ -281,8 +277,8 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
 
     if (widget.isLoading) {
       return isSmallScreen
-        ? const ListViewShimmer(itemCount: 7)
-        : const TableShimmer(itemCount: 7);
+          ? const ListViewShimmer(itemCount: 7)
+          : const TableShimmer(itemCount: 7);
     }
 
     if (filteredClientes.isEmpty) {
@@ -291,8 +287,6 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
 
     return isSmallScreen ? _buildListView() : _buildDataTable(context);
   }
-
-
 
   Widget _buildEmptyState() {
     return SingleChildScrollView(
@@ -546,48 +540,88 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
     return Theme(
       data: Theme.of(context).copyWith(
         cardColor: Colors.white,
-        dividerColor: Colors.grey[200],
+        dividerColor: Colors.grey[100],
         dataTableTheme: DataTableThemeData(
-          headingTextStyle: TextStyle(
-            color: Theme.of(context).primaryColor,
-            fontWeight: FontWeight.bold,
+          headingTextStyle: GoogleFonts.inter(
+            color: const Color(0xFF2D3748),
+            fontWeight: FontWeight.w600,
             fontSize: 14,
           ),
-          dataTextStyle: const TextStyle(
-            color: Colors.black87,
+          dataTextStyle: GoogleFonts.inter(
+            color: const Color(0xFF4A5568),
             fontSize: 14,
           ),
         ),
       ),
-      child: PaginatedDataTable2(
-        columns: _buildColumns(),
-        source: ClientesDataTableSource(
-          filteredClientes,
-          widget.deleteClient,
-          widget.showClientVisitFormDialog,
-          context,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        rowsPerPage: _rowsPerPage,
-        columnSpacing: 24,
-        horizontalMargin: 24,
-        showCheckboxColumn: false,
-        headingRowHeight: 48,
-        dataRowHeight: 64,
-        headingRowColor: WidgetStateProperty.resolveWith(
-          (states) => Colors.grey[50]!,
-        ),
-        onSelectAll: null,
-        empty: Center(
-          child: Container(
-            padding: const EdgeInsets.all(20),
+        child: PaginatedDataTable2(
+          columns: _buildColumns(),
+          source: ClientesDataTableSource(
+            filteredClientes,
+            widget.deleteClient,
+            widget.showClientVisitFormDialog,
+            context,
+          ),
+          rowsPerPage: _rowsPerPage,
+          columnSpacing: 32,
+          horizontalMargin: 32,
+          showCheckboxColumn: false,
+          headingRowHeight: 56,
+          dataRowHeight: 72,
+          headingRowColor: WidgetStateProperty.all(
+            const Color(0xFFF7FAFC),
+          ),
+          border: TableBorder(
+            borderRadius: BorderRadius.circular(16),
+            horizontalInside: BorderSide(
+              color: Colors.grey[200]!,
+              width: 1,
+            ),
+          ),
+          onSelectAll: null,
+          empty: Container(
+            padding: const EdgeInsets.all(32),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.warning, size: 40, color: Colors.amber[700]),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.amber[50],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.warning_rounded,
+                    size: 48,
+                    color: Colors.amber[700],
+                  ),
+                ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'No se encontraron registros',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF2D3748),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Intenta ajustar los filtros de búsqueda',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: const Color(0xFF718096),
+                  ),
                 ),
               ],
             ),
