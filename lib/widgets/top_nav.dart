@@ -292,6 +292,7 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
 
                             if (confirmLogout == true) {
                               await FirebaseAuth.instance.signOut();
+                              menuController.changeActiveItemTo(overviewPageDisplayName);
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
                                     builder: (context) =>

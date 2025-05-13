@@ -10,7 +10,7 @@ class SmallVisitsPieChart extends StatefulWidget {
 }
 
 class _SmallVisitsPieChartState extends State<SmallVisitsPieChart> {
-  late Future<List<PieChartSectionData>> _visitsFuture;
+  late Future<_PieChartData> _visitsFuture;
   static const _queryTimeout = Duration(seconds: 10);
   int touchedIndex = -1;
 
@@ -20,7 +20,8 @@ class _SmallVisitsPieChartState extends State<SmallVisitsPieChart> {
     _visitsFuture = _fetchVisitsData();
   }
 
-  Future<List<PieChartSectionData>> _fetchVisitsData() async {
+
+  Future<_PieChartData> _fetchVisitsData() async {
     final visitsCollection = FirebaseFirestore.instance.collection('Visits');
     final Map<String, int> visitsByPropVisita = {};
     final List<Color> sectionColors = [
@@ -37,7 +38,7 @@ class _SmallVisitsPieChartState extends State<SmallVisitsPieChart> {
           .get(const GetOptions(source: Source.server))
           .timeout(_queryTimeout);
 
-      if (!mounted) return [];
+      if (!mounted) return _PieChartData([], {});
 
       for (var doc in querySnapshot.docs) {
         String propVisita = doc['PropositoVisita'] as String? ?? 'Otros';
@@ -45,14 +46,16 @@ class _SmallVisitsPieChartState extends State<SmallVisitsPieChart> {
       }
 
       List<PieChartSectionData> sections = [];
+      Map<String, Color> legendMap = {};
       int colorIndex = 0;
       double total = visitsByPropVisita.values.fold(0, (suma, counter) => suma + counter);
 
       visitsByPropVisita.forEach((type, counter) {
         final double percentage = (counter / total) * 100;
+        final color = sectionColors[colorIndex % sectionColors.length];
         sections.add(
           PieChartSectionData(
-            color: sectionColors[colorIndex % sectionColors.length],
+            color: color,
             value: percentage,
             title: '${percentage.toStringAsFixed(0)}%',
             radius: touchedIndex == colorIndex ? 65 : 60,
@@ -61,26 +64,18 @@ class _SmallVisitsPieChartState extends State<SmallVisitsPieChart> {
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
-            // badgeWidget: type.length > 10
-            //     ? null
-            //     : _SmallBadge(
-            //         type,
-            //         size: 30,
-            //         borderColor: sectionColors[colorIndex % sectionColors.length],
-            //       ),
-            // badgePositionPercentageOffset: .95,
           ),
         );
+        legendMap[type] = color;
         colorIndex++;
       });
 
-      return sections;
+      return _PieChartData(sections, legendMap);
     } catch (e) {
       debugPrint('Error al obtener datos de las visitas: $e');
-      return [];
+      return _PieChartData([], {});
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
@@ -101,31 +96,62 @@ class _SmallVisitsPieChartState extends State<SmallVisitsPieChart> {
               ),
               const SizedBox(height: 8),
               Expanded(
-                child: FutureBuilder<List<PieChartSectionData>>(
+                child: FutureBuilder<_PieChartData>(
                   future: _visitsFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
 
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    if (!snapshot.hasData || snapshot.data!.sections.isEmpty) {
                       return const Center(child: Text('Sin datos'));
                     }
 
-                    return PieChart(
-                      PieChartData(
-                        pieTouchData: PieTouchData(
-                          touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                            setState(() {
-                              touchedIndex = pieTouchResponse?.touchedSection?.touchedSectionIndex ?? -1;
-                            });
-                          },
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: PieChart(
+                            PieChartData(
+                              pieTouchData: PieTouchData(
+                                touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                                  setState(() {
+                                    touchedIndex = pieTouchResponse?.touchedSection?.touchedSectionIndex ?? -1;
+                                  });
+                                },
+                              ),
+                              sections: snapshot.data!.sections,
+                              sectionsSpace: 1,
+                              centerSpaceRadius: 25,
+                            ),
+                            swapAnimationDuration: const Duration(milliseconds: 150),
+                          ),
                         ),
-                        sections: snapshot.data!,
-                        sectionsSpace: 1,
-                        centerSpaceRadius: 25,
-                      ),
-                      swapAnimationDuration: const Duration(milliseconds: 150),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 4,
+                          children: snapshot.data!.legendMap.entries.map((entry) {
+                            return Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 14,
+                                  height: 14,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: entry.value,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  entry.key,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ],
                     );
                   },
                 ),
@@ -136,6 +162,12 @@ class _SmallVisitsPieChartState extends State<SmallVisitsPieChart> {
       ),
     );
   }
+}
+
+class _PieChartData {
+  final List<PieChartSectionData> sections;
+  final Map<String, Color> legendMap;
+  _PieChartData(this.sections, this.legendMap);
 }
 
 // class _SmallBadge extends StatelessWidget {
