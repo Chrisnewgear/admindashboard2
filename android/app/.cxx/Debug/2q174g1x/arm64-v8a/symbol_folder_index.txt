@@ -1,0 +1,1 @@
+/Users/desarrollador/development/FLUTTER PROJECT/admindashboard/admindashboard/build/app/intermediates/cxx/Debug/2q174g1x/obj/arm64-v8a
