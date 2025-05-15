@@ -1,20 +1,28 @@
 
-import 'package:admindashboard/helpers/responsiveness.dart';
-import 'package:admindashboard/widgets/horizontal_menu_items.dart';
-import 'package:admindashboard/widgets/vertical_menu_items.dart';
 import 'package:flutter/material.dart';
 
 class SideMenuItem extends StatelessWidget {
   final String itemName;
-  final Function() onTap;
-  const SideMenuItem({super.key, required this.itemName, required this.onTap});
+  final IconData icon;
+  final bool isExpanded;
+  final VoidCallback onTap;
+
+  const SideMenuItem({
+    required this.itemName,
+    required this.icon,
+    required this.isExpanded,
+    required this.onTap,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if(ResponsiveWidget.isCustomScreen(context)) {
-      return VerticalMenuItem(itemName: itemName, onTap: onTap);
-    }
-
-    return HorizontalMenuItem(itemName: itemName, onTap: onTap);
+    return ListTile(
+      leading: Icon(icon),
+      title: isExpanded ? Text(itemName) : null,
+      onTap: onTap,
+      minLeadingWidth: 0,
+      dense: true,
+    );
   }
 }

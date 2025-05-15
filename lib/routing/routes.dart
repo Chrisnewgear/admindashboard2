@@ -1,6 +1,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 const rootRoute = "/";
 const overviewPageDisplayName = "Overview";
@@ -27,8 +28,9 @@ const pageNotFoundPageRoute = "/404";
 class MenuItem {
   final String name;
   final String route;
+  final IconData? icon; // Agregado para el icono
 
-  MenuItem(this.name, this.route);
+  MenuItem(this.name, this.route, {this.icon});
 }
 
 Future<List<MenuItem>> getSideMenuItemRoutes() async {
