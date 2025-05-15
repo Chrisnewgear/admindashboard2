@@ -55,7 +55,7 @@ class _SiteLayoutState extends State<SiteLayout> {
           toggleExpanded: toggleExpanded,
         ),
       ),
-      body: ResponsiveWidge
+      body: ResponsiveWidget(
         largeScreen: LargeScreen(
           isExpanded: isExpanded,
           toggleExpanded: toggleExpanded,
