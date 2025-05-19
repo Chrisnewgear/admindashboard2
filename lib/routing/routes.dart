@@ -74,7 +74,6 @@ Future<List<MenuItem>> getSideMenuItemRoutes() async {
 
     return menuItems;
   } catch (e) {
-    print('Error al verificar el rol del usuario: $e');
     return menuItems; // Retorna el menú base en caso de error
   }
 }

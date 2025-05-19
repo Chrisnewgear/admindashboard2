@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class SideMenuItem extends StatelessWidget {
   final String itemName;
-  final IconData icon;
+  final Widget icon;
   final bool isExpanded;
   final VoidCallback onTap;
 
@@ -18,7 +18,7 @@ class SideMenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon),
+      leading: icon,
       title: isExpanded ? Text(itemName) : null,
       onTap: onTap,
       minLeadingWidth: 0,

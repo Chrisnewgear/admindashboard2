@@ -139,10 +139,11 @@ class SideMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isLargeScreen = !ResponsiveWidget.isSmallScreen(context);
-    double width = isExpanded ? 250 : 70;
+    double width = isExpanded ? 150 : 70;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 700),
+      curve: Curves.easeInOut,
       width: width,
       color: light,
       child: ListView(
@@ -210,7 +211,7 @@ class SideMenu extends StatelessWidget {
                 children: snapshot.data!
                     .map((item) => SideMenuItem(
                           itemName: item.name,
-                          icon: item.icon ?? Icons.error,
+                          icon: menuController.returnIconFor(item.name),
                           isExpanded: isLargeScreen ? isExpanded : true,
                           onTap: () {
                             if (item.route == authenticationPageRoute) {

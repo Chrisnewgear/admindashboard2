@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
                 page: () => const PageNotFound(),
                 transition: Transition.downToUp),
             getPages: [
-              GetPage(name: rootRoute, page: () => SiteLayout()),
+              GetPage(name: rootRoute, page: () => const SiteLayout()),
               GetPage(name: authenticationPageRoute, page: () => const AuthenticationPage()),
               GetPage(name: pageNotFoundPageRoute, page: () => const PageNotFound()),
             ],

@@ -12,7 +12,7 @@ class LargeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Set the width based on isExpanded
-    double sideMenuWidth = isExpanded ? 250 : 70;
+    double sideMenuWidth = isExpanded ? 150 : 70;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
