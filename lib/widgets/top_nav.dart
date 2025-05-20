@@ -5,6 +5,7 @@ import 'package:admindashboard/pages/authentication/authentication.dart';
 import 'package:admindashboard/routing/routes.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // Importar FirebaseAuth
@@ -151,7 +152,9 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
                     ),
                   ),
                   onSelected: (String value) {
-                    print("Seleccionaste: $value");
+                    if (kDebugMode) {
+                      print("Seleccionaste: $value");
+                    }
                   },
                   offset: const Offset(0, 40),
                   itemBuilder: (BuildContext context) {
@@ -293,11 +296,13 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
                             if (confirmLogout == true) {
                               await FirebaseAuth.instance.signOut();
                               menuController.changeActiveItemTo(overviewPageDisplayName);
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const AuthenticationPage()),
-                              );
+                              if (context.mounted) {
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const AuthenticationPage()),
+                                );
+                              }
                             }
                           });
                         },

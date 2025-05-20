@@ -74,6 +74,7 @@ class _ClientsPageState extends State<ClientsPage> {
       }
 
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content:
@@ -105,6 +106,7 @@ class _ClientsPageState extends State<ClientsPage> {
 
       return hasRole;
     } catch (e) {
+      if (!mounted) return false;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content:
@@ -146,6 +148,7 @@ class _ClientsPageState extends State<ClientsPage> {
         isLoading = false; // Desactivar loading incluso si hay error
       });
 
+      if(!mounted) return;
       // Mostrar un mensaje de error al usuario
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -241,7 +244,7 @@ class _ClientsPageState extends State<ClientsPage> {
 
       await _loadUsers();
       _clearFormFields();
-
+      
       Navigator.of(context, rootNavigator: true).pop();
       scaffoldMessenger.showSnackBar(
         SnackBar(

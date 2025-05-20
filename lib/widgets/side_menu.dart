@@ -206,7 +206,7 @@ class SideMenu extends StatelessWidget {
                 );
               }
 
-              return Column(
+              return Obx(() => Column(
                 mainAxisSize: MainAxisSize.min,
                 children: snapshot.data!
                     .map((item) => SideMenuItem(
@@ -228,7 +228,7 @@ class SideMenu extends StatelessWidget {
                           },
                         ))
                     .toList(),
-              );
+              ));
             },
           ),
         ],

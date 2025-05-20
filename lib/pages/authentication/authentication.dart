@@ -255,10 +255,7 @@ class _AuthenticationPageState extends State<AuthenticationPage>
                       final email = _email.text;
                       final password = _password.text;
                       try {
-                        final UserCredential userCredential = await FirebaseAuth
-                            .instance
-                            .signInWithEmailAndPassword(
-                                email: email, password: password);
+                      await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
                         _saveRememberMe(); // Save remember me state
                         Get.offAllNamed(rootRoute);
                       } on FirebaseAuthException catch (e) {

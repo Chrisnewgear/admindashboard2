@@ -1,4 +1,5 @@
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
@@ -7,10 +8,10 @@ class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
 
   @override
-  _ForgotPasswordPageState createState() => _ForgotPasswordPageState();
+  ForgotPasswordPageState createState() => ForgotPasswordPageState();
 }
 
-class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+class ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>(); // Form key for validation
   bool _isLoading = false;
@@ -20,8 +21,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
-        password:
-            'any_password', // Puedes usar una contraseña temporal para la verificación
+        password:'any_password', // Puedes usar una contraseña temporal para la verificación
       );
       // Si llegamos hasta aquí sin excepción, el correo ya existe
       return true;
@@ -30,13 +30,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         // El correo ya está en uso
         return true;
       } else if (e.code == 'invalid-email') {
+        if(!mounted) return false;
         // Correo inválido
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('El formato de correo no es válido')),
         );
       } else {
         // Otro error de Firebase
-        print('Error de Firebase: ${e.message}');
+        if (kDebugMode) {
+          print('Error de Firebase: ${e.message}');
+        }
       }
       return false;
     }
@@ -49,6 +52,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       });
 
       final emailExists = await _checkIfEmailExists(_emailController.text.trim());
+
+      if(!mounted) return;
 
       if (!emailExists) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -67,6 +72,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         await FirebaseAuth.instance.sendPasswordResetEmail(
           email: _emailController.text.trim(),
         );
+        if(!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text(
@@ -80,6 +86,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         } else if (e.code == 'invalid-email') {
           errorMessage = 'El formato de correo no es válido.';
         }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
         );

@@ -8,10 +8,10 @@ class VerifyEmailView extends StatefulWidget {
   const VerifyEmailView({super.key});
 
   @override
-  _VerifyEmailViewState createState() => _VerifyEmailViewState();
+  VerifyEmailViewState createState() => VerifyEmailViewState();
 }
 
-class _VerifyEmailViewState extends State<VerifyEmailView> {
+class VerifyEmailViewState extends State<VerifyEmailView> {
   bool isEmailVerified = false;
 
   @override
@@ -29,10 +29,12 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
   }
   void verifyEmail() async {
     await checkEmailVerified();
+    if(!mounted) return;
+
     if (isEmailVerified) {
       // Navega al dashboard si el correo ya está verificado
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => SiteLayout()),
+        MaterialPageRoute(builder: (context) => const SiteLayout()),
       );
     }else{
       showCustomAlert(context, 'Debes verificar tu email para poder iniciar sesión.');

@@ -1,6 +1,5 @@
 import 'package:admindashboard/pages/visits/widgets/visitas_paginated_table.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:admindashboard/models/visits.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -71,9 +70,8 @@ class _VisitsPageState extends State<VisitsPage> {
         }
       }
     } catch (e) {
-      // if (kDebugMode) {
-      //   print('Error loading user code and visits: $e');
-      // }
+      if(!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content:
@@ -105,6 +103,9 @@ class _VisitsPageState extends State<VisitsPage> {
 
       return hasRole;
     } catch (e) {
+
+      if(!mounted) return false;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content:
@@ -143,6 +144,8 @@ class _VisitsPageState extends State<VisitsPage> {
         isLoading = false; // Desactivar loading incluso si hay error
       });
 
+      if(!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error al cargar las visitas: $e'),
@@ -152,89 +155,92 @@ class _VisitsPageState extends State<VisitsPage> {
     }
   }
 
-  Future<void> _saveOrUpdateVisit(
-      BuildContext context, Visita? existingVisit) async {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
+  Future<void> _saveOrUpdateVisit(BuildContext context, Visita? existingVisit) async {
+  // Store scaffold messenger and context-dependent objects before any async operation
+  final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-    showLoadingDialog(context);
+  // Show loading dialog
+  showLoadingDialog(context);
 
-    try {
-      // Mostrar el loading
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return const Center(
-            child: SpinKitFadingCircle(
-              color: Colors.blue,
-              size: 50.0,
-            ),
-          );
-        },
-      );
+  try {
+    // Obtener el usuario actual
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No hay ningún usuario logueado.');
+    }
 
-      // Obtener el usuario actual y la ubicación
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        throw Exception('No hay ningún usuario logueado.');
-      }
-      GeoPoint? geoPoint = await _getCurrentLocation(context);
-      if (geoPoint == null) {
-        throw Exception('No se pudo obtener la ubicación actual.');
-      }
+    // Obtener la ubicación
+    GeoPoint? geoPoint = await _getCurrentLocation(context);
 
-      final visitData = {
-        'Acciones': _accionesController.text,
-        'CodVendedor': currentVendorCode,
-        'Hora': _horaController.text,
-        'Notas': _notasController.text,
-        'ProductoServicio': _prodServicioController.text,
-        'PropositoVisita': selectedPurpose,
-        'NombreCliente': _nombreClienteController.text,
-        'UserId': user.uid,
-        'Fecha': Timestamp.fromDate(
-            DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
-        'Location': geoPoint,
-        'updatedAt': Timestamp.now(),
-      };
+    // Check if widget is still mounted after the async gap
+    if (!mounted) return;
 
-      // Guardar o actualizar la visita en Firestore
-      if (existingVisit == null) {
-        visitData['createdAt'] = Timestamp.now();
-        await FirebaseFirestore.instance.collection('Visits').add(visitData);
-      } else {
-        await FirebaseFirestore.instance
-            .collection('Visits')
-            .doc(existingVisit.id)
-            .update(visitData);
-      }
+    if (geoPoint == null) {
+      throw Exception('No se pudo obtener la ubicación actual.');
+    }
 
-      await _loadVisits(user.uid);
-      _clearFormFields();
+    final visitData = {
+      'Acciones': _accionesController.text,
+      'CodVendedor': currentVendorCode,
+      'Hora': _horaController.text,
+      'Notas': _notasController.text,
+      'ProductoServicio': _prodServicioController.text,
+      'PropositoVisita': selectedPurpose,
+      'NombreCliente': _nombreClienteController.text,
+      'UserId': user.uid,
+      'Fecha': Timestamp.fromDate(
+          DateFormat('dd/MM/yyyy').parse(_fechaController.text)),
+      'Location': geoPoint,
+      'updatedAt': Timestamp.now(),
+    };
 
-      // Cerrar el loading y mostrar el SnackBar
-      Navigator.of(context).pop();
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text(existingVisit == null
-              ? 'Visita creada exitosamente'
-              : 'Visita actualizada exitosamente'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      // Cerrar el loading y mostrar el SnackBar con el error
-      Navigator.of(context).pop();
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
+    // Guardar o actualizar la visita en Firestore
+    if (existingVisit == null) {
+      visitData['createdAt'] = Timestamp.now();
+      await FirebaseFirestore.instance.collection('Visits').add(visitData);
+    } else {
+      await FirebaseFirestore.instance
+          .collection('Visits')
+          .doc(existingVisit.id)
+          .update(visitData);
+    }
+
+    await _loadVisits(user.uid);
+
+    // Check if widget is still mounted after all async operations
+    if (!mounted) return;
+
+    _clearFormFields();
+
+    // Close the loading dialog - safe because we verified mounted status
+    Navigator.of(context).pop();
+
+    // Use the stored scaffold messenger to show the success message
+    scaffoldMessenger.showSnackBar(
+      SnackBar(
+        content: Text(existingVisit == null
+            ? 'Visita creada exitosamente'
+            : 'Visita actualizada exitosamente'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  } catch (e) {
+    // Check if widget is still mounted
+    if (mounted) {
+      // Close the loading dialog if widget is still mounted
       Navigator.of(context).pop();
     }
+
+    // Use the stored scaffold messenger for the error message
+    scaffoldMessenger.showSnackBar(
+      SnackBar(
+        content: Text('Error: ${e.toString()}'),
+        backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
+
   Future<GeoPoint?> _getCurrentLocation(BuildContext context) async {
     try {
       // Verificar permisos
@@ -872,6 +878,8 @@ class _VisitsPageState extends State<VisitsPage> {
 
       // Cargar la lista de visitas actualizada
       await _loadVisits(FirebaseAuth.instance.currentUser!.uid);
+
+      if(!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Visita eliminada con éxito')),

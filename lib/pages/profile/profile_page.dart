@@ -7,10 +7,10 @@ class ProfileWidget extends StatefulWidget {
   const ProfileWidget({super.key});
 
   @override
-  _ProfileWidgetState createState() => _ProfileWidgetState();
+  ProfileWidgetState createState() => ProfileWidgetState();
 }
 
-class _ProfileWidgetState extends State<ProfileWidget> {
+class ProfileWidgetState extends State<ProfileWidget> {
   final ValueNotifier<int> _selectedIndex =
       ValueNotifier<int>(0); // Notificador para evitar recargas completas
   //final _formKey = GlobalKey<FormState>();
@@ -694,6 +694,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
           'Telefono': phoneController.text,
         });
 
+        if(!mounted) return;
         // Show success SnackBar
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -725,7 +726,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
         );
 
         await currentUser.reauthenticateWithCredential(credential);
-
+        if(!mounted) return;
         // Validación de la longitud de la nueva contraseña
         if (newPasswordController.text.length < 8) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -754,6 +755,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
         // Actualización de la nueva contraseña
         await currentUser.updatePassword(newPasswordController.text);
 
+        if(!mounted) return;
         // Mostrar mensaje de éxito
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

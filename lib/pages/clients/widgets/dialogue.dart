@@ -9,10 +9,10 @@ class ClientFormDialog extends StatefulWidget {
   const ClientFormDialog({super.key, this.client});
 
   @override
-  _ClientFormDialogState createState() => _ClientFormDialogState();
+  ClientFormDialogState createState() => ClientFormDialogState();
 }
 
-class _ClientFormDialogState extends State<ClientFormDialog> {
+class ClientFormDialogState extends State<ClientFormDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nombresController = TextEditingController();
   final TextEditingController _apellidosController = TextEditingController();

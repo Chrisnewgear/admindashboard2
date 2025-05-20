@@ -68,6 +68,7 @@ class _MyTeamPageState extends State<MyTeamPage> {
         }
       }
     } catch (e) {
+      if(!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content:
@@ -78,7 +79,7 @@ class _MyTeamPageState extends State<MyTeamPage> {
       );
     }
   }
-  
+
   Future<void> _loadUsers() async {
     setState(() {
       isLoading = true; // Activar loading al inicio de la carga
@@ -107,7 +108,7 @@ class _MyTeamPageState extends State<MyTeamPage> {
       setState(() {
         isLoading = false; // Desactivar loading incluso si hay error
       });
-
+      if(!mounted) return;
       // Mostrar un mensaje de error al usuario
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -118,14 +119,14 @@ class _MyTeamPageState extends State<MyTeamPage> {
     }
   }
 
-  void _clearFormFields() {
-    _nombresController.clear();
-    _apellidosController.clear();
-    _emailController.clear();
-    _telefonoController.clear();
-    _direccionController.clear();
-    _empresaController.clear();
-  }
+  // void _clearFormFields() {
+  //   _nombresController.clear();
+  //   _apellidosController.clear();
+  //   _emailController.clear();
+  //   _telefonoController.clear();
+  //   _direccionController.clear();
+  //   _empresaController.clear();
+  // }
 
   // void _showFormDialog(BuildContext context, Cliente? client, bool editModeOn) {
   //   final formKey = GlobalKey<FormState>();

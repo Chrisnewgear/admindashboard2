@@ -21,7 +21,7 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   late final TextEditingController _email;
   late final TextEditingController _password;
-  late final TextEditingController _repeated_password;
+  late final TextEditingController _repeatedPassword;
   late final TextEditingController _name;
   late final TextEditingController _surname;
   late final TextEditingController _phone;
@@ -35,7 +35,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
-    _repeated_password = TextEditingController();
+    _repeatedPassword = TextEditingController();
     _name = TextEditingController();
     _surname = TextEditingController();
     _phone = TextEditingController();
@@ -249,7 +249,7 @@ class _RegisterPageState extends State<RegisterPage> {
       onChanged: (value) {
         if (isRepeatedPassword || labelText == 'Password*') {
           setState(() {
-            _passwordsMatch = _repeated_password.text == _password.text;
+            _passwordsMatch = _repeatedPassword.text == _password.text;
           });
         }
       },
@@ -339,7 +339,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                           const SizedBox(height: 15),
                                           _buildRowFields(
                                               _password,
-                                              _repeated_password,
+                                              _repeatedPassword,
                                               'Password*',
                                               'Repita su Password*',
                                               isSecondFieldPassword: true),
@@ -401,7 +401,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                           ),
                                           const SizedBox(height: 15),
                                           _buildTextField(
-                                            controller: _repeated_password,
+                                            controller: _repeatedPassword,
                                             labelText: 'Repita su Password*',
                                             hintText: 'Repita su password',
                                             isPassword: true,
@@ -422,7 +422,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   if (_formKey.currentState?.validate() ??
                                       false) {
                                     if (_password.text !=
-                                        _repeated_password.text) {
+                                        _repeatedPassword.text) {
                                       setState(() {
                                         _passwordsMatch = false;
                                       });
@@ -594,7 +594,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void dispose() {
     _email.dispose();
     _password.dispose();
-    _repeated_password.dispose();
+    _repeatedPassword.dispose();
     _name.dispose();
     _surname.dispose();
     _phone.dispose();

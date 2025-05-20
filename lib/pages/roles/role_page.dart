@@ -57,6 +57,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
       if (kDebugMode) {
         print('Error loading users: $e');
       }
+      if(!mounted) return;
       // Puedes mostrar un mensaje de error al usuario si lo deseas
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -154,6 +155,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
       // Reload users
       await _loadUsers();
 
+      if(!mounted) return;
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -304,7 +306,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
       query = query.toLowerCase().trim();
       return fullName.contains(query) || codigo.contains(query);
     }
-
+  
     showDialog(
       context: context,
       builder: (BuildContext context) {
