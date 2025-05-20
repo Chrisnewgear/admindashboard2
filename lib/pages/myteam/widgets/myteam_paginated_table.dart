@@ -163,6 +163,8 @@ class _ResponsiveMyTeamTableState extends State<ResponsiveMyTeamTable> {
             if (newValue != null) {
               setState(() {
                 _rowsPerPage = newValue;
+                // Force a rebuild of the table by updating the filteredUsers list
+                filteredUsers = List.from(filteredUsers);
               });
             }
           },
@@ -217,6 +219,7 @@ class _ResponsiveMyTeamTableState extends State<ResponsiveMyTeamTable> {
         ),
       ),
       child: PaginatedDataTable2(
+        key: ValueKey<int>(_rowsPerPage),
         columns: _buildColumns(),
         source: TableDataSource(
           filteredUsers,

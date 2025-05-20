@@ -256,6 +256,8 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
             if (newValue != null) {
               setState(() {
                 _rowsPerPage = newValue;
+                // Force a rebuild of the table by updating the filteredVisitas list
+                filteredVisitas = List.from(filteredVisitas);
               });
             }
           },
@@ -553,6 +555,7 @@ class _ResponsiveVisitasTableState extends State<ResponsiveVisitasTable> {
         ),
       ),
       child: PaginatedDataTable2(
+        key: ValueKey<int>(_rowsPerPage),
         columns: _buildColumns(),
         source: VisitasDataTableSource(
           filteredVisitas,

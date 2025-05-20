@@ -215,7 +215,7 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
             );
           }).toList(),
           onChanged: (int? newValue) {
-            if (newValue != null) {
+            if (newValue != null && newValue != _rowsPerPage) {
               setState(() {
                 _rowsPerPage = newValue;
               });
@@ -523,7 +523,7 @@ Widget _buildAssignmentChip(Usuario item) {
   Widget _buildDataTable(BuildContext context) {
     return Theme(
       data: Theme.of(context).copyWith(
-        cardColor: Colors.white, // Fondo blanco para la tabla
+        cardColor: Colors.white,
         dividerColor: Colors.grey[200],
         dataTableTheme: DataTableThemeData(
           headingTextStyle: TextStyle(
@@ -538,6 +538,7 @@ Widget _buildAssignmentChip(Usuario item) {
         ),
       ),
       child: PaginatedDataTable2(
+        key: ValueKey<int>(_rowsPerPage),
         columns: [
           ..._buildColumns(),
         ],
@@ -546,10 +547,10 @@ Widget _buildAssignmentChip(Usuario item) {
           widget.deleteUsuario,
           widget.showUsuarioFormDialog,
           context,
-          addAvatar: true, // Indicamos que se incluye el avatar
+          addAvatar: true,
         ),
         rowsPerPage: _rowsPerPage,
-        columnSpacing: 12, // Reducir el espacio entre columnas
+        columnSpacing: 12,
         horizontalMargin: 24,
         showCheckboxColumn: false,
         headingRowHeight: 48,

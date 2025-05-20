@@ -179,6 +179,8 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
             if (newValue != null) {
               setState(() {
                 _rowsPerPage = newValue;
+                // Force a rebuild of the table by updating the filteredClientes list
+                filteredClientes = List.from(filteredClientes);
               });
             }
           },
@@ -565,6 +567,7 @@ class _ResponsiveClientsTableState extends State<ResponsiveClientsTable> {
           ],
         ),
         child: PaginatedDataTable2(
+          key: ValueKey<int>(_rowsPerPage),
           columns: _buildColumns(),
           source: ClientesDataTableSource(
             filteredClientes,
