@@ -115,86 +115,106 @@ class ProfileWidgetState extends State<ProfileWidget> {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Barra lateral izquierda con navegación
-            Card(
-              elevation: 2,
-              child: Container(
-                width: 250,
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Sección de foto de perfil
-                    Center(
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.photo_library_outlined,
-                              size: 50,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          Positioned(
-                            right: 0,
-                            bottom: 0,
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: const BoxDecoration(
-                                color: Colors.indigo,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.camera_alt,
-                                size: 20,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    _buildNavItem('Editar Perfil'),
-                    _buildNavItem('Preferencias'),
-                    _buildNavItem('Seguridad'),
-                    _buildNavItem('Notificaciones'),
-                    //_buildNavItem('Connected Accounts'),
-                  ],
+            //Title row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Mi Perfil',
+                  style: GoogleFonts.roboto(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
+              ],
             ),
-            const SizedBox(width: 24),
-            // Área de contenido principal
-            Expanded(
-              child: Card(
-                elevation: 2,
-                child: Container(
-                  padding: const EdgeInsets.all(32),
-                  child: ValueListenableBuilder<int>(
-                    valueListenable: _selectedIndex,
-                    builder: (context, selectedIndex, _) {
-                      // Renderizamos la sección según el índice seleccionado
-                      if (selectedIndex == 0) {
-                        return _buildProfileEditSection();
-                      } else if (selectedIndex == 2) {
-                        return _buildPasswordChangeSection();
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    },
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Barra lateral izquierda con navegación
+                Card(
+                  elevation: 2,
+                  child: Container(
+                    width: 250,
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Sección de foto de perfil
+                        Center(
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: 120,
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.photo_library_outlined,
+                                  size: 50,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.indigo,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.camera_alt,
+                                    size: 20,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        _buildNavItem('Editar Perfil'),
+                        _buildNavItem('Preferencias'),
+                        _buildNavItem('Seguridad'),
+                        _buildNavItem('Notificaciones'),
+                        //_buildNavItem('Connected Accounts'),
+                      ],
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 24),
+                // Área de contenido principal
+                Expanded(
+                  child: Card(
+                    elevation: 2,
+                    child: Container(
+                      padding: const EdgeInsets.all(32),
+                      child: ValueListenableBuilder<int>(
+                        valueListenable: _selectedIndex,
+                        builder: (context, selectedIndex, _) {
+                          // Renderizamos la sección según el índice seleccionado
+                          if (selectedIndex == 0) {
+                            return _buildProfileEditSection();
+                          } else if (selectedIndex == 2) {
+                            return _buildPasswordChangeSection();
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -224,36 +244,50 @@ class ProfileWidgetState extends State<ProfileWidget> {
             ),
           ],
         ),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildTab('Editar Perfil', 0),
-                    _buildTab('Preferencias', 1),
-                    _buildTab('Seguridad', 2),
-                  ],
-                ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Mi Perfil',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 24),
-              ValueListenableBuilder<int>(
-                valueListenable: _selectedIndex,
-                builder: (context, index, _) {
-                  if (index == 0) {
-                    return _buildProfileEditSection();
-                  } else if (index == 2) {
-                    return _buildPasswordChangeSection();
-                  } else {
-                    return const SizedBox.shrink();
-                  }
-                },
+              textAlign: TextAlign.center,
+            ),
+            Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildTab('Editar Perfil', 0),
+                        _buildTab('Preferencias', 1),
+                        _buildTab('Seguridad', 2),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ValueListenableBuilder<int>(
+                    valueListenable: _selectedIndex,
+                    builder: (context, index, _) {
+                      if (index == 0) {
+                        return _buildProfileEditSection();
+                      } else if (index == 2) {
+                        return _buildPasswordChangeSection();
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -458,127 +492,129 @@ class ProfileWidgetState extends State<ProfileWidget> {
   }
 
   Widget _buildProfileEditSection() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      LayoutBuilder(
-        builder: (context, constraints) {
-          bool isLargeScreen = constraints.maxWidth > 600;
-          return Wrap(
-            spacing: 16,
-            runSpacing: 16,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LayoutBuilder(
+          builder: (context, constraints) {
+            bool isLargeScreen = constraints.maxWidth > 600;
+            return Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: [
+                SizedBox(
+                  width: isLargeScreen
+                      ? (constraints.maxWidth / 2) - 8
+                      : constraints.maxWidth,
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: isEditing,
+                    builder: (context, editing, child) {
+                      return _buildInputField(
+                        nameController,
+                        'Nombre',
+                        enabled: editing,
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: isLargeScreen
+                      ? (constraints.maxWidth / 2) - 8
+                      : constraints.maxWidth,
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: isEditing,
+                    builder: (context, editing, child) {
+                      return _buildInputField(
+                        apellidoController,
+                        'Apellidos',
+                        enabled: editing,
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: isLargeScreen
+                      ? (constraints.maxWidth / 2) - 8
+                      : constraints.maxWidth,
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: isEditing,
+                    builder: (context, editing, child) {
+                      return _buildInputField(
+                        emailController,
+                        'Correo electrónico',
+                        isEmail: true,
+                        enabled: editing,
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: isLargeScreen
+                      ? (constraints.maxWidth / 2) - 8
+                      : constraints.maxWidth,
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: isEditing,
+                    builder: (context, editing, child) {
+                      return _buildInputField(
+                        phoneController,
+                        'Teléfono',
+                        enabled: editing,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 24),
+        Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
-                width: isLargeScreen
-                    ? (constraints.maxWidth / 2) - 8
-                    : constraints.maxWidth,
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: isEditing,
-                  builder: (context, editing, child) {
-                    return _buildInputField(
-                      nameController,
-                      'Nombre',
-                      enabled: editing,
-                    );
-                  },
-                ),
+              ValueListenableBuilder<bool>(
+                valueListenable: isEditing,
+                builder: (context, editing, child) {
+                  return ElevatedButton.icon(
+                    icon: Icon(editing ? Icons.cancel : Icons.edit),
+                    label: Text(editing ? 'Cancelar' : 'Editar Perfil'),
+                    onPressed: () {
+                      isEditing.value = !editing;
+                    },
+                  );
+                },
               ),
-              SizedBox(
-                width: isLargeScreen
-                    ? (constraints.maxWidth / 2) - 8
-                    : constraints.maxWidth,
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: isEditing,
-                  builder: (context, editing, child) {
-                    return _buildInputField(
-                      apellidoController,
-                      'Apellidos',
-                      enabled: editing,
-                    );
-                  },
-                ),
-              ),
-              SizedBox(
-                width: isLargeScreen
-                    ? (constraints.maxWidth / 2) - 8
-                    : constraints.maxWidth,
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: isEditing,
-                  builder: (context, editing, child) {
-                    return _buildInputField(
-                      emailController,
-                      'Correo electrónico',
-                      isEmail: true,
-                      enabled: editing,
-                    );
-                  },
-                ),
-              ),
-              SizedBox(
-                width: isLargeScreen
-                    ? (constraints.maxWidth / 2) - 8
-                    : constraints.maxWidth,
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: isEditing,
-                  builder: (context, editing, child) {
-                    return _buildInputField(
-                      phoneController,
-                      'Teléfono',
-                      enabled: editing,
-                    );
-                  },
-                ),
+              const SizedBox(width: 8),
+              ValueListenableBuilder<bool>(
+                valueListenable: isEditing,
+                builder: (context, editing, child) {
+                  return ElevatedButton.icon(
+                    icon: Icon(Icons.save,
+                        color: editing ? Colors.white : Colors.grey),
+                    label: Text(
+                      'Guardar',
+                      style: TextStyle(
+                          color: editing ? Colors.white : Colors.grey),
+                    ),
+                    onPressed: editing
+                        ? () {
+                            saveProfile();
+                            isEditing.value = false;
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          editing ? Colors.indigo : Colors.grey[300],
+                    ),
+                  );
+                },
               ),
             ],
-          );
-        },
-      ),
-      const SizedBox(height: 24),
-      Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ValueListenableBuilder<bool>(
-              valueListenable: isEditing,
-              builder: (context, editing, child) {
-                return ElevatedButton.icon(
-                  icon: Icon(editing ? Icons.cancel : Icons.edit),
-                  label: Text(editing ? 'Cancelar' : 'Editar Perfil'),
-                  onPressed: () {
-                    isEditing.value = !editing;
-                  },
-                );
-              },
-            ),
-            const SizedBox(width: 8),
-            ValueListenableBuilder<bool>(
-              valueListenable: isEditing,
-              builder: (context, editing, child) {
-                return ElevatedButton.icon(
-                  icon: Icon(Icons.save,
-                      color: editing ? Colors.white : Colors.grey),
-                  label: Text(
-                    'Guardar',
-                    style: TextStyle(color: editing ? Colors.white : Colors.grey),
-                  ),
-                  onPressed: editing
-                      ? () {
-                          saveProfile();
-                          isEditing.value = false;
-                        }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: editing ? Colors.indigo : Colors.grey[300],
-                  ),
-                );
-              },
-            ),
-          ],
+          ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 
   Widget _buildPasswordChangeSection() {
     final formKey = GlobalKey<FormState>();
@@ -654,11 +690,10 @@ class ProfileWidgetState extends State<ProfileWidget> {
                   builder: (context, editing, child) {
                     return ElevatedButton.icon(
                       icon: Icon(Icons.save,
-                        color: editing ? Colors.white : Colors.grey),
-                      label: Text(
-                        'Guardar',
-                        style: TextStyle(color: editing ? Colors.white : Colors.grey)
-                      ),
+                          color: editing ? Colors.white : Colors.grey),
+                      label: Text('Guardar',
+                          style: TextStyle(
+                              color: editing ? Colors.white : Colors.grey)),
                       onPressed: editing
                           ? () async {
                               if (formKey.currentState!.validate()) {
@@ -671,7 +706,8 @@ class ProfileWidgetState extends State<ProfileWidget> {
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: editing ? Colors.indigo : Colors.grey[300],
+                        backgroundColor:
+                            editing ? Colors.indigo : Colors.grey[300],
                       ),
                     );
                   },
@@ -683,6 +719,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
       ),
     );
   }
+
   Future<void> saveProfile() async {
     try {
       User? currentUser = FirebaseAuth.instance.currentUser;
@@ -694,7 +731,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
           'Telefono': phoneController.text,
         });
 
-        if(!mounted) return;
+        if (!mounted) return;
         // Show success SnackBar
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -726,7 +763,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
         );
 
         await currentUser.reauthenticateWithCredential(credential);
-        if(!mounted) return;
+        if (!mounted) return;
         // Validación de la longitud de la nueva contraseña
         if (newPasswordController.text.length < 8) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -755,7 +792,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
         // Actualización de la nueva contraseña
         await currentUser.updatePassword(newPasswordController.text);
 
-        if(!mounted) return;
+        if (!mounted) return;
         // Mostrar mensaje de éxito
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
