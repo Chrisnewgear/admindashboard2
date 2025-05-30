@@ -306,7 +306,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
       query = query.toLowerCase().trim();
       return fullName.contains(query) || codigo.contains(query);
     }
-  
+
     showDialog(
       context: context,
       builder: (BuildContext context) {

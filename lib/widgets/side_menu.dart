@@ -29,10 +29,10 @@ class SideMenu extends StatelessWidget {
       color: light,
       child: ListView(
         children: [
-            IconButton(
-              icon: Icon(isExpanded ? Icons.arrow_back_ios : Icons.arrow_forward_ios),
-              onPressed: toggleExpanded
-            ),
+          IconButton(
+              icon: Icon(
+                  isExpanded ? Icons.arrow_back_ios : Icons.arrow_forward_ios),
+              onPressed: toggleExpanded),
           if (ResponsiveWidget.isSmallScreen(context) && isExpanded)
             Column(
               mainAxisSize: MainAxisSize.min,
@@ -49,13 +49,11 @@ class SideMenu extends StatelessWidget {
                         width: 100,
                       ),
                     ),
-                    Flexible(
-                      child: CustomText(
-                        text: "Dash",
-                        size: 20,
-                        weight: FontWeight.bold,
-                        color: active,
-                      ),
+                    CustomText(
+                      text: "Dash",
+                      size: 20,
+                      weight: FontWeight.bold,
+                      color: active,
                     ),
                     SizedBox(width: width / 48),
                   ],
@@ -88,28 +86,29 @@ class SideMenu extends StatelessWidget {
               }
 
               return Obx(() => Column(
-                mainAxisSize: MainAxisSize.min,
-                children: snapshot.data!
-                    .map((item) => SideMenuItem(
-                          itemName: item.name,
-                          icon: menuController.returnIconFor(item.name),
-                          isExpanded: isLargeScreen ? isExpanded : true,
-                          onTap: () {
-                            if (item.route == authenticationPageRoute) {
-                              Get.offAllNamed(authenticationPageRoute);
-                              menuController.changeActiveItemTo(overviewPageDisplayName);
-                            }
-                            if (!menuController.isActive(item.name)) {
-                              menuController.changeActiveItemTo(item.name);
-                              if (ResponsiveWidget.isSmallScreen(context)) {
-                                Get.back();
-                              }
-                              navigationController.navigateTo(item.route);
-                            }
-                          },
-                        ))
-                    .toList(),
-              ));
+                    mainAxisSize: MainAxisSize.min,
+                    children: snapshot.data!
+                        .map((item) => SideMenuItem(
+                              itemName: item.name,
+                              icon: menuController.returnIconFor(item.name),
+                              isExpanded: isLargeScreen ? isExpanded : true,
+                              onTap: () {
+                                if (item.route == authenticationPageRoute) {
+                                  Get.offAllNamed(authenticationPageRoute);
+                                  menuController.changeActiveItemTo(
+                                      overviewPageDisplayName);
+                                }
+                                if (!menuController.isActive(item.name)) {
+                                  menuController.changeActiveItemTo(item.name);
+                                  if (ResponsiveWidget.isSmallScreen(context)) {
+                                    Get.back();
+                                  }
+                                  navigationController.navigateTo(item.route);
+                                }
+                              },
+                            ))
+                        .toList(),
+                  ));
             },
           ),
         ],

@@ -589,7 +589,7 @@ Widget _buildAssignmentChip(Usuario item) {
       _buildColumn('Role', 'role', ColumnSize.M),
       _buildColumn('Asignado', 'asignado', ColumnSize.S),
       DataColumn2(
-        label: const Text('Fecha',
+        label: const Text('Fecha Creación',
             textAlign: TextAlign.center), // Center-aligned label
         size: ColumnSize.S,
         numeric: false,
