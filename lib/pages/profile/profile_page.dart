@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class ProfileWidget extends StatefulWidget {
   const ProfileWidget({super.key});
@@ -23,9 +27,12 @@ class ProfileWidgetState extends State<ProfileWidget> {
   final ValueNotifier<bool> confirmPasswordObscureNotifier =
       ValueNotifier<bool>(true);
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  File? _profileImage;
+  Uint8List? _profileImageBytes;
 
   String? newPasswordError;
   String? confirmPasswordError;
+  String? photoUrl = '';
 
   late TextEditingController nameController;
   late TextEditingController apellidoController;
@@ -75,6 +82,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
     final User? user = FirebaseAuth.instance.currentUser;
     final screenSize = MediaQuery.of(context).size;
     final isDesktop = screenSize.width > 1024;
+    //photoUrl = user?.photoURL;
 
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
@@ -110,6 +118,173 @@ class ProfileWidgetState extends State<ProfileWidget> {
       },
     );
   }
+
+  // Widget _buildDesktopLayout(BuildContext context) {
+  //   return SingleChildScrollView(
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(32.0),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.center,
+  //         children: [
+  //           //Title row
+  //           Row(
+  //             mainAxisAlignment: MainAxisAlignment.center,
+  //             children: [
+  //               Text(
+  //                 'Mi Perfil',
+  //                 style: GoogleFonts.roboto(
+  //                   fontSize: 24,
+  //                   fontWeight: FontWeight.bold,
+  //                 ),
+  //                 textAlign: TextAlign.center,
+  //               ),
+  //             ],
+  //           ),
+  //           const SizedBox(height: 16),
+  //           Row(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               // Barra lateral izquierda con navegación
+  //               Card(
+  //                 elevation: 2,
+  //                 child: Container(
+  //                   width: 250,
+  //                   padding: const EdgeInsets.all(24),
+  //                   child: Column(
+  //                     crossAxisAlignment: CrossAxisAlignment.start,
+  //                     children: [
+  //                       // Sección de foto de perfil
+  //                       Center(
+  //                         child: Stack(
+  //                           children: [
+  //                             Container(
+  //                               width: 120,
+  //                               height: 120,
+  //                               decoration: BoxDecoration(
+  //                                 color: Colors.grey[200],
+  //                                 shape: BoxShape.circle,
+  //                               ),
+  //                               child: photoUrl != null && photoUrl!.isNotEmpty
+  //                                   ? ClipOval(
+  //                                       child: Image.network(
+  //                                         photoUrl.toString(),
+  //                                         fit: BoxFit.cover,
+  //                                         width: 120,
+  //                                         height: 120,
+  //                                       ),
+  //                                     )
+  //                                   : kIsWeb
+  //                                       ? (_profileImageBytes != null
+  //                                           ? ClipOval(
+  //                                               child: Image.memory(
+  //                                                 _profileImageBytes!,
+  //                                                 fit: BoxFit.cover,
+  //                                                 width: 120,
+  //                                                 height: 120,
+  //                                               ),
+  //                                             )
+  //                                           : const Icon(
+  //                                               Icons.photo_library_outlined,
+  //                                               size: 50,
+  //                                               color: Colors.grey,
+  //                                             ))
+  //                                       : (_profileImage != null
+  //                                           ? ClipOval(
+  //                                               child: Image.file(
+  //                                                 _profileImage!,
+  //                                                 fit: BoxFit.cover,
+  //                                                 width: 120,
+  //                                                 height: 120,
+  //                                               ),
+  //                                             )
+  //                                           : const Icon(
+  //                                               Icons.photo_library_outlined,
+  //                                               size: 50,
+  //                                               color: Colors.grey,
+  //                                             )),
+  //                             ),
+  //                             Positioned(
+  //                               right: 0,
+  //                               bottom: 0,
+  //                               child: Container(
+  //                                 padding: const EdgeInsets.all(8),
+  //                                 decoration: const BoxDecoration(
+  //                                   color: Colors.indigo,
+  //                                   shape: BoxShape.circle,
+  //                                 ),
+  //                                 child: GestureDetector(
+  //                                   onTap: () async {
+  //                                     final picker = ImagePicker();
+  //                                     final pickedFile = await picker.pickImage(
+  //                                         source: ImageSource.camera);
+  //                                     if (pickedFile != null) {
+  //                                       if (kIsWeb) {
+  //                                         final bytes =
+  //                                             await pickedFile.readAsBytes();
+  //                                         setState(() {
+  //                                           _profileImageBytes = bytes;
+  //                                         });
+  //                                         await uploadProfileImage();
+  //                                       } else {
+  //                                         setState(() {
+  //                                           _profileImage =
+  //                                               File(pickedFile.path);
+  //                                         });
+  //                                         await uploadProfileImage();
+  //                                       }
+  //                                     }
+  //                                   },
+  //                                   child: const Icon(
+  //                                     Icons.camera_alt,
+  //                                     size: 20,
+  //                                     color: Colors.white,
+  //                                   ),
+  //                                 ),
+  //                               ),
+  //                             )
+  //                           ],
+  //                         ),
+  //                       ),
+  //                       const SizedBox(height: 24),
+  //                       _buildNavItem('Editar Perfil'),
+  //                       _buildNavItem('Preferencias'),
+  //                       _buildNavItem('Seguridad'),
+  //                       _buildNavItem('Notificaciones'),
+  //                       //_buildNavItem('Connected Accounts'),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ),
+  //               const SizedBox(width: 24),
+  //               // Área de contenido principal
+  //               Expanded(
+  //                 child: Card(
+  //                   elevation: 2,
+  //                   child: Container(
+  //                     padding: const EdgeInsets.all(32),
+  //                     child: ValueListenableBuilder<int>(
+  //                       valueListenable: _selectedIndex,
+  //                       builder: (context, selectedIndex, _) {
+  //                         // Renderizamos la sección según el índice seleccionado
+  //                         if (selectedIndex == 0) {
+  //                           return _buildProfileEditSection();
+  //                         } else if (selectedIndex == 2) {
+  //                           return _buildPasswordChangeSection();
+  //                         } else {
+  //                           return const SizedBox.shrink();
+  //                         }
+  //                       },
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildDesktopLayout(BuildContext context) {
     return SingleChildScrollView(
@@ -156,11 +331,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
                                   color: Colors.grey[200],
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
-                                  Icons.photo_library_outlined,
-                                  size: 50,
-                                  color: Colors.grey,
-                                ),
+                                child: _buildProfileImage(),
                               ),
                               Positioned(
                                 right: 0,
@@ -171,13 +342,16 @@ class ProfileWidgetState extends State<ProfileWidget> {
                                     color: Colors.indigo,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(
-                                    Icons.camera_alt,
-                                    size: 20,
-                                    color: Colors.white,
+                                  child: GestureDetector(
+                                    onTap: _pickAndUploadImage,
+                                    child: const Icon(
+                                      Icons.camera_alt,
+                                      size: 20,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
-                              ),
+                              )
                             ],
                           ),
                         ),
@@ -186,7 +360,6 @@ class ProfileWidgetState extends State<ProfileWidget> {
                         _buildNavItem('Preferencias'),
                         _buildNavItem('Seguridad'),
                         _buildNavItem('Notificaciones'),
-                        //_buildNavItem('Connected Accounts'),
                       ],
                     ),
                   ),
@@ -201,7 +374,6 @@ class ProfileWidgetState extends State<ProfileWidget> {
                       child: ValueListenableBuilder<int>(
                         valueListenable: _selectedIndex,
                         builder: (context, selectedIndex, _) {
-                          // Renderizamos la sección según el índice seleccionado
                           if (selectedIndex == 0) {
                             return _buildProfileEditSection();
                           } else if (selectedIndex == 2) {
@@ -220,6 +392,149 @@ class ProfileWidgetState extends State<ProfileWidget> {
         ),
       ),
     );
+  }
+
+  // Separated widget for better organization
+  Widget _buildProfileImage() {
+    // Priority 1: Show uploaded image from Firebase
+    if (photoUrl != null && photoUrl!.isNotEmpty) {
+      return ClipOval(
+        child: Image.network(
+          photoUrl.toString(),
+          fit: BoxFit.cover,
+          width: 120,
+          height: 120,
+          // Add cache headers to force refresh
+          headers: const {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+          },
+          errorBuilder: (context, error, stackTrace) {
+            print('Error loading network image: $error');
+            print('Image URL: $photoUrl');
+            // Fallback to local image if network fails
+            return _buildLocalImage();
+          },
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return const Center(
+              child: CircularProgressIndicator(strokeWidth: 2),
+            );
+          },
+        ),
+      );
+    }
+
+    // Priority 2: Show local images while uploading or if no network image
+    return _buildLocalImage();
+  }
+
+  Widget _buildLocalImage() {
+    if (kIsWeb && _profileImageBytes != null) {
+      return ClipOval(
+        child: Image.memory(
+          _profileImageBytes!,
+          fit: BoxFit.cover,
+          width: 120,
+          height: 120,
+        ),
+      );
+    }
+
+    if (!kIsWeb && _profileImage != null) {
+      return ClipOval(
+        child: Image.file(
+          _profileImage!,
+          fit: BoxFit.cover,
+          width: 120,
+          height: 120,
+        ),
+      );
+    }
+
+    return const Icon(
+      Icons.photo_library_outlined,
+      size: 50,
+      color: Colors.grey,
+    );
+  }
+
+  // Improved image picker with better error handling
+  Future<void> _pickAndUploadImage() async {
+    try {
+      final picker = ImagePicker();
+
+      // Show dialog to choose between camera and gallery
+      final ImageSource? source = await showDialog<ImageSource>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Seleccionar imagen'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: const Text('Cámara'),
+                  onTap: () => Navigator.of(context).pop(ImageSource.camera),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Galería'),
+                  onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      if (source == null) return;
+
+      final pickedFile = await picker.pickImage(
+        source: source,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 80,
+      );
+
+      if (pickedFile != null) {
+        // Show loading indicator
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(width: 16),
+                  Text('Subiendo imagen...'),
+                ],
+              ),
+              duration: Duration(seconds: 5),
+            ),
+          );
+        }
+
+        if (kIsWeb) {
+          final bytes = await pickedFile.readAsBytes();
+          setState(() {
+            _profileImageBytes = bytes;
+          });
+        } else {
+          setState(() {
+            _profileImage = File(pickedFile.path);
+          });
+        }
+
+        await uploadProfileImage();
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al seleccionar imagen: $e')),
+        );
+      }
+    }
   }
 
   Widget _buildMobileLayout(BuildContext context) {
@@ -814,6 +1129,132 @@ class ProfileWidgetState extends State<ProfileWidget> {
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  // Improved upload function with better error handling and validation
+  Future<void> uploadProfileImage() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Usuario no autenticado')),
+        );
+      }
+      return;
+    }
+
+    try {
+      String downloadUrl = '';
+
+      // Create a reference with timestamp to avoid caching issues
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('profile_images/${user.uid}_$timestamp.jpg');
+
+      if (kIsWeb && _profileImageBytes != null) {
+        // Upload for web
+        final uploadTask = ref.putData(
+          _profileImageBytes!,
+          SettableMetadata(
+            contentType: 'image/jpeg',
+            customMetadata: {
+              'userId': user.uid,
+              'uploadedAt': DateTime.now().toIso8601String(),
+            },
+          ),
+        );
+
+        final snapshot = await uploadTask;
+        downloadUrl = await snapshot.ref.getDownloadURL();
+      } else if (!kIsWeb && _profileImage != null) {
+        // Upload for mobile
+        final uploadTask = ref.putFile(
+          _profileImage!,
+          SettableMetadata(
+            contentType: 'image/jpeg',
+            customMetadata: {
+              'userId': user.uid,
+              'uploadedAt': DateTime.now().toIso8601String(),
+            },
+          ),
+        );
+
+        final snapshot = await uploadTask;
+        downloadUrl = await snapshot.ref.getDownloadURL();
+      }
+
+      if (downloadUrl.isNotEmpty) {
+        // Update Firestore with additional user data structure
+        await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
+          'photoUrl': downloadUrl,
+          'lastUpdated': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+
+        // Update Auth profile
+        await user.updatePhotoURL(downloadUrl);
+
+        // Update the local state properly
+        setState(() {
+          photoUrl = downloadUrl;
+          // Clear local images since we now have the uploaded URL
+          _profileImageBytes = null;
+          _profileImage = null;
+        });
+
+        print('Profile image uploaded successfully: $downloadUrl');
+      }
+
+      if (!mounted) return;
+
+      // Hide loading snackbar
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Foto de perfil actualizada con éxito'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      print('Error uploading profile image: $e');
+
+      if (!mounted) return;
+
+      // Hide loading snackbar
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al actualizar la foto de perfil: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+// Additional helper method to refresh profile data
+  Future<void> refreshProfileData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final doc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get();
+
+        if (doc.exists && doc.data() != null) {
+          final data = doc.data()!;
+          setState(() {
+            photoUrl = data['photoUrl'] as String?;
+          });
+          print('Refreshed photoUrl: $photoUrl');
+        }
+      } catch (e) {
+        print('Error refreshing profile data: $e');
+      }
     }
   }
 }
