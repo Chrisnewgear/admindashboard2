@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http/http.dart' as http;
+
 
 class ProfileWidget extends StatefulWidget {
   const ProfileWidget({super.key});
@@ -33,6 +35,8 @@ class ProfileWidgetState extends State<ProfileWidget> {
   String? newPasswordError;
   String? confirmPasswordError;
   String? photoUrl = '';
+  // Add this to your ProfileWidgetState class
+  bool _isCameraHovered = false;
 
   late TextEditingController nameController;
   late TextEditingController apellidoController;
@@ -48,7 +52,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
   //bool _isPasswordEditMode = false;
   //int _selectedIndex = 0; // Index to track the selected tab
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  String? _photoUrl;
   @override
   void initState() {
     super.initState();
@@ -60,6 +64,8 @@ class ProfileWidgetState extends State<ProfileWidget> {
     confirmPasswordController = TextEditingController();
     phoneController = TextEditingController();
     locationController = TextEditingController();
+    initializeProfile();
+    //_loadCurrentPhotoUrl();
   }
 
   @override
@@ -77,12 +83,25 @@ class ProfileWidgetState extends State<ProfileWidget> {
     super.dispose();
   }
 
+  Future<void> _loadCurrentPhotoUrl() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final doc = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(user.uid)
+        .get();
+    if (doc.exists) {
+      setState(() {
+        _photoUrl = doc.data()?['photoUrl'] as String?;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
     final screenSize = MediaQuery.of(context).size;
     final isDesktop = screenSize.width > 1024;
-    //photoUrl = user?.photoURL;
 
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
@@ -103,6 +122,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
         }
 
         final userData = snapshot.data!.data() as Map<String, dynamic>;
+        final firestorePhotoUrl = userData['photoUrl'] as String? ?? '';
 
         // Update controllers with user data
         nameController.text = userData['Nombre'] ?? '';
@@ -112,181 +132,16 @@ class ProfileWidgetState extends State<ProfileWidget> {
 
         return Scaffold(
           body: isDesktop
-              ? _buildDesktopLayout(context)
-              : _buildMobileLayout(context),
+              ? _buildDesktopLayout(
+                  context, firestorePhotoUrl) // Pass the URL from Firestore
+              : _buildMobileLayout(
+                  context, firestorePhotoUrl), // Pass the URL from Firestore
         );
       },
     );
   }
 
-  // Widget _buildDesktopLayout(BuildContext context) {
-  //   return SingleChildScrollView(
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(32.0),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.center,
-  //         children: [
-  //           //Title row
-  //           Row(
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             children: [
-  //               Text(
-  //                 'Mi Perfil',
-  //                 style: GoogleFonts.roboto(
-  //                   fontSize: 24,
-  //                   fontWeight: FontWeight.bold,
-  //                 ),
-  //                 textAlign: TextAlign.center,
-  //               ),
-  //             ],
-  //           ),
-  //           const SizedBox(height: 16),
-  //           Row(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               // Barra lateral izquierda con navegación
-  //               Card(
-  //                 elevation: 2,
-  //                 child: Container(
-  //                   width: 250,
-  //                   padding: const EdgeInsets.all(24),
-  //                   child: Column(
-  //                     crossAxisAlignment: CrossAxisAlignment.start,
-  //                     children: [
-  //                       // Sección de foto de perfil
-  //                       Center(
-  //                         child: Stack(
-  //                           children: [
-  //                             Container(
-  //                               width: 120,
-  //                               height: 120,
-  //                               decoration: BoxDecoration(
-  //                                 color: Colors.grey[200],
-  //                                 shape: BoxShape.circle,
-  //                               ),
-  //                               child: photoUrl != null && photoUrl!.isNotEmpty
-  //                                   ? ClipOval(
-  //                                       child: Image.network(
-  //                                         photoUrl.toString(),
-  //                                         fit: BoxFit.cover,
-  //                                         width: 120,
-  //                                         height: 120,
-  //                                       ),
-  //                                     )
-  //                                   : kIsWeb
-  //                                       ? (_profileImageBytes != null
-  //                                           ? ClipOval(
-  //                                               child: Image.memory(
-  //                                                 _profileImageBytes!,
-  //                                                 fit: BoxFit.cover,
-  //                                                 width: 120,
-  //                                                 height: 120,
-  //                                               ),
-  //                                             )
-  //                                           : const Icon(
-  //                                               Icons.photo_library_outlined,
-  //                                               size: 50,
-  //                                               color: Colors.grey,
-  //                                             ))
-  //                                       : (_profileImage != null
-  //                                           ? ClipOval(
-  //                                               child: Image.file(
-  //                                                 _profileImage!,
-  //                                                 fit: BoxFit.cover,
-  //                                                 width: 120,
-  //                                                 height: 120,
-  //                                               ),
-  //                                             )
-  //                                           : const Icon(
-  //                                               Icons.photo_library_outlined,
-  //                                               size: 50,
-  //                                               color: Colors.grey,
-  //                                             )),
-  //                             ),
-  //                             Positioned(
-  //                               right: 0,
-  //                               bottom: 0,
-  //                               child: Container(
-  //                                 padding: const EdgeInsets.all(8),
-  //                                 decoration: const BoxDecoration(
-  //                                   color: Colors.indigo,
-  //                                   shape: BoxShape.circle,
-  //                                 ),
-  //                                 child: GestureDetector(
-  //                                   onTap: () async {
-  //                                     final picker = ImagePicker();
-  //                                     final pickedFile = await picker.pickImage(
-  //                                         source: ImageSource.camera);
-  //                                     if (pickedFile != null) {
-  //                                       if (kIsWeb) {
-  //                                         final bytes =
-  //                                             await pickedFile.readAsBytes();
-  //                                         setState(() {
-  //                                           _profileImageBytes = bytes;
-  //                                         });
-  //                                         await uploadProfileImage();
-  //                                       } else {
-  //                                         setState(() {
-  //                                           _profileImage =
-  //                                               File(pickedFile.path);
-  //                                         });
-  //                                         await uploadProfileImage();
-  //                                       }
-  //                                     }
-  //                                   },
-  //                                   child: const Icon(
-  //                                     Icons.camera_alt,
-  //                                     size: 20,
-  //                                     color: Colors.white,
-  //                                   ),
-  //                                 ),
-  //                               ),
-  //                             )
-  //                           ],
-  //                         ),
-  //                       ),
-  //                       const SizedBox(height: 24),
-  //                       _buildNavItem('Editar Perfil'),
-  //                       _buildNavItem('Preferencias'),
-  //                       _buildNavItem('Seguridad'),
-  //                       _buildNavItem('Notificaciones'),
-  //                       //_buildNavItem('Connected Accounts'),
-  //                     ],
-  //                   ),
-  //                 ),
-  //               ),
-  //               const SizedBox(width: 24),
-  //               // Área de contenido principal
-  //               Expanded(
-  //                 child: Card(
-  //                   elevation: 2,
-  //                   child: Container(
-  //                     padding: const EdgeInsets.all(32),
-  //                     child: ValueListenableBuilder<int>(
-  //                       valueListenable: _selectedIndex,
-  //                       builder: (context, selectedIndex, _) {
-  //                         // Renderizamos la sección según el índice seleccionado
-  //                         if (selectedIndex == 0) {
-  //                           return _buildProfileEditSection();
-  //                         } else if (selectedIndex == 2) {
-  //                           return _buildPasswordChangeSection();
-  //                         } else {
-  //                           return const SizedBox.shrink();
-  //                         }
-  //                       },
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  Widget _buildDesktopLayout(BuildContext context) {
+  Widget _buildDesktopLayout(BuildContext context, String photoUrl) {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -331,27 +186,52 @@ class ProfileWidgetState extends State<ProfileWidget> {
                                   color: Colors.grey[200],
                                   shape: BoxShape.circle,
                                 ),
-                                child: _buildProfileImage(),
+                                child: _buildProfileImage(photoUrl),
                               ),
                               Positioned(
                                 right: 0,
                                 bottom: 0,
                                 child: Container(
                                   padding: const EdgeInsets.all(8),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.indigo,
+                                  decoration: BoxDecoration(
+                                    color: _isCameraHovered
+                                        ? Colors.indigo[700]
+                                        : Colors.indigo,
                                     shape: BoxShape.circle,
+                                    boxShadow: _isCameraHovered
+                                        ? [
+                                            BoxShadow(
+                                                color: Colors.indigo
+                                                    .withOpacity(0.3),
+                                                blurRadius: 8)
+                                          ]
+                                        : [],
                                   ),
-                                  child: GestureDetector(
-                                    onTap: _pickAndUploadImage,
-                                    child: const Icon(
-                                      Icons.camera_alt,
-                                      size: 20,
-                                      color: Colors.white,
+                                  child: MouseRegion(
+                                    onEnter: (_) =>
+                                        setState(() => _isCameraHovered = true),
+                                    onExit: (_) => setState(
+                                        () => _isCameraHovered = false),
+                                    child: GestureDetector(
+                                      onTap: _pickAndUploadImage,
+                                      child: Icon(
+                                        Icons.camera_alt,
+                                        size: 20,
+                                        color: _isCameraHovered
+                                            ? Colors.amber
+                                            : Colors.white,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              )
+                              ),
+                              // IconButton(
+                              //   onPressed: () {
+                              //     refreshProfileData();
+                              //     forceImageRefresh();
+                              //   },
+                              //   icon: const Icon(Icons.refresh),
+                              // )
                             ],
                           ),
                         ),
@@ -395,41 +275,217 @@ class ProfileWidgetState extends State<ProfileWidget> {
   }
 
   // Separated widget for better organization
-  Widget _buildProfileImage() {
-    // Priority 1: Show uploaded image from Firebase
-    if (photoUrl != null && photoUrl!.isNotEmpty) {
+  Widget _buildProfileImage(String? photoUrl) {
+    print('=== DEBUG: _buildProfileImage called ===');
+    print('photoUrl: "$photoUrl"');
+    print('_isUploading: $_isUploading');
+
+    if (_isUploading) {
+      return _buildLocalImage();
+    }
+
+    if (photoUrl != null && photoUrl.trim().isNotEmpty) {
+      print('Attempting to load network image: $photoUrl');
       return ClipOval(
         child: Image.network(
-          photoUrl.toString(),
+          photoUrl,
           fit: BoxFit.cover,
           width: 120,
           height: 120,
-          // Add cache headers to force refresh
-          headers: const {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-          },
           errorBuilder: (context, error, stackTrace) {
-            print('Error loading network image: $error');
-            print('Image URL: $photoUrl');
-            // Fallback to local image if network fails
+            print('ERROR loading network image: $error');
             return _buildLocalImage();
           },
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
-            return const Center(
-              child: CircularProgressIndicator(strokeWidth: 2),
+            return Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
             );
           },
         ),
       );
     }
 
-    // Priority 2: Show local images while uploading or if no network image
+    print('Falling back to local image or placeholder');
     return _buildLocalImage();
   }
 
+  Widget _buildWebImage(String photoUrl) {
+    // For web, use Image.network directly with cachebusting
+    return Image.network(
+      "$photoUrl&t=${DateTime.now().millisecondsSinceEpoch}",
+      fit: BoxFit.cover,
+      width: 120,
+      height: 120,
+      errorBuilder: (context, error, stackTrace) {
+        print('Error loading web image: $error');
+        return _buildLocalImage();
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            shape: BoxShape.circle,
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<Uint8List?> _loadImageBytes(String photoUrl) async {
+    try {
+      print('Loading image bytes for: $photoUrl');
+
+      // Extract the path from the Firebase Storage URL
+      final uri = Uri.parse(photoUrl);
+      final pathSegments = uri.pathSegments;
+
+      // Find the path after '/o/' in the URL
+      String? imagePath;
+      for (int i = 0; i < pathSegments.length; i++) {
+        if (pathSegments[i] == 'o' && i + 1 < pathSegments.length) {
+          imagePath = Uri.decodeComponent(pathSegments[i + 1]);
+          break;
+        }
+      }
+
+      if (imagePath != null) {
+        print('Extracted image path: $imagePath');
+
+        // Use Firebase Storage SDK to get the image
+        final ref = FirebaseStorage.instance.ref().child(imagePath);
+        final bytes = await ref.getData();
+
+        print('Successfully loaded ${bytes?.length ?? 0} bytes');
+        return bytes;
+      } else {
+        print('Could not extract path from URL');
+        return null;
+      }
+    } catch (e) {
+      print('Error loading image bytes: $e');
+      return null;
+    }
+  }
+
+  Widget _buildWebImageAlternative(String photoUrl) {
+    return Image.network(
+      photoUrl,
+      fit: BoxFit.cover,
+      width: 120,
+      height: 120,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': '*',
+      },
+      errorBuilder: (context, error, stackTrace) {
+        print('ERROR loading network image: $error');
+        // Try loading without CORS headers as fallback
+        return Image.network(
+          photoUrl,
+          fit: BoxFit.cover,
+          width: 120,
+          height: 120,
+          errorBuilder: (context, error2, stackTrace2) {
+            print('ERROR on second attempt: $error2');
+            return _buildLocalImage();
+          },
+        );
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) {
+          print('Network image loaded successfully!');
+          return child;
+        }
+        return Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            shape: BoxShape.circle,
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> initializeProfile() async {
+    print('=== DEBUG: initializeProfile called ===');
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        print('Loading profile for user: ${user.uid}');
+
+        // First check Firebase Auth
+        print('Firebase Auth photoURL: "${user.photoURL}"');
+
+        // Then check Firestore
+        final doc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get();
+
+        if (doc.exists && doc.data() != null) {
+          final data = doc.data()!;
+          final firestorePhotoUrl = data['photoUrl'] as String?;
+          print('Firestore photoUrl: "$firestorePhotoUrl"');
+
+          setState(() {
+            // Use the non-empty URL, prefer Firestore over Auth
+            if (firestorePhotoUrl != null &&
+                firestorePhotoUrl.trim().isNotEmpty) {
+              photoUrl = firestorePhotoUrl;
+            } else if (user.photoURL != null &&
+                user.photoURL!.trim().isNotEmpty) {
+              photoUrl = user.photoURL;
+            } else {
+              photoUrl = null; // Explicitly set to null instead of empty string
+            }
+          });
+
+          print('Initialized photoUrl to: "$photoUrl"');
+        } else {
+          print('No Firestore document found');
+          setState(() {
+            photoUrl =
+                user.photoURL?.trim().isEmpty == true ? null : user.photoURL;
+          });
+        }
+      } catch (e) {
+        print('Error initializing profile: $e');
+      }
+    }
+  }
+
   Widget _buildLocalImage() {
+    print('=== DEBUG: _buildLocalImage called ===');
+    print('kIsWeb: $kIsWeb');
+    print('_profileImageBytes != null: ${_profileImageBytes != null}');
+    print('_profileImage != null: ${_profileImage != null}');
+    print('_isUploading: $_isUploading');
+
+    // Show local image if available
     if (kIsWeb && _profileImageBytes != null) {
+      print('Showing web local image');
       return ClipOval(
         child: Image.memory(
           _profileImageBytes!,
@@ -441,6 +497,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
     }
 
     if (!kIsWeb && _profileImage != null) {
+      print('Showing mobile local image');
       return ClipOval(
         child: Image.file(
           _profileImage!,
@@ -451,10 +508,63 @@ class ProfileWidgetState extends State<ProfileWidget> {
       );
     }
 
-    return const Icon(
-      Icons.photo_library_outlined,
-      size: 50,
-      color: Colors.grey,
+    // Show loading indicator if uploading
+    if (_isUploading) {
+      print('Showing upload progress indicator');
+      return Container(
+        width: 120,
+        height: 120,
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          shape: BoxShape.circle,
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+
+    // Default placeholder
+    print('Showing default placeholder');
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(
+        Icons.photo_library_outlined,
+        size: 50,
+        color: Colors.grey,
+      ),
+    );
+  }
+
+  Widget _buildErrorPlaceholder(String reason) {
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.red, width: 2),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.photo_library_outlined,
+            size: 40,
+            color: Colors.grey,
+          ),
+          Text(
+            reason,
+            style: const TextStyle(fontSize: 10, color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 
@@ -463,7 +573,6 @@ class ProfileWidgetState extends State<ProfileWidget> {
     try {
       final picker = ImagePicker();
 
-      // Show dialog to choose between camera and gallery
       final ImageSource? source = await showDialog<ImageSource>(
         context: context,
         builder: (BuildContext context) {
@@ -498,22 +607,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
       );
 
       if (pickedFile != null) {
-        // Show loading indicator
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Row(
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(width: 16),
-                  Text('Subiendo imagen...'),
-                ],
-              ),
-              duration: Duration(seconds: 5),
-            ),
-          );
-        }
-
+        // Update local image first
         if (kIsWeb) {
           final bytes = await pickedFile.readAsBytes();
           setState(() {
@@ -525,6 +619,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
           });
         }
 
+        // Then upload
         await uploadProfileImage();
       }
     } catch (e) {
@@ -537,7 +632,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
     }
   }
 
-  Widget _buildMobileLayout(BuildContext context) {
+  Widget _buildMobileLayout(BuildContext context, String photoUrl) {
     return SingleChildScrollView(
       child: Container(
         constraints: BoxConstraints(
@@ -1132,11 +1227,14 @@ class ProfileWidgetState extends State<ProfileWidget> {
     }
   }
 
-  // Improved upload function with better error handling and validation
-  Future<void> uploadProfileImage() async {
-    final user = FirebaseAuth.instance.currentUser;
+  bool _isUploading = false;
 
+  Future<void> uploadProfileImage() async {
+    print('=== DEBUG: uploadProfileImage started ===');
+
+    final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
+      print('ERROR: User not authenticated');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Usuario no autenticado')),
@@ -1145,17 +1243,23 @@ class ProfileWidgetState extends State<ProfileWidget> {
       return;
     }
 
+    print('User UID: ${user.uid}');
+
+    setState(() {
+      _isUploading = true;
+    });
+
     try {
       String downloadUrl = '';
-
-      // Create a reference with timestamp to avoid caching issues
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final ref = FirebaseStorage.instance
-          .ref()
-          .child('profile_images/${user.uid}_$timestamp.jpg');
+      final imagePath = 'profile_images/${user.uid}_$timestamp.jpg';
+
+      print('Creating Firebase Storage reference: $imagePath');
+      final ref = FirebaseStorage.instance.ref().child(imagePath);
 
       if (kIsWeb && _profileImageBytes != null) {
-        // Upload for web
+        print('Uploading web image, size: ${_profileImageBytes!.length} bytes');
+
         final uploadTask = ref.putData(
           _profileImageBytes!,
           SettableMetadata(
@@ -1169,8 +1273,10 @@ class ProfileWidgetState extends State<ProfileWidget> {
 
         final snapshot = await uploadTask;
         downloadUrl = await snapshot.ref.getDownloadURL();
+        print('Web upload complete. Download URL: "$downloadUrl"');
       } else if (!kIsWeb && _profileImage != null) {
-        // Upload for mobile
+        print('Uploading mobile image: ${_profileImage!.path}');
+
         final uploadTask = ref.putFile(
           _profileImage!,
           SettableMetadata(
@@ -1184,77 +1290,185 @@ class ProfileWidgetState extends State<ProfileWidget> {
 
         final snapshot = await uploadTask;
         downloadUrl = await snapshot.ref.getDownloadURL();
+        print('Mobile upload complete. Download URL: "$downloadUrl"');
       }
 
-      if (downloadUrl.isNotEmpty) {
-        // Update Firestore with additional user data structure
+      if (downloadUrl.isNotEmpty && downloadUrl.trim().isNotEmpty) {
+        print('Updating Firestore with URL: "$downloadUrl"');
+
+        // Update Firestore
         await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
-          'photoUrl': downloadUrl,
+          'photoUrl': downloadUrl.trim(), // Ensure no whitespace
           'lastUpdated': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
 
-        // Update Auth profile
-        await user.updatePhotoURL(downloadUrl);
+        print('Firestore updated successfully');
 
-        // Update the local state properly
-        setState(() {
-          photoUrl = downloadUrl;
-          // Clear local images since we now have the uploaded URL
-          _profileImageBytes = null;
-          _profileImage = null;
-        });
+        // Update Firebase Auth
+        await user.updatePhotoURL(downloadUrl.trim());
+        print('Firebase Auth profile updated');
 
-        print('Profile image uploaded successfully: $downloadUrl');
+        // Verify the update by re-reading from Firestore
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        final verifyDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get(const GetOptions(source: Source.server));
+
+        if (verifyDoc.exists) {
+          final verifyData = verifyDoc.data();
+          final verifiedUrl = verifyData?['photoUrl'] as String?;
+          print('Verified Firestore photoUrl: "$verifiedUrl"');
+
+          // Update local state with verified URL
+          setState(() {
+            photoUrl = verifiedUrl?.trim().isEmpty == true
+                ? null
+                : verifiedUrl?.trim();
+          });
+
+          print('Updated local photoUrl to: "$photoUrl"');
+        }
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Foto de perfil actualizada con éxito'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        print('ERROR: downloadUrl is empty or invalid');
       }
+    } catch (e, stackTrace) {
+      print('ERROR uploading profile image: $e');
+      print('StackTrace: $stackTrace');
 
       if (!mounted) return;
-
-      // Hide loading snackbar
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Foto de perfil actualizada con éxito'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      print('Error uploading profile image: $e');
-
-      if (!mounted) return;
-
-      // Hide loading snackbar
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error al actualizar la foto de perfil: $e'),
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+        });
+
+        // Clear local images after successful upload
+        if (photoUrl != null && photoUrl!.trim().isNotEmpty) {
+          print('Clearing local images after successful upload');
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              setState(() {
+                _profileImageBytes = null;
+                _profileImage = null;
+              });
+              print('Local images cleared');
+            }
+          });
+        }
+      }
     }
   }
 
-// Additional helper method to refresh profile data
+// Enhanced refresh method
   Future<void> refreshProfileData() async {
+    print('=== DEBUG: refreshProfileData called ===');
+
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
+        print('Refreshing user data for UID: ${user.uid}');
+
+        // Force refresh from server
+        await user.reload();
+        final refreshedUser = FirebaseAuth.instance.currentUser;
+        print(
+            'Firebase Auth photoURL after reload: ${refreshedUser?.photoURL}');
+
+        // Get fresh data from Firestore
         final doc = await FirebaseFirestore.instance
             .collection('Users')
             .doc(user.uid)
-            .get();
+            .get(const GetOptions(source: Source.server));
 
         if (doc.exists && doc.data() != null) {
           final data = doc.data()!;
+          final newPhotoUrl = data['photoUrl'] as String?;
+
+          print('Firestore photoUrl: $newPhotoUrl');
+          print('Current local photoUrl: $photoUrl');
+
           setState(() {
-            photoUrl = data['photoUrl'] as String?;
+            photoUrl = newPhotoUrl;
           });
-          print('Refreshed photoUrl: $photoUrl');
+
+          print('Updated local photoUrl to: $photoUrl');
+        } else {
+          print('Firestore document does not exist or has no data');
+        }
+      } catch (e, stackTrace) {
+        print('Error refreshing profile data: $e');
+        print('StackTrace: $stackTrace');
+      }
+    } else {
+      print('No authenticated user found');
+    }
+  }
+
+// Add this method to force refresh the image widget
+  void forceImageRefresh() {
+    setState(() {
+      // This will trigger a rebuild of the image widget
+    });
+  }
+
+  // Add this method to test the image URL directly
+  Future<void> testImageUrl() async {
+    if (photoUrl != null && photoUrl!.isNotEmpty) {
+      print('Testing image URL: $photoUrl');
+
+      try {
+        final response = await http.get(Uri.parse(photoUrl!));
+        print('HTTP Response status: ${response.statusCode}');
+        print('HTTP Response headers: ${response.headers}');
+
+        if (response.statusCode == 200) {
+          print('Image URL is accessible');
+        } else {
+          print('Image URL returned error: ${response.statusCode}');
         }
       } catch (e) {
-        print('Error refreshing profile data: $e');
+        print('Error testing image URL: $e');
       }
     }
+  }
+
+// Add a manual refresh button for testing
+  Widget buildRefreshButton() {
+    return Column(
+      children: [
+        ElevatedButton(
+          onPressed: refreshProfileData,
+          child: const Text('Refresh Profile'),
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          onPressed: testImageUrl,
+          child: const Text('Test Image URL'),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Current photoUrl: ${photoUrl ?? "null"}',
+          style: const TextStyle(fontSize: 12),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
   }
 }
