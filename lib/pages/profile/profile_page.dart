@@ -1,13 +1,12 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
-
 
 class ProfileWidget extends StatefulWidget {
   const ProfileWidget({super.key});
@@ -17,42 +16,39 @@ class ProfileWidget extends StatefulWidget {
 }
 
 class ProfileWidgetState extends State<ProfileWidget> {
-  final ValueNotifier<int> _selectedIndex =
-      ValueNotifier<int>(0); // Notificador para evitar recargas completas
-  //final _formKey = GlobalKey<FormState>();
+  // --- Controllers ---
+  late final TextEditingController nameController;
+  late final TextEditingController apellidoController;
+  late final TextEditingController emailController;
+  late final TextEditingController passwordController;
+  late final TextEditingController currentPasswordController;
+  late final TextEditingController newPasswordController;
+  late final TextEditingController confirmPasswordController;
+  late final TextEditingController phoneController;
+  late final TextEditingController locationController;
+
+  // --- Notifiers ---
+  final ValueNotifier<int> _selectedIndex = ValueNotifier<int>(0);
   final ValueNotifier<bool> isEditing = ValueNotifier<bool>(false);
   final ValueNotifier<bool> isPasswordEditMode = ValueNotifier(false);
-  final ValueNotifier<bool> currentPasswordObscureNotifier =
-      ValueNotifier<bool>(true);
-  final ValueNotifier<bool> newPasswordObscureNotifier =
-      ValueNotifier<bool>(true);
-  final ValueNotifier<bool> confirmPasswordObscureNotifier =
-      ValueNotifier<bool>(true);
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final ValueNotifier<bool> currentPasswordObscureNotifier = ValueNotifier<bool>(true);
+  final ValueNotifier<bool> newPasswordObscureNotifier = ValueNotifier<bool>(true);
+  final ValueNotifier<bool> confirmPasswordObscureNotifier = ValueNotifier<bool>(true);
+
+  // --- State ---
   File? _profileImage;
   Uint8List? _profileImageBytes;
-
+  String? photoUrl = '';
   String? newPasswordError;
   String? confirmPasswordError;
-  String? photoUrl = '';
-  // Add this to your ProfileWidgetState class
-  bool _isCameraHovered = false;
+  bool _isUploading = false;
+  //final bool _isCameraHovered = false;
 
-  late TextEditingController nameController;
-  late TextEditingController apellidoController;
-  late TextEditingController emailController;
-  late TextEditingController passwordController;
-  late TextEditingController currentPasswordController;
-  late TextEditingController newPasswordController;
-  late TextEditingController confirmPasswordController;
-  late TextEditingController phoneController;
-  late TextEditingController locationController;
-  //bool _obscurePassword = true;
-  //bool _isEditMode = false;
-  //bool _isPasswordEditMode = false;
-  //int _selectedIndex = 0; // Index to track the selected tab
+  // --- Services ---
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String? _photoUrl;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
@@ -65,7 +61,6 @@ class ProfileWidgetState extends State<ProfileWidget> {
     phoneController = TextEditingController();
     locationController = TextEditingController();
     initializeProfile();
-    //_loadCurrentPhotoUrl();
   }
 
   @override
@@ -193,33 +188,18 @@ class ProfileWidgetState extends State<ProfileWidget> {
                                 bottom: 0,
                                 child: Container(
                                   padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: _isCameraHovered
-                                        ? Colors.indigo[700]
-                                        : Colors.indigo,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.indigo,
                                     shape: BoxShape.circle,
-                                    boxShadow: _isCameraHovered
-                                        ? [
-                                            BoxShadow(
-                                                color: Colors.indigo
-                                                    .withOpacity(0.3),
-                                                blurRadius: 8)
-                                          ]
-                                        : [],
                                   ),
                                   child: MouseRegion(
-                                    onEnter: (_) =>
-                                        setState(() => _isCameraHovered = true),
-                                    onExit: (_) => setState(
-                                        () => _isCameraHovered = false),
+                                    cursor: SystemMouseCursors.click,
                                     child: GestureDetector(
                                       onTap: _pickAndUploadImage,
-                                      child: Icon(
+                                      child: const Icon(
                                         Icons.camera_alt,
                                         size: 20,
-                                        color: _isCameraHovered
-                                            ? Colors.amber
-                                            : Colors.white,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   ),
@@ -274,18 +254,17 @@ class ProfileWidgetState extends State<ProfileWidget> {
     );
   }
 
-  // Separated widget for better organization
+  /// Helper to build the profile image with loading and error handling.
   Widget _buildProfileImage(String? photoUrl) {
-    print('=== DEBUG: _buildProfileImage called ===');
-    print('photoUrl: "$photoUrl"');
-    print('_isUploading: $_isUploading');
+    debugPrint('=== DEBUG: _buildProfileImage called ===');
+    debugPrint('photoUrl: "$photoUrl"');
+    debugPrint('_isUploading: $_isUploading');
 
     if (_isUploading) {
       return _buildLocalImage();
     }
-
     if (photoUrl != null && photoUrl.trim().isNotEmpty) {
-      print('Attempting to load network image: $photoUrl');
+      debugPrint('Attempting to load network image: $photoUrl');
       return ClipOval(
         child: Image.network(
           photoUrl,
@@ -293,7 +272,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
           width: 120,
           height: 120,
           errorBuilder: (context, error, stackTrace) {
-            print('ERROR loading network image: $error');
+            debugPrint('ERROR loading network image: $error');
             return _buildLocalImage();
           },
           loadingBuilder: (context, child, loadingProgress) {
@@ -313,179 +292,20 @@ class ProfileWidgetState extends State<ProfileWidget> {
         ),
       );
     }
-
-    print('Falling back to local image or placeholder');
+    debugPrint('Falling back to local image or placeholder');
     return _buildLocalImage();
   }
 
-  Widget _buildWebImage(String photoUrl) {
-    // For web, use Image.network directly with cachebusting
-    return Image.network(
-      "$photoUrl&t=${DateTime.now().millisecondsSinceEpoch}",
-      fit: BoxFit.cover,
-      width: 120,
-      height: 120,
-      errorBuilder: (context, error, stackTrace) {
-        print('Error loading web image: $error');
-        return _buildLocalImage();
-      },
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            shape: BoxShape.circle,
-          ),
-          child: const Center(
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<Uint8List?> _loadImageBytes(String photoUrl) async {
-    try {
-      print('Loading image bytes for: $photoUrl');
-
-      // Extract the path from the Firebase Storage URL
-      final uri = Uri.parse(photoUrl);
-      final pathSegments = uri.pathSegments;
-
-      // Find the path after '/o/' in the URL
-      String? imagePath;
-      for (int i = 0; i < pathSegments.length; i++) {
-        if (pathSegments[i] == 'o' && i + 1 < pathSegments.length) {
-          imagePath = Uri.decodeComponent(pathSegments[i + 1]);
-          break;
-        }
-      }
-
-      if (imagePath != null) {
-        print('Extracted image path: $imagePath');
-
-        // Use Firebase Storage SDK to get the image
-        final ref = FirebaseStorage.instance.ref().child(imagePath);
-        final bytes = await ref.getData();
-
-        print('Successfully loaded ${bytes?.length ?? 0} bytes');
-        return bytes;
-      } else {
-        print('Could not extract path from URL');
-        return null;
-      }
-    } catch (e) {
-      print('Error loading image bytes: $e');
-      return null;
-    }
-  }
-
-  Widget _buildWebImageAlternative(String photoUrl) {
-    return Image.network(
-      photoUrl,
-      fit: BoxFit.cover,
-      width: 120,
-      height: 120,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': '*',
-      },
-      errorBuilder: (context, error, stackTrace) {
-        print('ERROR loading network image: $error');
-        // Try loading without CORS headers as fallback
-        return Image.network(
-          photoUrl,
-          fit: BoxFit.cover,
-          width: 120,
-          height: 120,
-          errorBuilder: (context, error2, stackTrace2) {
-            print('ERROR on second attempt: $error2');
-            return _buildLocalImage();
-          },
-        );
-      },
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) {
-          print('Network image loaded successfully!');
-          return child;
-        }
-        return Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            shape: BoxShape.circle,
-          ),
-          child: const Center(
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> initializeProfile() async {
-    print('=== DEBUG: initializeProfile called ===');
-
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        print('Loading profile for user: ${user.uid}');
-
-        // First check Firebase Auth
-        print('Firebase Auth photoURL: "${user.photoURL}"');
-
-        // Then check Firestore
-        final doc = await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .get();
-
-        if (doc.exists && doc.data() != null) {
-          final data = doc.data()!;
-          final firestorePhotoUrl = data['photoUrl'] as String?;
-          print('Firestore photoUrl: "$firestorePhotoUrl"');
-
-          setState(() {
-            // Use the non-empty URL, prefer Firestore over Auth
-            if (firestorePhotoUrl != null &&
-                firestorePhotoUrl.trim().isNotEmpty) {
-              photoUrl = firestorePhotoUrl;
-            } else if (user.photoURL != null &&
-                user.photoURL!.trim().isNotEmpty) {
-              photoUrl = user.photoURL;
-            } else {
-              photoUrl = null; // Explicitly set to null instead of empty string
-            }
-          });
-
-          print('Initialized photoUrl to: "$photoUrl"');
-        } else {
-          print('No Firestore document found');
-          setState(() {
-            photoUrl =
-                user.photoURL?.trim().isEmpty == true ? null : user.photoURL;
-          });
-        }
-      } catch (e) {
-        print('Error initializing profile: $e');
-      }
-    }
-  }
-
+  /// Helper to build the local image or placeholder.
   Widget _buildLocalImage() {
-    print('=== DEBUG: _buildLocalImage called ===');
-    print('kIsWeb: $kIsWeb');
-    print('_profileImageBytes != null: ${_profileImageBytes != null}');
-    print('_profileImage != null: ${_profileImage != null}');
-    print('_isUploading: $_isUploading');
+    debugPrint('=== DEBUG: _buildLocalImage called ===');
+    debugPrint('kIsWeb: $kIsWeb');
+    debugPrint('_profileImageBytes != null: \\${_profileImageBytes != null}');
+    debugPrint('_profileImage != null: \\${_profileImage != null}');
+    debugPrint('_isUploading: $_isUploading');
 
-    // Show local image if available
     if (kIsWeb && _profileImageBytes != null) {
-      print('Showing web local image');
+      debugPrint('Showing web local image');
       return ClipOval(
         child: Image.memory(
           _profileImageBytes!,
@@ -495,9 +315,8 @@ class ProfileWidgetState extends State<ProfileWidget> {
         ),
       );
     }
-
     if (!kIsWeb && _profileImage != null) {
-      print('Showing mobile local image');
+      debugPrint('Showing mobile local image');
       return ClipOval(
         child: Image.file(
           _profileImage!,
@@ -507,10 +326,8 @@ class ProfileWidgetState extends State<ProfileWidget> {
         ),
       );
     }
-
-    // Show loading indicator if uploading
     if (_isUploading) {
-      print('Showing upload progress indicator');
+      debugPrint('Showing upload progress indicator');
       return Container(
         width: 120,
         height: 120,
@@ -523,9 +340,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
         ),
       );
     }
-
-    // Default placeholder
-    print('Showing default placeholder');
+    debugPrint('Showing default placeholder');
     return Container(
       width: 120,
       height: 120,
@@ -541,31 +356,53 @@ class ProfileWidgetState extends State<ProfileWidget> {
     );
   }
 
-  Widget _buildErrorPlaceholder(String reason) {
-    return Container(
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.red, width: 2),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.photo_library_outlined,
-            size: 40,
-            color: Colors.grey,
-          ),
-          Text(
-            reason,
-            style: const TextStyle(fontSize: 10, color: Colors.red),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+  Future<void> initializeProfile() async {
+    debugPrint('=== DEBUG: initializeProfile called ===');
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        debugPrint('Loading profile for user: ${user.uid}');
+
+        // First check Firebase Auth
+        debugPrint('Firebase Auth photoURL: "${user.photoURL}"');
+
+        // Then check Firestore
+        final doc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get();
+
+        if (doc.exists && doc.data() != null) {
+          final data = doc.data()!;
+          final firestorePhotoUrl = data['photoUrl'] as String?;
+          debugPrint('Firestore photoUrl: "$firestorePhotoUrl"');
+
+          setState(() {
+            // Use the non-empty URL, prefer Firestore over Auth
+            if (firestorePhotoUrl != null &&
+                firestorePhotoUrl.trim().isNotEmpty) {
+              photoUrl = firestorePhotoUrl;
+            } else if (user.photoURL != null &&
+                user.photoURL!.trim().isNotEmpty) {
+              photoUrl = user.photoURL;
+            } else {
+              photoUrl = null; // Explicitly set to null instead of empty string
+            }
+          });
+
+          debugPrint('Initialized photoUrl to: "$photoUrl"');
+        } else {
+          debugPrint('No Firestore document found');
+          setState(() {
+            photoUrl =
+                user.photoURL?.trim().isEmpty == true ? null : user.photoURL;
+          });
+        }
+      } catch (e) {
+        debugPrint('Error initializing profile: $e');
+      }
+    }
   }
 
   // Improved image picker with better error handling
@@ -623,7 +460,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
         await uploadProfileImage();
       }
     } catch (e) {
-      print('Error picking image: $e');
+      debugPrint('Error picking image: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al seleccionar imagen: $e')),
@@ -1227,14 +1064,12 @@ class ProfileWidgetState extends State<ProfileWidget> {
     }
   }
 
-  bool _isUploading = false;
-
   Future<void> uploadProfileImage() async {
-    print('=== DEBUG: uploadProfileImage started ===');
+    debugPrint('=== DEBUG: uploadProfileImage started ===');
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      print('ERROR: User not authenticated');
+      debugPrint('ERROR: User not authenticated');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Usuario no autenticado')),
@@ -1243,7 +1078,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
       return;
     }
 
-    print('User UID: ${user.uid}');
+    debugPrint('User UID: ${user.uid}');
 
     setState(() {
       _isUploading = true;
@@ -1254,11 +1089,11 @@ class ProfileWidgetState extends State<ProfileWidget> {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final imagePath = 'profile_images/${user.uid}_$timestamp.jpg';
 
-      print('Creating Firebase Storage reference: $imagePath');
+      debugPrint('Creating Firebase Storage reference: $imagePath');
       final ref = FirebaseStorage.instance.ref().child(imagePath);
 
       if (kIsWeb && _profileImageBytes != null) {
-        print('Uploading web image, size: ${_profileImageBytes!.length} bytes');
+        debugPrint('Uploading web image, size: ${_profileImageBytes!.length} bytes');
 
         final uploadTask = ref.putData(
           _profileImageBytes!,
@@ -1273,9 +1108,9 @@ class ProfileWidgetState extends State<ProfileWidget> {
 
         final snapshot = await uploadTask;
         downloadUrl = await snapshot.ref.getDownloadURL();
-        print('Web upload complete. Download URL: "$downloadUrl"');
+        debugPrint('Web upload complete. Download URL: "$downloadUrl"');
       } else if (!kIsWeb && _profileImage != null) {
-        print('Uploading mobile image: ${_profileImage!.path}');
+        debugPrint('Uploading mobile image: ${_profileImage!.path}');
 
         final uploadTask = ref.putFile(
           _profileImage!,
@@ -1290,11 +1125,11 @@ class ProfileWidgetState extends State<ProfileWidget> {
 
         final snapshot = await uploadTask;
         downloadUrl = await snapshot.ref.getDownloadURL();
-        print('Mobile upload complete. Download URL: "$downloadUrl"');
+        debugPrint('Mobile upload complete. Download URL: "$downloadUrl"');
       }
 
       if (downloadUrl.isNotEmpty && downloadUrl.trim().isNotEmpty) {
-        print('Updating Firestore with URL: "$downloadUrl"');
+        debugPrint('Updating Firestore with URL: "$downloadUrl"');
 
         // Update Firestore
         await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
@@ -1302,11 +1137,11 @@ class ProfileWidgetState extends State<ProfileWidget> {
           'lastUpdated': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
 
-        print('Firestore updated successfully');
+        debugPrint('Firestore updated successfully');
 
         // Update Firebase Auth
         await user.updatePhotoURL(downloadUrl.trim());
-        print('Firebase Auth profile updated');
+        debugPrint('Firebase Auth profile updated');
 
         // Verify the update by re-reading from Firestore
         await Future.delayed(const Duration(milliseconds: 500));
@@ -1319,7 +1154,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
         if (verifyDoc.exists) {
           final verifyData = verifyDoc.data();
           final verifiedUrl = verifyData?['photoUrl'] as String?;
-          print('Verified Firestore photoUrl: "$verifiedUrl"');
+          debugPrint('Verified Firestore photoUrl: "$verifiedUrl"');
 
           // Update local state with verified URL
           setState(() {
@@ -1328,7 +1163,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
                 : verifiedUrl?.trim();
           });
 
-          print('Updated local photoUrl to: "$photoUrl"');
+          debugPrint('Updated local photoUrl to: "$photoUrl"');
         }
 
         if (!mounted) return;
@@ -1340,11 +1175,11 @@ class ProfileWidgetState extends State<ProfileWidget> {
           ),
         );
       } else {
-        print('ERROR: downloadUrl is empty or invalid');
+        debugPrint('ERROR: downloadUrl is empty or invalid');
       }
     } catch (e, stackTrace) {
-      print('ERROR uploading profile image: $e');
-      print('StackTrace: $stackTrace');
+      debugPrint('ERROR uploading profile image: $e');
+      debugPrint('StackTrace: $stackTrace');
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1361,14 +1196,14 @@ class ProfileWidgetState extends State<ProfileWidget> {
 
         // Clear local images after successful upload
         if (photoUrl != null && photoUrl!.trim().isNotEmpty) {
-          print('Clearing local images after successful upload');
+          debugPrint('Clearing local images after successful upload');
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
               setState(() {
                 _profileImageBytes = null;
                 _profileImage = null;
               });
-              print('Local images cleared');
+              debugPrint('Local images cleared');
             }
           });
         }
@@ -1378,17 +1213,17 @@ class ProfileWidgetState extends State<ProfileWidget> {
 
 // Enhanced refresh method
   Future<void> refreshProfileData() async {
-    print('=== DEBUG: refreshProfileData called ===');
+    debugPrint('=== DEBUG: refreshProfileData called ===');
 
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        print('Refreshing user data for UID: ${user.uid}');
+        debugPrint('Refreshing user data for UID: ${user.uid}');
 
         // Force refresh from server
         await user.reload();
         final refreshedUser = FirebaseAuth.instance.currentUser;
-        print(
+        debugPrint(
             'Firebase Auth photoURL after reload: ${refreshedUser?.photoURL}');
 
         // Get fresh data from Firestore
@@ -1401,23 +1236,23 @@ class ProfileWidgetState extends State<ProfileWidget> {
           final data = doc.data()!;
           final newPhotoUrl = data['photoUrl'] as String?;
 
-          print('Firestore photoUrl: $newPhotoUrl');
-          print('Current local photoUrl: $photoUrl');
+          debugPrint('Firestore photoUrl: $newPhotoUrl');
+          debugPrint('Current local photoUrl: $photoUrl');
 
           setState(() {
             photoUrl = newPhotoUrl;
           });
 
-          print('Updated local photoUrl to: $photoUrl');
+          debugPrint('Updated local photoUrl to: $photoUrl');
         } else {
-          print('Firestore document does not exist or has no data');
+          debugPrint('Firestore document does not exist or has no data');
         }
       } catch (e, stackTrace) {
-        print('Error refreshing profile data: $e');
-        print('StackTrace: $stackTrace');
+        debugPrint('Error refreshing profile data: $e');
+        debugPrint('StackTrace: $stackTrace');
       }
     } else {
-      print('No authenticated user found');
+      debugPrint('No authenticated user found');
     }
   }
 
@@ -1431,25 +1266,25 @@ class ProfileWidgetState extends State<ProfileWidget> {
   // Add this method to test the image URL directly
   Future<void> testImageUrl() async {
     if (photoUrl != null && photoUrl!.isNotEmpty) {
-      print('Testing image URL: $photoUrl');
+      debugPrint('Testing image URL: $photoUrl');
 
       try {
         final response = await http.get(Uri.parse(photoUrl!));
-        print('HTTP Response status: ${response.statusCode}');
-        print('HTTP Response headers: ${response.headers}');
+        debugPrint('HTTP Response status: ${response.statusCode}');
+        debugPrint('HTTP Response headers: ${response.headers}');
 
         if (response.statusCode == 200) {
-          print('Image URL is accessible');
+          debugPrint('Image URL is accessible');
         } else {
-          print('Image URL returned error: ${response.statusCode}');
+          debugPrint('Image URL returned error: ${response.statusCode}');
         }
       } catch (e) {
-        print('Error testing image URL: $e');
+        debugPrint('Error testing image URL: $e');
       }
     }
   }
 
-// Add a manual refresh button for testing
+  // Add a manual refresh button for testing
   Widget buildRefreshButton() {
     return Column(
       children: [
