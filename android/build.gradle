@@ -4,13 +4,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.1'
+        classpath 'com.android.tools.build:gradle:8.2.2'  // Downgrade slightly for compatibility
     }
 }
 
 allprojects {
     tasks.withType(JavaCompile) {
         options.compilerArgs << "-Xlint:deprecation"
+        options.compilerArgs << "-Xlint:-options"
     }
 
     repositories {

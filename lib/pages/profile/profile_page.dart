@@ -1086,14 +1086,13 @@ class ProfileWidgetState extends State<ProfileWidget> {
 
     try {
       String downloadUrl = '';
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final imagePath = 'profile_images/${user.uid}_$timestamp.jpg';
+      final imagePath = 'profile_images/${user.uid}.jpg'; // Always use the same path for the user
 
       debugPrint('Creating Firebase Storage reference: $imagePath');
       final ref = FirebaseStorage.instance.ref().child(imagePath);
 
       if (kIsWeb && _profileImageBytes != null) {
-        debugPrint('Uploading web image, size: ${_profileImageBytes!.length} bytes');
+        debugPrint('Uploading web image, size: \\${_profileImageBytes!.length} bytes');
 
         final uploadTask = ref.putData(
           _profileImageBytes!,
@@ -1110,7 +1109,7 @@ class ProfileWidgetState extends State<ProfileWidget> {
         downloadUrl = await snapshot.ref.getDownloadURL();
         debugPrint('Web upload complete. Download URL: "$downloadUrl"');
       } else if (!kIsWeb && _profileImage != null) {
-        debugPrint('Uploading mobile image: ${_profileImage!.path}');
+        debugPrint('Uploading mobile image: \\${_profileImage!.path}');
 
         final uploadTask = ref.putFile(
           _profileImage!,

@@ -5,6 +5,7 @@ import 'package:admindashboard/pages/authentication/authentication.dart';
 import 'package:admindashboard/routing/routes.dart';
 import 'package:admindashboard/widgets/custom_text.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -144,12 +145,55 @@ AppBar topNavigationBar(BuildContext context, GlobalKey<ScaffoldState> key) {
                 padding: const EdgeInsets.all(2),
                 margin: const EdgeInsets.all(2),
                 child: PopupMenuButton<String>(
-                  icon: CircleAvatar(
-                    backgroundColor: light,
-                    child: Icon(
-                      Icons.person_2_outlined,
-                      color: dark,
-                    ),
+                  icon: StreamBuilder<DocumentSnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('Users')
+                        .doc(FirebaseAuth.instance.currentUser?.uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircleAvatar(
+                          backgroundColor: Colors.white,
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        );
+                      }
+                      if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
+                        return CircleAvatar(
+                          backgroundColor: light,
+                          child: Icon(
+                            Icons.person_2_outlined,
+                            color: dark,
+                          ),
+                        );
+                      }
+                      final userData = snapshot.data!.data() as Map<String, dynamic>;
+                      final photoUrl = userData['photoUrl'] as String?;
+                      if (photoUrl != null && photoUrl.isNotEmpty) {
+                        return CircleAvatar(
+                          backgroundColor: light,
+                          child: ClipOval(
+                            child: Image.network(
+                              photoUrl,
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Icon(Icons.person_2_outlined, color: dark),
+                            ),
+                          ),
+                        );
+                      }
+                      return CircleAvatar(
+                        backgroundColor: light,
+                        child: Icon(
+                          Icons.person_2_outlined,
+                          color: dark,
+                        ),
+                      );
+                    },
                   ),
                   onSelected: (String value) {
                     if (kDebugMode) {
