@@ -57,7 +57,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
       if (kDebugMode) {
         print('Error loading users: $e');
       }
-      if(!mounted) return;
+      if (!mounted) return;
       // Puedes mostrar un mensaje de error al usuario si lo deseas
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -155,7 +155,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
       // Reload users
       await _loadUsers();
 
-      if(!mounted) return;
+      if (!mounted) return;
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -400,7 +400,7 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
                                           child: Text(
                                             codSupervisor.isEmpty
                                                 ? "El vendedor no está asignado a un supervisor"
-                                                : "El vendedor está asignado al supervisor $nombreSupervisor con código $codSupervisor",
+                                                : "El vendedor está asignado al supervisor ${capitalizeEachWord(nombreSupervisor)} con código $codSupervisor",
                                             style: TextStyle(
                                               color: codSupervisor.isEmpty
                                                   ? Colors.red
@@ -676,6 +676,13 @@ class RoleManagementWidgetState extends State<RoleManagementWidget> {
         );
       },
     );
+  }
+
+  String capitalizeEachWord(String input) {
+    return input.split(RegExp(r'[\s_\-]+')).map((word) {
+      if (word.isEmpty) return '';
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
   }
 
   void _populateEmployeeData(Usuario employee,

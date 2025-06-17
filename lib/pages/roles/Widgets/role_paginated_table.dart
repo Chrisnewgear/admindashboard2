@@ -231,8 +231,8 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
 
     if (widget.isLoading) {
       return isSmallScreen
-        ? const ListViewShimmer(itemCount: 7)
-        : const TableShimmer(itemCount: 7);
+          ? const ListViewShimmer(itemCount: 7)
+          : const TableShimmer(itemCount: 7);
     }
 
     if (filteredUsuarios.isEmpty) {
@@ -361,54 +361,54 @@ class _ResponsiveRolesTableState extends State<ResponsiveRolesTable> {
     );
   }
 
-
   Widget _buildRoleChip(String role) {
-  final roleColor = RoleColorUtil.getRoleColor(role);
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Reducido
-    decoration: BoxDecoration(
-      color: roleColor.withOpacity(0.1),
-      borderRadius: BorderRadius.circular(12), // Más compacto
-      border: Border.all(color: roleColor.withOpacity(0.3)),
-    ),
-    child: Text(
-      role,
-      style: TextStyle(
-        color: roleColor,
-        fontWeight: FontWeight.w500,
-        fontSize: 12, // Texto más pequeño
+    final roleColor = RoleColorUtil.getRoleColor(role);
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Reducido
+      decoration: BoxDecoration(
+        color: roleColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12), // Más compacto
+        border: Border.all(color: roleColor.withOpacity(0.3)),
       ),
-    ),
-  );
-}
-
-Widget _buildAssignmentChip(Usuario item) {
-  // Verificar si el usuario es un 'Vendedor'
-  if (item.role != 'Vendedor') return const SizedBox.shrink();
-
-  // Determinar el estado de asignación
-  final isAssigned = item.nombreSupervisor != '';
-  final chipText = isAssigned ? 'Asignado' : 'No Asignado';
-  final chipColor = isAssigned ? Colors.green : Colors.red;
-
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Reducido
-    decoration: BoxDecoration(
-      color: chipColor.withOpacity(0.1),
-      borderRadius: BorderRadius.circular(12), // Más compacto
-      border: Border.all(color: chipColor.withOpacity(0.3)),
-    ),
-    child: Text(
-      chipText,
-      style: TextStyle(
-        color: chipColor,
-        fontWeight: FontWeight.w500,
-        fontSize: 12, // Texto más pequeño
+      child: Text(
+        role,
+        style: TextStyle(
+          color: roleColor,
+          fontWeight: FontWeight.w500,
+          fontSize: 12, // Texto más pequeño
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
+  Widget _buildAssignmentChip(Usuario item) {
+    // Verificar si el usuario es un 'Vendedor'
+    if (item.role != 'Vendedor') return const SizedBox.shrink();
+
+    // Determinar el estado de asignación
+    final isAssigned = item.nombreSupervisor != '';
+    final chipText = isAssigned ? 'Asignado' : 'No Asignado';
+    final chipColor = isAssigned ? Colors.green : Colors.red;
+
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Reducido
+      decoration: BoxDecoration(
+        color: chipColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12), // Más compacto
+        border: Border.all(color: chipColor.withOpacity(0.3)),
+      ),
+      child: Text(
+        chipText,
+        style: TextStyle(
+          color: chipColor,
+          fontWeight: FontWeight.w500,
+          fontSize: 12, // Texto más pequeño
+        ),
+      ),
+    );
+  }
 
   // Existing popup menu and delete confirmation methods remain unchanged
   Widget _buildPopupMenu(Usuario usuario) {
