@@ -16,7 +16,7 @@ dependencies {
 android {
     namespace = "com.gosoftware.admindashboard"
     compileSdk 35  // Changed from compileSdkVersion
-    ndkVersion = "25.1.8937393"
+    ndkVersion = "26.1.10909125"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
