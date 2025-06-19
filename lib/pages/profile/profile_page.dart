@@ -216,10 +216,10 @@ class ProfileWidgetState extends State<ProfileWidget> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        _buildNavItem('Editar Perfil'),
-                        _buildNavItem('Preferencias'),
-                        _buildNavItem('Seguridad'),
-                        _buildNavItem('Notificaciones'),
+                        MouseRegion(cursor: SystemMouseCursors.click, child: _buildNavItem('Editar Perfil')),
+                        MouseRegion(cursor: SystemMouseCursors.click, child: _buildNavItem('Preferencias')),
+                        MouseRegion(cursor: SystemMouseCursors.click, child: _buildNavItem('Seguridad')),
+                        MouseRegion(cursor: SystemMouseCursors.click, child: _buildNavItem('Notificaciones')),
                       ],
                     ),
                   ),
@@ -501,6 +501,45 @@ class ProfileWidgetState extends State<ProfileWidget> {
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            // Sección de foto de perfil
+            Center(
+              child: Stack(
+                children: [
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      shape: BoxShape.circle,
+                    ),
+                    child: _buildProfileImage(photoUrl),
+                  ),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Colors.indigo,
+                        shape: BoxShape.circle,
+                      ),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: _pickAndUploadImage,
+                          child: const Icon(
+                            Icons.camera_alt,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             Form(
               key: _formKey,
