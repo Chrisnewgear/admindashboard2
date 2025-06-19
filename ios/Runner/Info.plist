@@ -51,5 +51,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to take photos and scan documents.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs microphone access to record audio and enable voice features.</string>
 </dict>
 </plist>
