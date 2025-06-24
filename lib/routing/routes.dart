@@ -39,6 +39,7 @@ Future<List<MenuItem>> getSideMenuItemRoutes() async {
     MenuItem(overviewPageDisplayName, overviewPageRoute),
     MenuItem(visitasPageDisplayName, visitasPageRoute),
     MenuItem(clientsPageDisplayName, clientsPageRoute),
+    //MenuItem(profileDisplayName, profilePageRoute),
   ];
 
   try {

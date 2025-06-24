@@ -7,12 +7,14 @@ class SideMenuItem extends StatelessWidget {
   final Widget icon;
   final bool isExpanded;
   final VoidCallback onTap;
+  final Color textColor;
 
   const SideMenuItem({
     required this.itemName,
     required this.icon,
     required this.isExpanded,
     required this.onTap,
+    this.textColor = Colors.white,
     super.key,
   });
 
@@ -23,7 +25,7 @@ class SideMenuItem extends StatelessWidget {
 
     Color backgroundColor;
     if (isActive) {
-      backgroundColor = active.withOpacity(0.18);
+      backgroundColor = light.withOpacity(0.3);
     } else if (isHovering) {
       backgroundColor = lightGrey.withOpacity(0.18);
     } else {
@@ -42,7 +44,7 @@ class SideMenuItem extends StatelessWidget {
         ),
         child: ListTile(
           leading: icon,
-          title: isExpanded ? Text(itemName) : null,
+          title: isExpanded ? Text(itemName, style: TextStyle(color: textColor),) : null,
           onTap: onTap,
           minLeadingWidth: 0,
           dense: true,

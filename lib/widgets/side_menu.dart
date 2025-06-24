@@ -26,90 +26,108 @@ class SideMenu extends StatelessWidget {
       duration: const Duration(milliseconds: 700),
       curve: Curves.easeInOut,
       width: width,
-      color: light,
-      child: ListView(
+      color: dark,
+      child: Column(
         children: [
-          IconButton(
-              icon: Icon(
-                  isExpanded ? Icons.arrow_back_ios : Icons.arrow_forward_ios),
-              onPressed: toggleExpanded),
-          if (ResponsiveWidget.isSmallScreen(context) && isExpanded)
-            Column(
-              mainAxisSize: MainAxisSize.min,
+          Expanded(
+            child: ListView(
               children: [
-                const SizedBox(height: 40),
-                Row(
-                  children: [
-                    SizedBox(width: width / 48),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Image.asset(
-                        "assets/icons/goSoftwareSolutions-01.png",
-                        height: 100,
-                        width: 100,
+                IconButton(
+                    icon: Icon(
+                        isExpanded ? Icons.arrow_back_ios : Icons.arrow_forward_ios, color: Colors.white),
+                    onPressed: toggleExpanded),
+                if (ResponsiveWidget.isSmallScreen(context) && isExpanded)
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 40),
+                      Row(
+                        children: [
+                          SizedBox(width: width / 48),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Image.asset(
+                              "assets/icons/goSoftwareSolutions-01.png",
+                              height: 100,
+                              width: 100,
+                            ),
+                          ),
+                          const CustomText(
+                            text: "Dash",
+                            size: 20,
+                            weight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: width / 48),
+                        ],
                       ),
-                    ),
-                    CustomText(
-                      text: "Dash",
-                      size: 20,
-                      weight: FontWeight.bold,
-                      color: active,
-                    ),
-                    SizedBox(width: width / 48),
-                  ],
+                      const SizedBox(height: 30),
+                    ],
+                  ),
+                Divider(
+                  color: lightGrey.withOpacity(.1),
                 ),
-                const SizedBox(height: 30),
+                FutureBuilder<List<MenuItem>>(
+                  future: getSideMenuItemRoutes(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text('Error: ${snapshot.error}'),
+                      );
+                    }
+
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(
+                        child: Text('No menu items available'),
+                      );
+                    }
+
+                    return Obx(() => Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: snapshot.data!
+                              .map((item) => SideMenuItem(
+                                    itemName: item.name,
+                                    icon: menuController.returnIconFor(item.name),
+                                    isExpanded: isLargeScreen ? isExpanded : true,
+                                    onTap: () {
+                                      if (item.route == authenticationPageRoute) {
+                                        Get.offAllNamed(authenticationPageRoute);
+                                        menuController.changeActiveItemTo(
+                                            overviewPageDisplayName);
+                                      }
+                                      if (!menuController.isActive(item.name)) {
+                                        menuController.changeActiveItemTo(item.name);
+                                        if (ResponsiveWidget.isSmallScreen(context)) {
+                                          Get.back();
+                                        }
+                                        navigationController.navigateTo(item.route);
+                                      }
+                                    },
+                                    textColor: Colors.white,
+                                  ))
+                              .toList(),
+                        ));
+                  },
+                ),
               ],
             ),
-          Divider(
-            color: lightGrey.withOpacity(.1),
           ),
-          FutureBuilder<List<MenuItem>>(
-            future: getSideMenuItemRoutes(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error: ${snapshot.error}'),
-                );
-              }
-
-              if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(
-                  child: Text('No menu items available'),
-                );
-              }
-
-              return Obx(() => Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: snapshot.data!
-                        .map((item) => SideMenuItem(
-                              itemName: item.name,
-                              icon: menuController.returnIconFor(item.name),
-                              isExpanded: isLargeScreen ? isExpanded : true,
-                              onTap: () {
-                                if (item.route == authenticationPageRoute) {
-                                  Get.offAllNamed(authenticationPageRoute);
-                                  menuController.changeActiveItemTo(
-                                      overviewPageDisplayName);
-                                }
-                                if (!menuController.isActive(item.name)) {
-                                  menuController.changeActiveItemTo(item.name);
-                                  if (ResponsiveWidget.isSmallScreen(context)) {
-                                    Get.back();
-                                  }
-                                  navigationController.navigateTo(item.route);
-                                }
-                              },
-                            ))
-                        .toList(),
-                  ));
+          // Profile item at the absolute bottom, aligned with other menu items
+          const SizedBox(height: 8),
+          SideMenuItem(
+            itemName: "Settings",
+            icon: const Icon(Icons.settings, color: Colors.white),
+            isExpanded: isLargeScreen ? isExpanded : true,
+            onTap: () {
+              // Your profile navigation logic here
             },
+            textColor: Colors.white,
           ),
         ],
       ),

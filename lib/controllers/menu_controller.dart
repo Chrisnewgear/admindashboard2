@@ -48,13 +48,15 @@ class MyMenuController extends GetxController{
         return _customIcon(Icons.person, itemName);
       case roleManagementWidgetDisplayName:
         return _customIcon(Icons.assignment_ind, itemName);
+      case profileDisplayName:
+        return _customIcon(Icons.settings, itemName);
       default:
         return _customIcon(Icons.supervisor_account, itemName);
     }
   }
 
   Widget _customIcon(IconData icon, String itemName) {
-    if (isActive(itemName)) return Icon(icon, size: 22, color: dark);
-    return Icon(icon, color: isHovering(itemName) ? dark : lightGrey);
+    if (isActive(itemName)) return Icon(icon, size: 22, color: Colors.white);
+    return Icon(icon, color: isHovering(itemName) ? light : lightGrey, size: 22);
   }
 }
