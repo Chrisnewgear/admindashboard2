@@ -748,8 +748,7 @@ class _RoleManagementWidgetState extends State<RoleManagementWidget> {
             },
           );
           if (pickedDate != null) {
-            String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
-            controller.text = formattedDate;
+            controller.text = DateFormat('dd/MM/yyyy').format(pickedDate);
           }
         },
         validator: (value) {

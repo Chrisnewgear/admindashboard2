@@ -36,7 +36,8 @@ class _ClientFormDialogState extends State<ClientFormDialog> {
       _codigoController.text = widget.client!.codigo;
       _direccionController.text = widget.client!.direccion;
       _empresaController.text = widget.client!.empresa;
-      _fechaIngresoController.text = DateFormat('dd/MM/yyyy').format(widget.client!.fechaIngreso);
+      _fechaIngresoController.text =
+          DateFormat('dd/MM/yyyy').format(widget.client!.fechaIngreso);
       // selectedRole = widget.client!.role;
     }
   }
@@ -80,7 +81,8 @@ class _ClientFormDialogState extends State<ClientFormDialog> {
               children: [
                 Text(
                   widget.client == null ? 'Nuevo Cliente' : 'Editar Cliente',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 20),
                 Form(
@@ -93,7 +95,8 @@ class _ClientFormDialogState extends State<ClientFormDialog> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: Text('Cancelar', style: TextStyle(color: Colors.grey[600])),
+                      child: Text('Cancelar',
+                          style: TextStyle(color: Colors.grey[600])),
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton(
@@ -116,7 +119,9 @@ class _ClientFormDialogState extends State<ClientFormDialog> {
                           SizedBox(width: 5),
                           Text(
                             'Guardar',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -141,9 +146,13 @@ class _ClientFormDialogState extends State<ClientFormDialog> {
             isLargeScreen
                 ? Row(
                     children: [
-                      Expanded(child: _buildTextField(_nombresController, 'Nombres')),
+                      Expanded(
+                          child:
+                              _buildTextField(_nombresController, 'Nombres')),
                       const SizedBox(width: 20),
-                      Expanded(child: _buildTextField(_apellidosController, 'Apellidos')),
+                      Expanded(
+                          child: _buildTextField(
+                              _apellidosController, 'Apellidos')),
                     ],
                   )
                 : Column(
@@ -161,7 +170,8 @@ class _ClientFormDialogState extends State<ClientFormDialog> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, {bool isEmail = false}) {
+  Widget _buildTextField(TextEditingController controller, String label,
+      {bool isEmail = false}) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(labelText: label),
@@ -172,41 +182,6 @@ class _ClientFormDialogState extends State<ClientFormDialog> {
         }
         return null;
       },
-    );
-  }
-
-  Widget _buildDatePicker(BuildContext context, TextEditingController controller) {
-    return TextFormField(
-      controller: controller,
-      decoration: const InputDecoration(labelText: 'Fecha de Ingreso'),
-      readOnly: true,
-      onTap: () async {
-        DateTime? pickedDate = await showDatePicker(
-          context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2100),
-        );
-        if (pickedDate != null) {
-          setState(() {
-            controller.text = DateFormat('dd/MM/yyyy').format(pickedDate);
-          });
-        }
-      },
-    );
-  }
-
-  Widget _buildDropdown(String? value, Function(String?) onChanged) {
-    return DropdownButtonFormField<String>(
-      value: value,
-      onChanged: onChanged,
-      decoration: const InputDecoration(labelText: 'Rol'),
-      items: ['Admin', 'Supervisor', 'Vendedor'].map((role) {
-        return DropdownMenuItem<String>(
-          value: role,
-          child: Text(role),
-        );
-      }).toList(),
     );
   }
 

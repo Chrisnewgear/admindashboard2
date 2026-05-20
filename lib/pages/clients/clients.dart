@@ -536,8 +536,7 @@ class _ClientsPageState extends State<ClientsPage> {
             },
           );
           if (pickedDate != null) {
-            String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
-            controller.text = formattedDate;
+            controller.text = DateFormat('dd/MM/yyyy').format(pickedDate);
           }
         },
         validator: (value) {
@@ -1036,7 +1035,8 @@ class _ClientsPageState extends State<ClientsPage> {
                     const SizedBox(width: 10),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red, // Color del botón "Guardar"
+                        backgroundColor:
+                            Colors.red, // Color del botón "Guardar"
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -1044,7 +1044,11 @@ class _ClientsPageState extends State<ClientsPage> {
                       onPressed: () {
                         Navigator.of(context).pop(true);
                       },
-                      child: const Text('Eliminar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                      child: const Text('Eliminar',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
                     ),
                   ],
                 ),

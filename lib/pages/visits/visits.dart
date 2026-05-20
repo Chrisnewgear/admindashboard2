@@ -183,8 +183,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
       _propVisitaController.clear();
       _notasController.clear();
       _horaController.clear();
-      _fechaController.text =
-          DateFormat('dd/MM/yyyy').format(DateTime.now());
+      _fechaController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
     }
 
     showDialog(
@@ -301,24 +300,25 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
                               //     maxLines: 3),
 
                               _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(_accionesController, 'Acciones',
-                                    enabled: editable),
                                 _buildInputField(
-                                    _prodServicioController, 'producto/Servicio',
+                                    _accionesController, 'Acciones',
+                                    enabled: editable),
+                                _buildInputField(_prodServicioController,
+                                    'producto/Servicio',
                                     enabled: editable),
                               ]),
                               _buildResponsiveRow(isLargeScreen, [
-                                _buildInputField(_propVisitaController, 'Visita',
-                                    isEmail: true, enabled: editable),
                                 _buildInputField(
-                                    _notasController, 'Notas',
+                                    _propVisitaController, 'Visita',
+                                    isEmail: true, enabled: editable),
+                                _buildInputField(_notasController, 'Notas',
                                     enabled: editable),
                               ]),
                               _buildResponsiveRow(isLargeScreen, [
                                 _buildInputField(_horaController, 'Hora',
                                     enabled: editable),
-                                _buildDatePicker(context,
-                                    _fechaController, 'Fecha de Ingreso',
+                                _buildDatePicker(context, _fechaController,
+                                    'Fecha de Ingreso',
                                     enabled: editable),
                               ]),
                             ],
@@ -484,8 +484,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
             },
           );
           if (pickedDate != null) {
-            String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
-            controller.text = formattedDate;
+            controller.text = DateFormat('dd/MM/yyyy').format(pickedDate);
           }
         },
         validator: (value) {
@@ -498,9 +497,7 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
     );
   }
 
-  // Widget _buildDatePicker(
   //     BuildContext context, TextEditingController controller, String label) {
-  //   return TextFormField(
   //     controller: controller,
   //     decoration: InputDecoration(labelText: label),
   //     readOnly: true,
@@ -518,35 +515,6 @@ class _VisitsManagementWidgetState extends State<VisitsManagementWidget> {
   //     validator: (value) => value!.isEmpty ? 'Seleccione una fecha' : null,
   //   );
   // }
-
-  Widget _buildTimePicker(
-      BuildContext context, TextEditingController controller, String label) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(labelText: label),
-      readOnly: true,
-      onTap: () async {
-        final TimeOfDay? picked = await showTimePicker(
-          context: context,
-          initialTime: TimeOfDay.now(),
-        );
-        if (picked != null) {
-          controller.text = picked.format(context);
-        }
-      },
-      validator: (value) => value!.isEmpty ? 'Seleccione una hora' : null,
-    );
-  }
-
-  Widget _buildTextField(TextEditingController controller, String label,
-      {int maxLines = 1}) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(labelText: label),
-      maxLines: maxLines,
-      validator: (value) => value!.isEmpty ? 'Este campo es requerido' : null,
-    );
-  }
 
   @override
   void dispose() {
